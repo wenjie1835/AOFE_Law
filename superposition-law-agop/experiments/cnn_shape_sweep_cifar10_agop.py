@@ -30,8 +30,9 @@ Key design choices
      This matches the Chinchilla "compute-optimal" evaluation protocol.
 
 4) Shape sweep under fixed parameter count:
-     sweep depth in [2,3,4,5,6,7,8,9,10,12] (10 non-extreme shapes), solve channels
+     sweep depth in [3,4,5,6,7,8,9,10,11,12] (10 non-extreme shapes), solve channels
      (multiple of groups=8, for GroupNorm) to match target params, then pad remainder.
+     depth=2 excluded as too shallow; depth=11 added for denser coverage.
 
 5) Unified correlation metrics (AOFE hypothesis):
      Pearson(AOFE=agop_offdiag_energy, test_loss)       -- raw CE loss, no log
@@ -704,7 +705,7 @@ def main():
     parser.add_argument("--num_workers", type=int, default=2)
 
     parser.add_argument("--target_params", type=int, default=1_000_000)
-    parser.add_argument("--depth_list",    type=str, default="2,3,4,5,6,7,8,9,10,12")
+    parser.add_argument("--depth_list",    type=str, default="3,4,5,6,7,8,9,10,11,12")
     parser.add_argument("--patch",         type=int, default=8)
     parser.add_argument("--dropout",       type=float, default=0.0)
 

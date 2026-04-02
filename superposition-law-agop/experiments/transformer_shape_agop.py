@@ -13,17 +13,35 @@ similar test NLL, mediated by AOFE (AGOP Off-diagonal Frobenius Energy).
 
 Key design choices
 ------------------
-1) AGOP = E[J J^T]  (output-space, fixed dimension across shapes)
+1) AGOP = E[J J^T]  (output-space, fixed dimension V×V across all shapes)
       e = tok_emb(tokens) + pos_emb(positions)   shape [B, T, d_model]
-      J = d(logits_flat)/d(e_flat)               logits_flat ∈ R^{T*V}
-      J J^T  ∈ R^{T*V × T*V}  — FIXED regardless of depth/d_model
+      J = d(last_answer_logit)/d(e_flat)         last_answer_logit ∈ R^V
+      J J^T  ∈ R^{V × V}  — FIXED regardless of depth/d_model
    Estimated via JVP random projections (forward-mode AD).
 
-2) Dataset: PeriodicPatternDataset
-   - num_patterns random token patterns of length period
-   - train and test sets drawn from the same patterns but different (pattern, offset) pairs
-   - train_size is set so that each (pattern, offset) is seen ≈ once at D=20N budget
-     → no repetition, no memorization pressure
+   Why last-answer position (not all T*V logits):
+     With T*V = 32*32 = 1024-dim AGOP, only 32 proj_samples → severely underdetermined.
+     Using only the last-answer logit (R^V = R^32) gives AGOP ∈ R^{32×32}:
+       • 64 proj × 256 batch = 16384 rank-1 updates for 528 unique AGOP entries → 31×
+         overdetermined (cf. CNN's 16×), ensuring reliable AOFE estimation.
+     Semantics: the gradient superposition at the retrieval prediction position captures
+     how the model uses cross-positional attention (induction circuits), directly testing
+     the architectural AOFE hypothesis.
+
+2) Dataset: AssociativeRecallDataset (key-value retrieval)
+   - vocab=32: keys {0,...,7}, values {8,...,15}  (tokens 16-31 unused)
+   - seq_len=32: [k0,v0,...,k7,v7, q0,a0,...,q7,a7] + one extra query at position 32
+   - The model's LAST USEFUL prediction (at position T-2) predicts the 8th answer a7
+     from context [k0,v0,...,k7,v7, q0,a0,...,q6,a6, q7]:
+       → requires attending back to the dictionary to find kj = q7, output vj = kj+8
+   - Optimal NLL approaches 0; different shapes converge to different loss levels at D=20N
+     because width (d_model) directly controls attention head expressiveness
+
+   Why AssociativeRecall over PeriodicPatternDataset:
+     PeriodicPatternDataset with ~19K patterns requires memorising each pattern from a
+     single pass (D=20N), placing ALL shapes near-random NLL (3.357 vs 3.466 random,
+     only 0.11 nats gap). AssociativeRecall is LEARNABLE (model finds the bijection
+     rule v=k+8 from many random key permutations) and creates shape-dependent loss.
 
 3) Strict Chinchilla D=20N training budget:
      steps = ceil(20N / (batch_size × seq_len))
@@ -31,8 +49,9 @@ Key design choices
      Final model state is evaluated (Chinchilla compute-optimal protocol).
 
 4) Shape sweep under fixed N:
-     10 non-extreme depths [2,3,4,5,6,7,8,9,10,12], d_model solved via binary search
+     10 non-extreme depths [3,4,5,6,7,8,9,10,11,12], d_model solved via binary search
      (must be a multiple of head_dim=16 for fine granularity, padding ≤ ~25%).
+     depth=2 excluded as too shallow to achieve stable nonlinear representations.
 
 5) Unified correlation metrics (AOFE hypothesis):
      Pearson(AOFE=agop_offdiag_energy,  test_nll)    — raw NLL, no log
@@ -132,69 +151,73 @@ def spearman_corr(x: np.ndarray, y: np.ndarray) -> float:
 
 
 # -----------------------
-# Dataset: PeriodicPatternDataset
+# Dataset: AssociativeRecallDataset
 # -----------------------
 
-class PeriodicPatternDataset(torch.utils.data.Dataset):
+class AssociativeRecallDataset(torch.utils.data.Dataset):
     """
-    Deterministic next-token dataset with non-trivial generalization structure.
+    Key-value associative recall  (deterministic retrieval under causal LM).
 
-    K random token patterns of length P are shared between train and test.
-    Each sample is a unique (pattern_id, offset) pair — no two samples share
-    the same (pid, off). Train and test draw disjoint pairs from the same pattern pool,
-    so the model must learn the periodic structure (not memorize offsets) to generalize.
+    vocab_size = 32: keys {0,...,7}, values {8,...,15}, tokens 16-31 unused.
 
-    train_size is set to ≈ D/seq_len unique pairs so each is seen ≈ once at D=20N.
-    This prevents repetition-based memorization and keeps the model in the
-    "compute-optimal" regime.
+    Sequence layout (33 tokens → input=seq[:32], target=seq[1:33]):
+      [k0, v0, ..., k7, v7,        (16 tokens: 8 kv-pairs, random key permutation)
+       q0, a0, ..., q7, a7,        (16 tokens: 8 query-answer pairs)
+       q_extra]                     ( 1 token:  extra random query)
+
+    where  ki = perm[i]  (random permutation of {0,...,7}),
+           vi = ki + 8   (fixed bijection),
+           qi ∈ {0,...,7}  (random, with replacement),
+           ai = qi + 8.
+
+    AGOP learning signal (last-answer position, logits[:, -2, :]):
+      Predicts y[-2] = a7 = q7+8 from context [k0,v0,...,k7,v7, q0,a0,...,q7].
+      Requires attending back to dictionary positions {0,2,4,...,14} to find kj = q7.
+      This multi-hop induction test creates genuine shape-dependent performance:
+        • Wide shallow models (d_model=160, depth=3) → larger attention heads → sharper
+          key-matching in fewer layers → lower NLL at D=20N budget.
+        • Narrow deep models (d_model=80, depth=12) → smaller heads, more layers →
+          potentially higher NLL if attention precision is the bottleneck.
+
+    Each sample is independently generated (no shared pattern pool),
+    so the model must learn the general rule v=k+8 from diverse key permutations.
     """
-    def __init__(
-        self,
-        *,
-        vocab_size: int,
-        seq_len: int,
-        size: int,
-        num_patterns: int,
-        period: int,
-        seed: int,
-        patterns_seed: int,
-    ):
+    NUM_KV     = 8   # number of key-value pairs per sequence
+    VOCAB_SIZE = 32  # keys 0..7, values 8..15; tokens 16..31 unused
+
+    def __init__(self, *, size: int, seed: int):
         super().__init__()
-        self.vocab_size   = int(vocab_size)
-        self.seq_len      = int(seq_len)
-        self.size         = int(size)
-        self.num_patterns = int(num_patterns)
-        self.period       = int(period)
-
-        g_pat = torch.Generator()
-        g_pat.manual_seed(int(patterns_seed))
-        self.patterns = torch.randint(
-            low=0, high=vocab_size, size=(num_patterns, period), generator=g_pat, dtype=torch.long
-        )
-
-        support_size = num_patterns * period
-        if size > support_size:
-            raise ValueError(
-                f"size={size} > unique support={support_size} (num_patterns×period). "
-                "Increase num_patterns or decrease size."
-            )
-
+        self.size   = int(size)
+        self.num_kv = self.NUM_KV
         g = torch.Generator()
         g.manual_seed(int(seed))
-        perm = torch.randperm(support_size, generator=g)[:size]
-        self.pattern_ids = torch.div(perm, period, rounding_mode="floor")
-        self.offsets     = perm % period
+
+        # Random key permutation per sample: [size, 8]
+        self.key_perm = torch.stack([
+            torch.randperm(self.num_kv, generator=g) for _ in range(self.size)
+        ])  # [size, 8]   — keys k0..k7 (random perm of 0..7)
+
+        # Random queries per sample (8 qa-pair queries + 1 extra): [size, 9]
+        self.queries = torch.randint(
+            0, self.num_kv, (self.size, self.num_kv + 1), generator=g
+        )
 
     def __len__(self) -> int:
         return self.size
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        pid = int(self.pattern_ids[idx])
-        off = int(self.offsets[idx])
-        pat = self.patterns[pid]
-        t   = torch.arange(self.seq_len + 1)
-        toks = pat[(off + t) % self.period]
-        return toks[:-1].clone(), toks[1:].clone()
+        keys    = self.key_perm[idx]                       # [8] perm of 0..7
+        values  = keys + self.num_kv                       # [8] = keys + 8
+        q_pairs = self.queries[idx, : self.num_kv]         # [8] random queries
+        answers = q_pairs + self.num_kv                    # [8] = queries + 8
+        q_extra = self.queries[idx, self.num_kv :]         # [1] extra query
+
+        # Build 33-token sequence: [kv-pairs (16)] + [qa-pairs (16)] + [extra_q (1)]
+        kv  = torch.stack([keys, values], dim=1).reshape(-1)      # [16]
+        qa  = torch.stack([q_pairs, answers], dim=1).reshape(-1)  # [16]
+        seq = torch.cat([kv, qa, q_extra], dim=0)                 # [33]
+
+        return seq[:-1].clone(), seq[1:].clone()                   # [32], [32]
 
 
 # -----------------------
@@ -322,25 +345,34 @@ def estimate_agop_wrt_embeddings(
     model: TinyGPT,
     idx: torch.Tensor,
     *,
-    proj_samples: int = 16,
-    max_agop_dim: int = 8192,
+    proj_samples: int = 64,
+    max_agop_dim: int = 2048,
 ) -> torch.Tensor:
     """
-    AGOP = E_data[J J^T]  where J = d(logits_flat)/d(e_flat).
-    logits_flat ∈ R^{T*V}  →  AGOP ∈ R^{T*V × T*V}  (fixed across shapes).
-    Estimated via JVP random projections.
+    AGOP = E_data[J J^T]  where J = d(last_answer_logit)/d(e_flat).
+    last_answer_logit ∈ R^V  →  AGOP ∈ R^{V × V}  (fixed across all shapes).
+
+    We use the second-to-last position logit (index T-2), which in the
+    AssociativeRecallDataset corresponds to predicting the 8th answer a7 from
+    context including the full key-value dictionary + all previous qa pairs.
+    This is the highest-information retrieval position and makes the gradient
+    flow through the model's full cross-positional attention machinery.
+
+    Estimation quality:
+      With B=256, proj_samples=64: 256×64=16384 rank-1 outer products
+      for V×(V+1)/2 = 32×33/2 = 528 unique AGOP entries → ~31× overdetermined.
+      (cf. T*V=1024-dim AGOP with 32 proj → 0.03× underdetermined — unusable.)
     """
     device = idx.device
     model.eval()
     B, T = idx.shape
     assert T == model.seq_len
     V     = model.vocab_size
-    D_out = T * V
+    D_out = V   # last-answer logits only (not T*V)
 
     if D_out > max_agop_dim:
         raise ValueError(
-            f"AGOP dim T*V={D_out} > max_agop_dim={max_agop_dim}. "
-            "Reduce seq_len/vocab_size or increase --max_agop_dim."
+            f"AGOP dim V={D_out} > max_agop_dim={max_agop_dim}."
         )
 
     with torch.no_grad():
@@ -350,7 +382,8 @@ def estimate_agop_wrt_embeddings(
     agop = torch.zeros((D_out, D_out), device=device, dtype=torch.float32)
 
     def fwd(e_in: torch.Tensor) -> torch.Tensor:
-        return model.forward_from_embeddings(e_in).reshape(B, D_out)
+        logits = model.forward_from_embeddings(e_in)  # [B, T, V]
+        return logits[:, -2, :]                        # [B, V] — last answer position
 
     for _ in range(int(proj_samples)):
         u = torch.randn_like(e)
@@ -378,12 +411,10 @@ class TrainCfg:
     grad_clip: float = 1.0
     eval_every: int = 1000
 
-    vocab_size: int = 128
-    seq_len: int = 32
+    vocab_size: int = 32   # keys 0-7, values 8-15, tokens 16-31 unused
+    seq_len: int = 32      # input/target length (AssociativeRecall: 33-token seq → x/y of 32)
     train_size: int = 0
     test_size: int = 5000
-    num_patterns: int = 0
-    period: int = 32
 
     target_params: int = 1_000_000
     depth_list: List[int] = None
@@ -391,8 +422,8 @@ class TrainCfg:
     dropout: float = 0.0
 
     agop_batch: int = 256
-    agop_proj_samples: int = 16
-    max_agop_dim: int = 8192
+    agop_proj_samples: int = 64   # 64 proj × 256 batch = 16384 rank-1 for 32×32 AGOP → 31×
+    max_agop_dim: int = 2048
 
     seed: int = 0
 
@@ -589,16 +620,21 @@ def find_d_model_for_target_params(
 # Plotting
 # -----------------------
 
-def scatter_plot(x, y, xlabel, ylabel, title, outpath, depths=None):
+def scatter_plot(x, y, xlabel, ylabel, title, outpath, depths=None, r=None, r_label="Pearson r"):
     """Linear-scale scatter plot (no log on y-axis, per AOFE hypothesis requirements)."""
-    plt.figure(figsize=(6, 5))
-    plt.scatter(x, y)
+    fig, ax = plt.subplots(figsize=(6, 5))
+    ax.scatter(x, y)
     if depths is not None:
         for i, d in enumerate(depths):
-            plt.annotate(f"d{d}", (x[i], y[i]), fontsize=8, alpha=0.8)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.title(title)
+            ax.annotate(f"d{d}", (x[i], y[i]), fontsize=8, alpha=0.8)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    if r is not None:
+        ax.text(0.05, 0.95, f"{r_label} = {r:.3f}",
+                transform=ax.transAxes, verticalalignment="top", fontsize=10,
+                bbox=dict(boxstyle="round,pad=0.4", facecolor="lightyellow",
+                          edgecolor="gray", alpha=0.85))
     plt.tight_layout()
     plt.savefig(outpath, dpi=200)
     plt.close()
@@ -640,16 +676,15 @@ def main():
     parser.add_argument("--seed",     type=int, default=0)
 
     parser.add_argument("--target_params", type=int, default=1_000_000)
-    parser.add_argument("--depth_list",    type=str, default="2,3,4,5,6,7,8,9,10,12")
+    parser.add_argument("--depth_list",    type=str, default="3,4,5,6,7,8,9,10,11,12")
     parser.add_argument("--head_dim",      type=int, default=16)
     parser.add_argument("--dropout",       type=float, default=0.0)
 
-    parser.add_argument("--vocab_size",   type=int, default=128)
+    parser.add_argument("--vocab_size",   type=int, default=32,
+                        help="Vocabulary size (AssociativeRecall uses only 0-15).")
     parser.add_argument("--seq_len",      type=int, default=32)
     parser.add_argument("--train_size",   type=int, default=0)
     parser.add_argument("--test_size",    type=int, default=5000)
-    parser.add_argument("--num_patterns", type=int, default=0)
-    parser.add_argument("--period",       type=int, default=32)
 
     parser.add_argument("--batch_size",   type=int,   default=128)
     parser.add_argument("--steps",        type=int,   default=0,
@@ -662,8 +697,8 @@ def main():
     parser.add_argument("--grad_clip",    type=float, default=1.0)
 
     parser.add_argument("--agop_batch",        type=int, default=256)
-    parser.add_argument("--agop_proj_samples", type=int, default=16)
-    parser.add_argument("--max_agop_dim",      type=int, default=8192)
+    parser.add_argument("--agop_proj_samples", type=int, default=64)
+    parser.add_argument("--max_agop_dim",      type=int, default=2048)
 
     args = parser.parse_args()
     os.makedirs(args.out_dir, exist_ok=True)
@@ -675,11 +710,9 @@ def main():
     if len(depths) != 10:
         raise ValueError(f"depth_list must contain exactly 10 shapes, got {len(depths)}.")
 
-    # Auto train_size: each (pattern, offset) seen ≈ once at D=20N
+    # Auto train_size and steps from D=data_ratio×N
     if args.train_size <= 0:
         args.train_size = int(math.ceil(args.data_ratio * args.target_params / float(args.seq_len)))
-    if args.num_patterns <= 0:
-        args.num_patterns = int(math.ceil((args.train_size + args.test_size) / float(args.period)))
     if args.steps <= 0:
         args.steps = int(math.ceil(
             args.data_ratio * args.target_params / float(args.batch_size * args.seq_len)
@@ -690,45 +723,40 @@ def main():
         data_ratio=args.data_ratio, warmup_steps=args.warmup_steps,
         batch_size=args.batch_size, eval_every=args.eval_every, grad_clip=args.grad_clip,
         vocab_size=args.vocab_size, seq_len=args.seq_len, train_size=args.train_size,
-        test_size=args.test_size, num_patterns=args.num_patterns, period=args.period,
+        test_size=args.test_size,
         target_params=args.target_params, depth_list=depths, head_dim=args.head_dim,
         dropout=args.dropout, agop_batch=args.agop_batch,
         agop_proj_samples=args.agop_proj_samples, max_agop_dim=args.max_agop_dim,
         seed=args.seed,
     )
 
-    agop_out_dim = cfg.seq_len * cfg.vocab_size
+    # AGOP dim = V (last-answer logit only), not T*V
+    agop_out_dim = cfg.vocab_size
     if agop_out_dim > cfg.max_agop_dim:
         raise ValueError(
-            f"AGOP dim T*V={agop_out_dim} > max_agop_dim={cfg.max_agop_dim}. "
-            "Reduce seq_len/vocab_size or increase --max_agop_dim."
+            f"AGOP dim V={agop_out_dim} > max_agop_dim={cfg.max_agop_dim}."
         )
 
     total_train_tokens = cfg.steps * cfg.batch_size * cfg.seq_len
     unique_tokens      = cfg.train_size * cfg.seq_len
     approx_epochs      = cfg.steps * cfg.batch_size / cfg.train_size
 
-    print("========== Budget (Transformer / next-token) ==========")
+    print("========== Budget (Transformer / AssociativeRecall) ==========")
     print(f"target_params N     = {cfg.target_params:,}")
-    print(f"AGOP output dim     = T*V = {cfg.seq_len}×{cfg.vocab_size} = {agop_out_dim}")
-    print(f"train_size          = {cfg.train_size:,}  (pattern, offset) pairs")
+    print(f"AGOP output dim     = V = {agop_out_dim}×{agop_out_dim}  "
+          f"(last-answer logit; prev T*V={cfg.seq_len * cfg.vocab_size})")
+    print(f"proj_samples        = {cfg.agop_proj_samples}  "
+          f"(→ {cfg.agop_proj_samples * cfg.agop_batch} rank-1 updates for "
+          f"{agop_out_dim*(agop_out_dim+1)//2} entries)")
+    print(f"train_size          = {cfg.train_size:,}  unique random sequences")
     print(f"approx epochs       = {approx_epochs:.2f}  (≈ 1 pass per unique sample)")
     print(f"base steps          = {cfg.steps:,}")
     print(f"D (total tokens)    = {total_train_tokens:,}   D/N = {total_train_tokens/cfg.target_params:.1f}×")
     print(f"unique tokens       = {unique_tokens:,}   {unique_tokens/cfg.target_params:.1f}×N")
-    print("=======================================================")
+    print("==============================================================")
 
-    patterns_seed = cfg.seed + 12345
-    train_ds = PeriodicPatternDataset(
-        vocab_size=cfg.vocab_size, seq_len=cfg.seq_len, size=cfg.train_size,
-        num_patterns=cfg.num_patterns, period=cfg.period,
-        seed=cfg.seed + 1, patterns_seed=patterns_seed,
-    )
-    test_ds = PeriodicPatternDataset(
-        vocab_size=cfg.vocab_size, seq_len=cfg.seq_len, size=cfg.test_size,
-        num_patterns=cfg.num_patterns, period=cfg.period,
-        seed=cfg.seed + 2, patterns_seed=patterns_seed,
-    )
+    train_ds = AssociativeRecallDataset(size=cfg.train_size, seed=cfg.seed + 1)
+    test_ds  = AssociativeRecallDataset(size=cfg.test_size,  seed=cfg.seed + 2)
 
     train_loader = torch.utils.data.DataLoader(
         train_ds, batch_size=cfg.batch_size, shuffle=True, drop_last=True)
@@ -813,7 +841,7 @@ def main():
     print(f"Saved: {npy_path}")
     print("-" * 80)
 
-    # ---------- Scatter plots (linear y-axis) ----------
+    # ---------- Scatter plots (linear y-axis, with Pearson r annotation) ----------
     scatter_plot(
         off_energy, test_nll,
         xlabel="AOFE  (AGOP off-diagonal energy)",
@@ -821,6 +849,7 @@ def main():
         title=f"Next-token: test NLL vs AOFE  [N={cfg.target_params}]",
         outpath=os.path.join(args.out_dir, "scatter_testnll_vs_aofe_energy.png"),
         depths=depths_arr,
+        r=p_aofe, r_label="Pearson r (AOFE, loss)",
     )
     scatter_plot(
         off_ratio, test_nll,
@@ -829,6 +858,7 @@ def main():
         title=f"Next-token: test NLL vs AOFE ratio  [N={cfg.target_params}]",
         outpath=os.path.join(args.out_dir, "scatter_testnll_vs_aofe_ratio.png"),
         depths=depths_arr,
+        r=p_aofe_ratio, r_label="Pearson r (AOFE_ratio, loss)",
     )
 
 

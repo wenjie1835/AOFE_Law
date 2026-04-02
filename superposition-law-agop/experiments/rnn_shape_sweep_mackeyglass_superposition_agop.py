@@ -7,23 +7,37 @@ rnn_shape_sweep_mackeyglass_superposition_agop.py
 
 Goal
 ----
-Fixed-parameter GRU shape sweep on Mackey–Glass time-series next-step prediction.
-Tests the AOFE hypothesis: under fixed N, different (depth, hidden_size) shapes reach
-similar loss, mediated by AOFE (AGOP Off-diagonal Frobenius Energy).
+Fixed-parameter GRU shape sweep on Lorenz-63 3-D chaotic time-series
+multi-step-ahead prediction.  Tests the AOFE hypothesis: under fixed N,
+different (depth, hidden_size) shapes reach similar loss, mediated by AOFE.
 
-Task
-----
-Mackey–Glass DDE (Euler discretization):
-    x_{t+1} = x_t + dt * ( beta * x_{t-τ}/(1+x_{t-τ}^n) - gamma * x_t )
+Task (Lorenz-63 multi-step prediction)
+---------------------------------------
+3-D chaotic ODE (σ=10, ρ=28, β=8/3), RK4 integration at dt=0.02.
 
-Windows of length T:
-    input  : [x_t, ..., x_{t+T-1}]   shape [T, 1]
-    target : [x_{t+1}, ..., x_{t+T}]  shape [T, 1]  (next-step prediction)
+    input  : T=64 consecutive steps × 3 channels  (x,y,z)  [B, T, 3]
+    output : next H=8 steps × 3 channels                    [B, H, 3]
 
-Output-space AGOP:
-    J = d(y_hat_flat)/d(x_in),  y_hat_flat ∈ R^T
-    AGOP = E_data[J J^T] ∈ R^{T×T}  — fixed dimension across shapes.
-Estimated via JVP random projections.
+The encoder-decoder design (GRU → last-hidden-state → H×3 linear head)
+concentrates the information bottleneck at the hidden state, amplifying
+architectural differences between shapes.
+
+Why Lorenz-63 over Mackey-Glass
+---------------------------------
+• 3-D chaotic dynamics with short Lyapunov time (~1.1 time units): harder than
+  1-D Mackey-Glass next-step prediction where all shapes converge to identical MSE.
+• H=8 steps ahead at dt=0.02 (= 0.16 time units = 15% of the Lyapunov time):
+  meaningful difficulty without being impossible for 1M-param models.
+• 3-D input changes the GRU first-layer cost from 3(1+h)h to 3(3+h)h, giving
+  genuinely different hidden sizes across depths (256→112) rather than clustering.
+
+Output-space AGOP (fixed dimension across all shapes)
+------------------------------------------------------
+    J = d(y_flat)/d(x_in_flat),   y_flat ∈ R^{H×3 = 24}
+    AGOP = E_data[J J^T] ∈ R^{24×24}
+
+With B=256, proj_samples=64: 256×64=16384 rank-1 outer products for
+24×25/2=300 distinct AGOP entries → ~55× overdetermined (cf. CNN's 16×).
 
 Training protocol (strict D=20N)
 ---------------------------------
@@ -32,17 +46,15 @@ The final model state (at D=20N) is evaluated and reported.
 
 Data budget (D=20N)
 -------------------
-"Token" = one scalar next-step supervision target:
-    tokens_per_step = batch_size × seq_len
+"Token" = one scalar prediction target:
+    tokens_per_step = batch_size × horizon × 3
     D = steps × tokens_per_step  ≈  20 × N
-
-train_size (number of unique windows) is set so that:
-    train_size × seq_len  ≈  20 × N  (each window seen ~1 time on average)
 
 Shapes
 ------
-10 non-extreme GRU shapes (depth 2..12), width found by binary search.
-min_hidden=64 prevents too-narrow shapes; gradient clipping prevents explosion.
+10 non-extreme GRU shapes (depth 3..12), hidden found by downward scan + padding.
+With 3-D input, GRU params ≈ 3(3+h)h + 6h²×(L-1), giving diverse hidden sizes:
+  depth=3 → h≈256,  depth=6 → h≈192,  depth=9 → h≈144,  depth=12 → h≈112.
 
 Unified correlation metrics
 ---------------------------
@@ -139,97 +151,132 @@ def spearman_corr(x: np.ndarray, y: np.ndarray) -> float:
 
 
 # -----------------------
-# Mackey–Glass generator
+# Lorenz-63 generator
 # -----------------------
 
-def generate_mackey_glass(
+def generate_lorenz63(
     *,
     total_len: int,
-    tau: int = 17,
-    beta: float = 0.2,
-    gamma: float = 0.1,
-    n: float = 10.0,
-    dt: float = 1.0,
-    warmup: int = 1000,
-    x0: float = 1.2,
-    init_noise: float = 0.05,
+    sigma: float = 10.0,
+    rho: float = 28.0,
+    lorenz_beta: float = 8.0 / 3.0,
+    dt: float = 0.02,
+    warmup: int = 2000,
+    x0: Tuple[float, float, float] = (1.0, 0.0, 0.0),
     seed: int = 0,
 ) -> np.ndarray:
     """
-    Generate Mackey–Glass time series via Euler discretization.
-    Returns 1D array of length total_len (after warmup).
+    Generate Lorenz-63 trajectory using RK4 integration.
+    Returns array of shape [total_len, 3] (x, y, z channels), float32.
+
+    Standard parameters (σ=10, ρ=28, β=8/3) give fully chaotic dynamics with
+    Lyapunov exponent λ≈0.9 (Lyapunov time ≈1.1 time units).
+    At dt=0.02, predicting H=8 steps ahead = 0.16 time units ≈ 15% of λ⁻¹.
     """
-    total_len = int(total_len)
-    tau       = int(tau)
-    warmup    = int(warmup)
     rng = np.random.default_rng(int(seed))
+    n_total = int(warmup) + int(total_len)
+    traj = np.zeros((n_total, 3), dtype=np.float64)
+    traj[0] = np.array(x0, dtype=np.float64) + rng.standard_normal(3) * 0.1
 
-    sim_len = warmup + total_len
-    x = np.zeros(tau + sim_len + 1, dtype=np.float64)
-    hist = x0 + init_noise * rng.standard_normal(size=(tau + 1,))
-    hist = np.clip(hist, 1e-6, None)
-    x[: tau + 1] = hist
+    def lorenz_deriv(s: np.ndarray) -> np.ndarray:
+        x, y, z = s
+        return np.array([
+            sigma * (y - x),
+            x * (rho - z) - y,
+            x * y - lorenz_beta * z,
+        ], dtype=np.float64)
 
-    for t in range(tau, tau + sim_len):
-        x_tau  = x[t - tau]
-        growth = beta * x_tau / (1.0 + (x_tau ** n))
-        decay  = gamma * x[t]
-        x[t + 1] = x[t] + dt * (growth - decay)
-        if not np.isfinite(x[t + 1]):
-            raise FloatingPointError("Non-finite value in Mackey–Glass simulation.")
-        x[t + 1] = max(x[t + 1], 1e-6)
+    for t in range(n_total - 1):
+        s  = traj[t]
+        k1 = lorenz_deriv(s)
+        k2 = lorenz_deriv(s + 0.5 * dt * k1)
+        k3 = lorenz_deriv(s + 0.5 * dt * k2)
+        k4 = lorenz_deriv(s + dt * k3)
+        traj[t + 1] = s + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        if not np.all(np.isfinite(traj[t + 1])):
+            raise FloatingPointError(f"Non-finite Lorenz state at step {t+1}.")
 
-    return x[tau + warmup : tau + warmup + total_len].astype(np.float32)
+    return traj[warmup:].astype(np.float32)
 
 
 # -----------------------
 # Dataset
 # -----------------------
 
-class MackeyGlassWindowDataset(torch.utils.data.Dataset):
-    """Fixed sampling of non-overlapping windows from the time series."""
-    def __init__(self, *, series: np.ndarray, seq_len: int, size: int, seed: int):
+class Lorenz63HorizonDataset(torch.utils.data.Dataset):
+    """
+    Multi-step-ahead prediction for Lorenz-63.
+
+    Input:  T consecutive steps × 3 channels (x,y,z)  [T, 3]
+    Output: next H steps × 3 channels                  [H, 3]
+
+    The encoder-decoder design (GRU encodes T steps → last hidden state →
+    linear head predicts next H steps) creates a strict information bottleneck
+    that amplifies shape-dependent performance differences compared to seq2seq.
+
+    Windows are sampled uniformly at random (with replacement) from the series.
+    """
+    def __init__(
+        self,
+        *,
+        series: np.ndarray,   # shape [L, 3], float32
+        seq_len: int,
+        horizon: int,
+        size: int,
+        seed: int,
+    ):
         super().__init__()
-        series = np.asarray(series, dtype=np.float32)
-        self.series  = series
+        self.series  = np.asarray(series, dtype=np.float32)
         self.seq_len = int(seq_len)
+        self.horizon = int(horizon)
         self.size    = int(size)
 
-        L = int(series.shape[0])
-        if L <= self.seq_len + 1:
-            raise ValueError(f"Series length {L} must be > seq_len+1={self.seq_len+1}.")
-
-        max_start    = L - (self.seq_len + 1)
-        support_size = max_start + 1
-        if self.size > support_size:
+        L = int(self.series.shape[0])
+        max_start = L - (self.seq_len + self.horizon)
+        if max_start < 0:
             raise ValueError(
-                f"Requested size={self.size} exceeds unique support {support_size}. "
-                "Increase series length or decrease train_size/test_size."
+                f"Series too short: need at least {self.seq_len + self.horizon} steps, got {L}."
             )
-        g = np.random.default_rng(int(seed))
-        self.starts = g.permutation(support_size)[: self.size]
+        if self.size > max_start + 1:
+            raise ValueError(
+                f"Requested size={self.size} > unique windows={max_start + 1}. "
+                "Increase series length or decrease size."
+            )
+        rng = np.random.default_rng(int(seed))
+        self.starts = rng.integers(0, max_start + 1, size=self.size)
 
     def __len__(self) -> int:
         return self.size
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         s = int(self.starts[idx])
-        x = self.series[s : s + self.seq_len]
-        y = self.series[s + 1 : s + 1 + self.seq_len]
-        return torch.from_numpy(x).unsqueeze(-1), torch.from_numpy(y).unsqueeze(-1)
+        x = torch.from_numpy(self.series[s           : s + self.seq_len].copy())          # [T, 3]
+        y = torch.from_numpy(self.series[s + self.seq_len : s + self.seq_len + self.horizon].copy())  # [H, 3]
+        return x, y
 
 
 # -----------------------
-# Model: stacked GRU
+# Model: stacked GRU with horizon head
 # -----------------------
 
 class TinyRNNRegressor(nn.Module):
+    """
+    Encoder-decoder GRU for multi-step-ahead prediction.
+
+    Encoder: stacked GRU processes T-step 3-D input sequence.
+    Decoder: linear head maps the last layer's final hidden state to H×3 predictions.
+
+    This bottleneck design (hidden state = compressed trajectory representation)
+    makes the model's capacity directly visible in the test MSE, creating
+    clear shape-dependent performance differences at D=20N.
+    """
     def __init__(
         self,
         *,
         input_size: int,
         hidden_size: int,
         depth: int,
+        horizon: int,
         rnn_type: str = "gru",
         dropout: float = 0.0,
         pad_params: int = 0,
@@ -238,6 +285,7 @@ class TinyRNNRegressor(nn.Module):
         self.input_size  = int(input_size)
         self.hidden_size = int(hidden_size)
         self.depth       = int(depth)
+        self.horizon     = int(horizon)
         self.rnn_type    = str(rnn_type).lower()
 
         if self.rnn_type == "gru":
@@ -261,46 +309,63 @@ class TinyRNNRegressor(nn.Module):
         else:
             raise ValueError("rnn_type must be one of: rnn, gru, lstm")
 
-        self.head = nn.Linear(self.hidden_size, 1, bias=False)
+        # Horizon head: last-layer final hidden → H × input_size predictions
+        self.head = nn.Linear(self.hidden_size, self.horizon * self.input_size, bias=True)
 
         self._pad_params = None
         if pad_params > 0:
             self._pad_params = nn.Parameter(torch.zeros(int(pad_params)), requires_grad=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        h, _ = self.rnn(x)
-        return self.head(h)
+        """
+        x: [B, T, input_size]
+        returns: [B, horizon, input_size]
+        """
+        _, h_n = self.rnn(x)
+        if self.rnn_type == "lstm":
+            h_n = h_n[0]              # extract hidden state from (h, c) tuple
+        h_last = h_n[-1]              # [B, hidden_size] — last layer, final step
+        out = self.head(h_last)       # [B, horizon * input_size]
+        return out.view(x.shape[0], self.horizon, self.input_size)  # [B, H, C]
 
 
 # -----------------------
-# AGOP estimation (wrt input sequence)
+# AGOP estimation (wrt input sequence, output-space AGOP)
 # -----------------------
 
 def estimate_agop_wrt_inputs(
     model: TinyRNNRegressor,
     x: torch.Tensor,
     *,
-    proj_samples: int = 16,
+    proj_samples: int = 64,
     max_agop_dim: int = 4096,
 ) -> torch.Tensor:
     """
-    AGOP = E[J J^T],  J = d(y_hat_flat)/d(x_in),  y_hat_flat ∈ R^T.
-    AGOP ∈ R^{T×T}  — fixed dimension across model shapes.
-    cuDNN must be disabled for JVP to work with RNNs.
+    AGOP = E[J J^T],  J = d(y_flat)/d(x_in_flat).
+    y_flat ∈ R^{H×C}  (horizon × input_size, e.g. 8×3=24).
+    AGOP ∈ R^{H*C × H*C}  — fixed dimension across all model shapes.
+
+    With B=256, proj_samples=64: ~16384 rank-1 outer products for
+    a 24×24=576-element AGOP → ~55× overdetermined (excellent estimation).
+
+    cuDNN must be disabled for JVP to work with stacked RNNs.
+    model.train() is required for cuDNN RNN backward compatibility.
     """
     device = x.device
-    model.train()  # cuDNN RNN requires train mode for JVP backward
+    model.train()   # cuDNN RNN requires train mode for JVP
     B, T, C = x.shape
-    assert C == 1
-    if T > max_agop_dim:
-        raise ValueError(f"AGOP dim T={T} > max_agop_dim={max_agop_dim}.")
+    D_out = model.horizon * model.input_size   # e.g., 8*3=24
+
+    if D_out > max_agop_dim:
+        raise ValueError(f"AGOP dim H*C={D_out} > max_agop_dim={max_agop_dim}.")
 
     x0   = x.detach()
-    agop = torch.zeros((T, T), device=device, dtype=torch.float32)
+    agop = torch.zeros((D_out, D_out), device=device, dtype=torch.float32)
 
     def fwd(x_in: torch.Tensor) -> torch.Tensor:
         with torch.backends.cudnn.flags(enabled=False):
-            return model(x_in).squeeze(-1)  # [B, T]
+            B_ = x_in.shape[0]
+            return model(x_in).view(B_, -1)   # [B, H*C]
 
     for _ in range(int(proj_samples)):
         u = torch.randn_like(x0)
@@ -325,21 +390,21 @@ class TrainCfg:
     warmup_steps: int = 200
     batch_size: int = 64
     grad_clip: float = 1.0
-    eval_every: int = 1000
+    eval_every: int = 500
 
     data_ratio: float = 20.0
-    seq_len: int = 128
+    input_size: int = 3          # Lorenz-63: 3 channels (x, y, z)
+    seq_len: int = 64            # input context window length
+    horizon: int = 8             # multi-step prediction horizon (H)
     train_size: int = 0
-    test_size: int = 1000
+    test_size: int = 2000
 
-    tau: int = 17
-    beta: float = 0.2
-    gamma: float = 0.1
-    n: float = 10.0
-    dt: float = 1.0
-    warmup: int = 1000
-    x0: float = 1.2
-    init_noise: float = 0.05
+    # Lorenz-63 generation parameters
+    sigma: float = 10.0
+    rho: float = 28.0
+    lorenz_beta: float = 8.0 / 3.0
+    dt: float = 0.02
+    warmup_lorenz: int = 2000
     train_series_len: int = 0
     test_series_len: int = 0
 
@@ -348,11 +413,11 @@ class TrainCfg:
     rnn_type: str = "gru"
     dropout: float = 0.0
     hidden_step: int = 16
-    min_hidden: int = 64
+    min_hidden: int = 112
     max_hidden: int = 1024
 
     agop_batch: int = 256
-    agop_proj_samples: int = 16
+    agop_proj_samples: int = 64
     max_agop_dim: int = 4096
 
     seed: int = 0
@@ -380,7 +445,7 @@ def evaluate_mse(
             break
         x = x.to(device)
         y = y.to(device)
-        y_hat = model(x)
+        y_hat = model(x)                                   # [B, H, C]
         se    = F.mse_loss(y_hat, y, reduction="sum")
         total_se     += float(se.item())
         total_tokens += int(y.numel())
@@ -396,7 +461,7 @@ def train_one_model(
 ) -> Tuple[Dict[str, float], List[Dict[str, float]]]:
     """
     Train for exactly cfg.steps steps (strict D=20N budget).
-    No early stopping, no checkpoint restoration — the final model state is reported.
+    No early stopping — final model state is reported.
     """
     model.to(device)
     model.train()
@@ -406,7 +471,7 @@ def train_one_model(
 
     t0        = time.time()
     history: List[Dict[str, float]] = []
-    max_steps = int(cfg.steps)  # strict D=20N budget — no extension
+    max_steps = int(cfg.steps)
 
     for step in range(max_steps):
         try:
@@ -422,7 +487,7 @@ def train_one_model(
         for pg in opt.param_groups:
             pg["lr"] = lr
 
-        y_hat = model(x)
+        y_hat = model(x)                                   # [B, H, C]
         loss  = F.mse_loss(y_hat, y, reduction="mean")
 
         opt.zero_grad(set_to_none=True)
@@ -434,7 +499,7 @@ def train_one_model(
         if (step + 1) % int(cfg.eval_every) == 0 or (step + 1) == max_steps:
             train_mse = evaluate_mse(model, train_loader, device, max_batches=50)
             test_mse  = evaluate_mse(model, test_loader,  device, max_batches=None)
-            model.train()   # restore train mode for cuDNN RNN
+            model.train()    # restore after eval (cuDNN RNN)
             history.append({
                 "step":      int(step + 1),
                 "lr":        float(lr),
@@ -449,7 +514,6 @@ def train_one_model(
                 f"rmse={math.sqrt(test_mse):.6f}  gap={gap:+.6f}  time={dt:.1f}s"
             )
 
-    # Final evaluation at end of strict D=20N budget
     train_mse = evaluate_mse(model, train_loader, device, max_batches=None)
     test_mse  = evaluate_mse(model, test_loader,  device, max_batches=None)
 
@@ -465,7 +529,7 @@ def train_one_model(
 
 
 # -----------------------
-# Shape/parameter matching
+# Shape / parameter matching
 # -----------------------
 
 def build_rnn_model(
@@ -475,56 +539,78 @@ def build_rnn_model(
     cfg: TrainCfg,
     pad_to_target: bool = True,
 ) -> TinyRNNRegressor:
-    tmp    = TinyRNNRegressor(input_size=1, hidden_size=hidden_size, depth=depth,
-                               rnn_type=cfg.rnn_type, dropout=cfg.dropout, pad_params=0)
+    tmp    = TinyRNNRegressor(
+        input_size=cfg.input_size, hidden_size=hidden_size, depth=depth,
+        horizon=cfg.horizon, rnn_type=cfg.rnn_type, dropout=cfg.dropout, pad_params=0,
+    )
     active = count_params(tmp)
     pad    = 0
     if pad_to_target:
         if active > cfg.target_params:
-            raise ValueError(f"Active params {active} > target {cfg.target_params} "
-                             f"for depth={depth}, hidden={hidden_size}.")
+            raise ValueError(
+                f"Active params {active} > target {cfg.target_params} "
+                f"for depth={depth}, hidden={hidden_size}."
+            )
         pad = int(cfg.target_params - active)
-    return TinyRNNRegressor(input_size=1, hidden_size=hidden_size, depth=depth,
-                             rnn_type=cfg.rnn_type, dropout=cfg.dropout, pad_params=pad)
+    return TinyRNNRegressor(
+        input_size=cfg.input_size, hidden_size=hidden_size, depth=depth,
+        horizon=cfg.horizon, rnn_type=cfg.rnn_type, dropout=cfg.dropout, pad_params=pad,
+    )
 
 
 def find_hidden_for_target_params(*, depth: int, cfg: TrainCfg) -> Tuple[int, int]:
+    """
+    Largest hidden_size (multiple of hidden_step) such that active params <= target_params.
+
+    With 3-D input, GRU params ≈ 3(3+h)h + 6h²(L-1) + horizon*input_size*h, giving
+    diverse hidden sizes across depths (256 at L=3 → 112 at L=12 for N=1M).
+    If min_hidden is infeasible at large depth, we lower hidden and warn.
+    """
     step = int(cfg.hidden_step)
 
-    def to_valid(h: int) -> int:
-        h = max(cfg.min_hidden, h)
-        return int((h // step) * step)
+    def round_step(h: int) -> int:
+        return max(step, int((h // step) * step))
 
-    h_min = to_valid(cfg.min_hidden)
-    h_max = to_valid(cfg.max_hidden)
+    h_max      = round_step(cfg.max_hidden)
+    h_pref_lo  = round_step(max(cfg.min_hidden, step))
 
     def active_params(h: int) -> int:
-        m = TinyRNNRegressor(input_size=1, hidden_size=h, depth=depth,
-                              rnn_type=cfg.rnn_type, dropout=cfg.dropout, pad_params=0)
+        m = TinyRNNRegressor(
+            input_size=cfg.input_size, hidden_size=h, depth=depth,
+            horizon=cfg.horizon, rnn_type=cfg.rnn_type, dropout=cfg.dropout, pad_params=0,
+        )
         return count_params(m)
 
-    if active_params(h_min) > cfg.target_params:
-        raise ValueError(f"hidden={h_min} already exceeds target_params={cfg.target_params} at depth={depth}.")
     if active_params(h_max) <= cfg.target_params:
-        return h_max, active_params(h_max)
+        return int(h_max), int(active_params(h_max))
 
-    lo, hi   = h_min, h_max
-    best_h   = h_min
-    best_a   = active_params(best_h)
-    while lo <= hi:
-        mid = to_valid((lo + hi) // 2)
-        a   = active_params(mid)
+    best_h: Optional[int] = None
+    for hv in range(h_max, step - 1, -step):
+        a = active_params(hv)
         if a <= cfg.target_params:
-            best_h, best_a = mid, a
-            lo = mid + step
-        else:
-            hi = mid - step
+            best_h = hv
+            break
 
-    candidates = []
-    for h in [max(h_min, best_h - step), best_h, min(h_max, best_h + step)]:
-        a = active_params(h)
+    if best_h is None:
+        raise ValueError(
+            f"No hidden in [{step}, {h_max}] fits target_params={cfg.target_params} "
+            f"at depth={depth}. Raise --target_params, reduce --depth, or raise --max_hidden."
+        )
+
+    if best_h < h_pref_lo:
+        print(
+            f"  [WARNING] depth={depth}: --min_hidden={cfg.min_hidden} infeasible "
+            f"(GRU params ~ O(L*H^2)); using hidden={best_h}."
+        )
+
+    candidates: List[Tuple[int, int, int]] = []
+    for h in [max(step, best_h - step), best_h, min(h_max, best_h + step)]:
+        hv = round_step(h)
+        if hv < step:
+            continue
+        a = active_params(hv)
         if a <= cfg.target_params:
-            candidates.append((abs(cfg.target_params - a), h, a))
+            candidates.append((abs(cfg.target_params - a), hv, a))
     candidates.sort(key=lambda t: t[0])
     _, h_best, a_best = candidates[0]
     return int(h_best), int(a_best)
@@ -535,7 +621,7 @@ def find_hidden_for_target_params(*, depth: int, cfg: TrainCfg) -> Tuple[int, in
 # -----------------------
 
 def scatter_plot(x, y, xlabel, ylabel, title, outpath, depths=None, r=None, r_label="Pearson r"):
-    """Linear-scale scatter plot (no log on y-axis, per AOFE hypothesis requirements)."""
+    """Linear-scale scatter plot with optional Pearson r annotation."""
     fig, ax = plt.subplots(figsize=(6, 5))
     ax.scatter(x, y)
     if depths is not None:
@@ -570,7 +656,7 @@ def save_curve(history: List[Dict[str, float]], out_dir: str, stem: str) -> None
     plt.figure(figsize=(6, 4))
     plt.plot(steps, train_vals, label="train_mse")
     plt.plot(steps, test_vals,  label="test_mse")
-    plt.yscale("log")   # log scale for appendix readability (NOT used in correlation)
+    plt.yscale("log")
     plt.xlabel("step")
     plt.ylabel("MSE  (log scale)")
     plt.title(stem)
@@ -591,27 +677,32 @@ def main():
     parser.add_argument("--seed",    type=int, default=0)
 
     parser.add_argument("--target_params", type=int, default=1_000_000)
-    parser.add_argument("--depth_list",    type=str, default="2,3,4,5,6,7,8,9,10,12")
+    parser.add_argument("--depth_list",    type=str, default="3,4,5,6,7,8,9,10,11,12")
     parser.add_argument("--rnn_type",      type=str, default="gru", choices=["rnn", "gru", "lstm"])
     parser.add_argument("--dropout",       type=float, default=0.0)
     parser.add_argument("--hidden_step",   type=int,   default=16)
-    parser.add_argument("--min_hidden",    type=int,   default=64)
+    parser.add_argument("--min_hidden",    type=int,   default=112,
+                        help="Preferred min hidden size (may be lowered for deep stacks at fixed N).")
     parser.add_argument("--max_hidden",    type=int,   default=1024)
 
-    parser.add_argument("--seq_len",    type=int, default=128)
-    parser.add_argument("--train_size", type=int, default=0)
-    parser.add_argument("--test_size",  type=int, default=1000)
+    parser.add_argument("--input_size",  type=int, default=3,
+                        help="Number of Lorenz channels (always 3 for x,y,z).")
+    parser.add_argument("--seq_len",     type=int, default=64,
+                        help="Input context window length (number of timesteps).")
+    parser.add_argument("--horizon",     type=int, default=8,
+                        help="Multi-step prediction horizon H.")
+    parser.add_argument("--train_size",  type=int, default=0,
+                        help="0 = auto-compute from D=data_ratio*N.")
+    parser.add_argument("--test_size",   type=int, default=2000)
+
+    # Lorenz-63 generation
+    parser.add_argument("--sigma",         type=float, default=10.0)
+    parser.add_argument("--rho",           type=float, default=28.0)
+    parser.add_argument("--lorenz_beta",   type=float, default=8.0 / 3.0)
+    parser.add_argument("--dt",            type=float, default=0.02)
+    parser.add_argument("--warmup_lorenz", type=int,   default=2000)
     parser.add_argument("--train_series_len", type=int, default=0)
     parser.add_argument("--test_series_len",  type=int, default=0)
-
-    parser.add_argument("--tau",        type=int,   default=17)
-    parser.add_argument("--beta",       type=float, default=0.2)
-    parser.add_argument("--gamma",      type=float, default=0.1)
-    parser.add_argument("--n",          type=float, default=10.0)
-    parser.add_argument("--dt",         type=float, default=1.0)
-    parser.add_argument("--warmup",     type=int,   default=1000)
-    parser.add_argument("--x0",         type=float, default=1.2)
-    parser.add_argument("--init_noise", type=float, default=0.05)
 
     parser.add_argument("--data_ratio",   type=float, default=20.0)
     parser.add_argument("--batch_size",   type=int,   default=64)
@@ -620,11 +711,11 @@ def main():
     parser.add_argument("--lr",           type=float, default=3e-4)
     parser.add_argument("--weight_decay", type=float, default=0.0)
     parser.add_argument("--warmup_steps", type=int,   default=200)
-    parser.add_argument("--eval_every",   type=int,   default=1000)
+    parser.add_argument("--eval_every",   type=int,   default=500)
     parser.add_argument("--grad_clip",    type=float, default=1.0)
 
     parser.add_argument("--agop_batch",        type=int, default=256)
-    parser.add_argument("--agop_proj_samples", type=int, default=16)
+    parser.add_argument("--agop_proj_samples", type=int, default=64)
     parser.add_argument("--max_agop_dim",      type=int, default=4096)
 
     args = parser.parse_args()
@@ -637,20 +728,25 @@ def main():
     if len(depths) != 10:
         raise ValueError(f"depth_list must contain exactly 10 shapes, got {len(depths)}.")
 
+    # Auto-compute train_size and steps from D=data_ratio*N
+    tokens_per_step = int(args.batch_size) * int(args.horizon) * int(args.input_size)
     if args.train_size <= 0:
-        args.train_size = int(math.ceil(args.data_ratio * args.target_params / float(args.seq_len)))
+        args.train_size = int(math.ceil(
+            args.data_ratio * args.target_params / float(args.horizon * args.input_size)
+        ))
     if args.train_series_len <= 0:
-        args.train_series_len = args.train_size + args.seq_len + 1024
+        args.train_series_len = args.train_size + args.seq_len + args.horizon + 1024
     if args.test_series_len <= 0:
-        args.test_series_len = max(args.test_size + args.seq_len + 64, 4096)
+        args.test_series_len = max(args.test_size + args.seq_len + args.horizon + 64, 8192)
 
     cfg = TrainCfg(
         lr=args.lr, weight_decay=args.weight_decay, steps=args.steps,
         warmup_steps=args.warmup_steps, batch_size=args.batch_size, grad_clip=args.grad_clip,
-        eval_every=args.eval_every, data_ratio=args.data_ratio, seq_len=args.seq_len,
+        eval_every=args.eval_every, data_ratio=args.data_ratio,
+        input_size=args.input_size, seq_len=args.seq_len, horizon=args.horizon,
         train_size=args.train_size, test_size=args.test_size,
-        tau=args.tau, beta=args.beta, gamma=args.gamma, n=args.n, dt=args.dt,
-        warmup=args.warmup, x0=args.x0, init_noise=args.init_noise,
+        sigma=args.sigma, rho=args.rho, lorenz_beta=args.lorenz_beta,
+        dt=args.dt, warmup_lorenz=args.warmup_lorenz,
         train_series_len=args.train_series_len, test_series_len=args.test_series_len,
         target_params=args.target_params, depth_list=depths, rnn_type=args.rnn_type,
         dropout=args.dropout, hidden_step=args.hidden_step,
@@ -659,45 +755,56 @@ def main():
         max_agop_dim=args.max_agop_dim, seed=args.seed,
     )
 
-    tokens_per_step = cfg.batch_size * cfg.seq_len
     if cfg.steps <= 0:
         cfg.steps = int(math.ceil(cfg.data_ratio * cfg.target_params / float(tokens_per_step)))
 
     total_train_tokens  = cfg.steps * tokens_per_step
-    unique_train_tokens = cfg.train_size * cfg.seq_len
+    unique_train_tokens = cfg.train_size * cfg.horizon * cfg.input_size
     approx_epochs       = cfg.steps * cfg.batch_size / cfg.train_size
+    agop_dim            = cfg.horizon * cfg.input_size
 
-    print("========== Budget (RNN / Mackey-Glass) ==========")
+    print("========== Budget (RNN / Lorenz-63 multi-step) ==========")
     print(f"target_params N     = {cfg.target_params:,}")
     print(f"rnn_type            = {cfg.rnn_type}")
+    print(f"input_size          = {cfg.input_size}  (Lorenz x,y,z)")
+    print(f"seq_len             = {cfg.seq_len}  (input context steps)")
+    print(f"horizon H           = {cfg.horizon}  (steps ahead; {cfg.horizon*cfg.dt:.3f} time units)")
+    print(f"AGOP dim            = H*C = {agop_dim}×{agop_dim}")
     print(f"train_size          = {cfg.train_size:,}  windows")
-    print(f"tokens_per_step     = batch×seq_len = {cfg.batch_size}×{cfg.seq_len} = {tokens_per_step:,}")
+    print(f"tokens_per_step     = batch×H×C = {cfg.batch_size}×{cfg.horizon}×{cfg.input_size} = {tokens_per_step:,}")
     print(f"base steps          = {cfg.steps:,}")
     print(f"approx epochs       = {approx_epochs:.2f}")
     print(f"D (total tokens)    = {total_train_tokens:,}   D/N = {total_train_tokens/cfg.target_params:.1f}×")
     print(f"unique tokens       = {unique_train_tokens:,}   {unique_train_tokens/cfg.target_params:.1f}×N")
-    print("=================================================")
+    print("=========================================================")
 
-    # Generate series
+    # Generate Lorenz-63 series (train + test)
     total_len = cfg.train_series_len + cfg.test_series_len
-    series    = generate_mackey_glass(
-        total_len=total_len, tau=cfg.tau, beta=cfg.beta, gamma=cfg.gamma,
-        n=cfg.n, dt=cfg.dt, warmup=cfg.warmup, x0=cfg.x0, init_noise=cfg.init_noise,
-        seed=cfg.seed + 123,
+    print(f"\nGenerating Lorenz-63 series: {total_len} steps (dt={cfg.dt}) ...")
+    series_raw = generate_lorenz63(
+        total_len=total_len,
+        sigma=cfg.sigma, rho=cfg.rho, lorenz_beta=cfg.lorenz_beta,
+        dt=cfg.dt, warmup=cfg.warmup_lorenz,
+        x0=(1.0, 0.0, 0.0), seed=cfg.seed + 123,
     )
-    train_series = series[: cfg.train_series_len]
-    test_series  = series[cfg.train_series_len : cfg.train_series_len + cfg.test_series_len]
+    train_series_raw = series_raw[: cfg.train_series_len]
+    test_series_raw  = series_raw[cfg.train_series_len : cfg.train_series_len + cfg.test_series_len]
 
-    mu  = float(train_series.mean())
-    std = float(train_series.std() + 1e-8)
-    train_series = (train_series - mu) / std
-    test_series  = (test_series  - mu) / std
-    print(f"Series normalized: train mean={mu:.4f}, std={std:.4f}")
+    # Normalize per-channel using training statistics
+    mu  = train_series_raw.mean(axis=0, keepdims=True)        # [1, 3]
+    std = train_series_raw.std(axis=0, keepdims=True) + 1e-8   # [1, 3]
+    train_series = (train_series_raw - mu) / std
+    test_series  = (test_series_raw  - mu) / std
+    print(f"Lorenz-63 normalized: train mean≈{mu.mean():.3f}, std≈{std.mean():.3f}")
 
-    train_ds = MackeyGlassWindowDataset(
-        series=train_series, seq_len=cfg.seq_len, size=cfg.train_size, seed=cfg.seed + 1)
-    test_ds  = MackeyGlassWindowDataset(
-        series=test_series,  seq_len=cfg.seq_len, size=cfg.test_size,  seed=cfg.seed + 2)
+    train_ds = Lorenz63HorizonDataset(
+        series=train_series, seq_len=cfg.seq_len, horizon=cfg.horizon,
+        size=cfg.train_size, seed=cfg.seed + 1,
+    )
+    test_ds = Lorenz63HorizonDataset(
+        series=test_series,  seq_len=cfg.seq_len, horizon=cfg.horizon,
+        size=cfg.test_size,  seed=cfg.seed + 2,
+    )
 
     train_loader = torch.utils.data.DataLoader(
         train_ds, batch_size=cfg.batch_size, shuffle=True,  drop_last=True,  num_workers=0)
@@ -722,7 +829,7 @@ def main():
         pad    = total - active
 
         print(f"\n[{i+1:02d}/{len(cfg.depth_list)}] depth={depth:2d}  hidden={hidden:4d}  "
-              f"active={active:,}  pad={pad:,}  total={total:,}  agop_dim(T)={cfg.seq_len}")
+              f"active={active:,}  pad={pad:,}  total={total:,}  agop_dim={agop_dim}")
 
         metrics, history = train_one_model(model, train_loader, test_loader, cfg, device)
         save_curve(history, curve_dir, f"rnn_depth{depth}_hidden{hidden}")
@@ -749,7 +856,7 @@ def main():
         del model, agop
         torch.cuda.empty_cache()
 
-    # ---------- Unified correlation metrics (no log) ----------
+    # ---------- Unified correlation metrics ----------
     print("\n========== Correlations (AOFE hypothesis) ==========")
     test_mse   = np.array([r["test_mse"]            for r in results], dtype=np.float64)
     off_energy = np.array([r["agop_offdiag_energy"]  for r in results], dtype=np.float64)
@@ -777,22 +884,24 @@ def main():
     print(f"Saved: {csv_path}")
     print(f"Saved: {npy_path}")
 
-    # ---------- Scatter plots (linear y-axis) ----------
+    # ---------- Scatter plots (with Pearson r annotation) ----------
     scatter_plot(
         off_energy, test_mse,
         xlabel="AOFE  (AGOP off-diagonal energy)",
-        ylabel="Test MSE (per token)",
-        title=f"Mackey-Glass: test MSE vs AOFE  [N={cfg.target_params}]",
+        ylabel="Test MSE (per scalar)",
+        title=f"Lorenz-63 RNN: test MSE vs AOFE  [N={cfg.target_params}]",
         outpath=os.path.join(args.out_dir, "scatter_testmse_vs_aofe_energy.png"),
         depths=depths_arr,
+        r=p_aofe, r_label="Pearson r (AOFE, loss)",
     )
     scatter_plot(
         off_ratio, test_mse,
         xlabel="AOFE ratio  (AGOP off-diagonal ratio)",
-        ylabel="Test MSE (per token)",
-        title=f"Mackey-Glass: test MSE vs AOFE ratio  [N={cfg.target_params}]",
+        ylabel="Test MSE (per scalar)",
+        title=f"Lorenz-63 RNN: test MSE vs AOFE ratio  [N={cfg.target_params}]",
         outpath=os.path.join(args.out_dir, "scatter_testmse_vs_aofe_ratio.png"),
         depths=depths_arr,
+        r=p_aofe_ratio, r_label="Pearson r (AOFE_ratio, loss)",
     )
     print(f"Saved plots to: {args.out_dir}")
 

@@ -7,29 +7,33 @@ mlp_shape_sweep_supervised_pde_agop.py
 
 Goal
 ----
-Fixed-parameter MLP shape sweep on supervised PDE (analytic heat equation operator learning).
-Tests the hypothesis: under fixed N, different (depth, width) shapes reach similar loss,
-mediated by AOFE (AGOP Off-diagonal Frobenius Energy).
+Fixed-parameter MLP shape sweep on nonlinear regression via a frozen random
+teacher MLP.  Tests the hypothesis: under fixed N, different (depth, width)
+shapes reach similar loss, mediated by AOFE (AGOP Off-diagonal Frobenius Energy).
 
-Task (Supervised PDE — Heat Equation)
---------------------------------------
-1D Heat equation with Dirichlet BC, analytic solution:
-    u_t = α u_xx ,  x∈[0,1], t∈[0, t_max]
-    u(x,0) = Σ_{k=1..K} a_k sin(kπx)
-    u(x,t) = Σ a_k exp(-α(kπ)²t) sin(kπx)
-
-We learn the solution operator slice:
-    input  z = [a_1,...,a_K, t] ∈ R^{K+1}
-    output y = [u(x_1,t),...,u(x_M,t)] ∈ R^M   (fixed spatial grid)
+Task (Teacher-Student Nonlinear Regression)
+-------------------------------------------
+A fixed random 3-layer teacher MLP generates (x, y) pairs:
+    teacher: Linear(in_dim → H) → GELU → Linear(H → H) → GELU → Linear(H → out_dim)
+    x ~ N(0, I_{in_dim}),  y = teacher(x)   (both normalized for stable training)
 
 Output-space AGOP:
-    J = d(y)/d(z)  ∈ R^{M×(K+1)}
-    AGOP = E_data[J J^T] ∈ R^{M×M}   — fixed dimension across all shapes.
+    J = d(ŷ_student)/d(x)  ∈ R^{out_dim × in_dim}
+    AGOP = E_data[J J^T] ∈ R^{out_dim × out_dim}   — fixed dimension across all shapes.
+
+Why teacher-student instead of a linear PDE?
+--------------------------------------------
+For smooth linear PDEs (e.g., heat equation), the target function's Jacobian
+structure is analytically fixed — all converged models approximate the same smooth
+function and therefore produce nearly identical AGOP structure (AOFE ratio varies
+by < 0.03 across shapes).  A nonlinear teacher with hidden nonlinearities forces
+different student architectures to learn genuinely different feature representations,
+producing meaningful AOFE variation that can correlate with test MSE.
 
 Data budget
 -----------
 "Token" = one scalar supervised target:
-    tokens_per_step = batch_size × M (out_grid)
+    tokens_per_step = batch_size × out_dim
     D = steps × tokens_per_step  ≈  20 × N   (Chinchilla D=20N)
 
 Training protocol (strict D=20N)
@@ -164,70 +168,76 @@ def spearman_corr(x: np.ndarray, y: np.ndarray) -> float:
 
 
 # -----------------------
-# Dataset: supervised PDE (analytic heat equation)
+# Dataset: teacher-student nonlinear regression
 # -----------------------
 
-class HeatEquationOperatorDataset(torch.utils.data.Dataset):
+class TeacherStudentDataset(torch.utils.data.Dataset):
     """
-    Supervised heat equation operator dataset.
-    Each sample:
-      z = [a_1..a_K, t]  (K Fourier coefficients + time)
-      y = u(x_grid, t)   (M fixed spatial grid values)
+    Multi-output nonlinear regression via a frozen random teacher MLP.
 
-    Coefficients and times are fixed at construction time (reproducible).
-    y is computed analytically on-the-fly at __getitem__.
+    Teacher:  Linear(in_dim → H) → GELU → Linear(H → H) → GELU → Linear(H → out_dim)
+    Data:     x ~ N(0, I_{in_dim}),  y = teacher(x)
+
+    Both inputs and outputs are normalized per-dimension (zero mean, unit std)
+    at dataset construction time for numerical stability.
+
+    This creates a rich nonlinear regression target where different student
+    depths/widths learn genuinely different effective feature representations,
+    causing the output-space AGOP E[J J^T] (out_dim × out_dim) to vary
+    across shapes — enabling a clean test of the AOFE hypothesis.
+
+    The teacher weights are drawn once from a fixed seed and never updated.
     """
     def __init__(
         self,
         *,
         size: int,
-        modes: int,
-        out_grid: int,
-        alpha: float,
-        t_max: float,
-        seed: int,
-        coeff_std_decay: float = 1.0,
-        coeff_scale: float = 1.0,
-        include_endpoints: bool = True,
+        in_dim: int,
+        out_dim: int,
+        teacher_hidden: int,
+        teacher_seed: int,
+        data_seed: int,
         dtype: torch.dtype = torch.float32,
     ):
         super().__init__()
-        self.size     = int(size)
-        self.modes    = int(modes)
-        self.out_grid = int(out_grid)
-        self.alpha    = float(alpha)
-        self.t_max    = float(t_max)
-        self.dtype    = dtype
+        self.size    = int(size)
+        self.in_dim  = int(in_dim)
+        self.out_dim = int(out_dim)
 
-        if include_endpoints:
-            x = torch.linspace(0.0, 1.0, self.out_grid, dtype=dtype)
-        else:
-            x = torch.linspace(0.0, 1.0, self.out_grid + 2, dtype=dtype)[1:-1]
-        self.x_grid = x
+        # Fixed random teacher (never trained — used only for data generation)
+        g_t = torch.Generator()
+        g_t.manual_seed(int(teacher_seed))
+        s1 = 1.0 / math.sqrt(in_dim)
+        s2 = 1.0 / math.sqrt(teacher_hidden)
+        W1 = (torch.randn(in_dim,         teacher_hidden, generator=g_t) * s1).to(dtype)
+        W2 = (torch.randn(teacher_hidden, teacher_hidden, generator=g_t) * s2).to(dtype)
+        W3 = (torch.randn(teacher_hidden, out_dim,        generator=g_t) * s2).to(dtype)
 
-        k = torch.arange(1, self.modes + 1, dtype=dtype).unsqueeze(1)
-        x_row = self.x_grid.unsqueeze(0)
-        self.basis = torch.sin(math.pi * k * x_row)
-        self.lam   = self.alpha * (math.pi * k.squeeze(1)) ** 2
+        # Generate raw inputs
+        g_d = torch.Generator()
+        g_d.manual_seed(int(data_seed))
+        x_raw = torch.randn(self.size, in_dim, generator=g_d, dtype=dtype)
 
-        g = torch.Generator()
-        g.manual_seed(int(seed))
-        kk  = torch.arange(1, self.modes + 1, dtype=dtype)
-        std = (coeff_scale / (kk ** float(coeff_std_decay))).to(dtype)
-        self.coeffs = torch.randn((self.size, self.modes), generator=g, dtype=dtype) * std.unsqueeze(0)
-        self.times  = torch.rand((self.size, 1), generator=g, dtype=dtype) * self.t_max
+        # Teacher forward pass (no biases — keeps symmetry simple)
+        h1    = F.gelu(x_raw @ W1)
+        h2    = F.gelu(h1 @ W2)
+        y_raw = h2 @ W3  # [size, out_dim]
+
+        # Normalize inputs per-dim
+        x_mean = x_raw.mean(0)
+        x_std  = x_raw.std(0).clamp(min=1e-6)
+        self.x = (x_raw - x_mean) / x_std
+
+        # Normalize outputs per-dim
+        y_mean = y_raw.mean(0)
+        y_std  = y_raw.std(0).clamp(min=1e-6)
+        self.y = (y_raw - y_mean) / y_std
 
     def __len__(self) -> int:
         return self.size
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        a = self.coeffs[idx]
-        t = self.times[idx].squeeze(0)
-        decay  = torch.exp(-self.lam * t)
-        scaled = a * decay
-        y = scaled @ self.basis
-        z = torch.cat([a, t.view(1)], dim=0)
-        return z, y
+        return self.x[idx], self.y[idx]
 
 
 # -----------------------
@@ -335,15 +345,11 @@ class TrainCfg:
     grad_clip: float = 1.0
     eval_every: int = 1000
 
-    modes: int = 32
-    out_grid: int = 128
-    alpha: float = 0.1
-    t_max: float = 1.0
+    in_dim: int = 32
+    out_dim: int = 32
+    teacher_hidden: int = 128
     train_size: int = 0
-    test_size: int = 1000
-    coeff_std_decay: float = 1.0
-    coeff_scale: float = 1.0
-    include_endpoints: bool = True
+    test_size: int = 2000
 
     target_params: int = 1_000_000
     depth_list: List[int] = None
@@ -354,7 +360,7 @@ class TrainCfg:
     dropout: float = 0.0
 
     agop_batch: int = 256
-    agop_proj_samples: int = 16
+    agop_proj_samples: int = 32
 
     seed: int = 0
 
@@ -475,8 +481,8 @@ def build_mlp_model(
     cfg: TrainCfg,
     pad_to_target: bool = True,
 ) -> TinyMLP:
-    in_dim  = cfg.modes + 1
-    out_dim = cfg.out_grid
+    in_dim  = cfg.in_dim
+    out_dim = cfg.out_dim
     tmp     = TinyMLP(in_dim=in_dim, out_dim=out_dim, depth=depth, width=width,
                       activation=cfg.activation, dropout=cfg.dropout, pad_params=0)
     active = count_params(tmp)
@@ -498,8 +504,8 @@ def find_width_for_target_params(*, depth: int, cfg: TrainCfg) -> Tuple[int, int
     w_min = to_valid(max(cfg.min_width, mul))
     w_max = to_valid(max(cfg.max_width, mul))
 
-    in_dim  = cfg.modes + 1
-    out_dim = cfg.out_grid
+    in_dim  = cfg.in_dim
+    out_dim = cfg.out_dim
 
     def active_params(w: int) -> int:
         m = TinyMLP(in_dim=in_dim, out_dim=out_dim, depth=depth, width=w,
@@ -601,19 +607,15 @@ def main() -> None:
     p.add_argument("--max_width",      type=int, default=2048)
     p.add_argument("--width_multiple", type=int, default=16)
 
-    p.add_argument("--modes",            type=int,   default=16,
-                   help="Number of Fourier modes (input dim = modes+1). Default 16.")
-    p.add_argument("--out_grid",         type=int,   default=32,
-                   help="Spatial output resolution. Default 32 (aligns tokens/step with Transformer seq_len=32).")
-    p.add_argument("--alpha",            type=float, default=0.1)
-    p.add_argument("--t_max",            type=float, default=1.0)
-    p.add_argument("--train_size",       type=int,   default=0,
+    p.add_argument("--in_dim",         type=int, default=32,
+                   help="Input dimension for student and data generation.")
+    p.add_argument("--out_dim",        type=int, default=32,
+                   help="Output dimension for student and data generation.")
+    p.add_argument("--teacher_hidden", type=int, default=128,
+                   help="Hidden size of the random teacher MLP.")
+    p.add_argument("--train_size",     type=int, default=0,
                    help="0 = auto-match unique_targets ≈ data_ratio×N.")
-    p.add_argument("--test_size",        type=int,   default=1000)
-    p.add_argument("--coeff_std_decay",  type=float, default=1.0)
-    p.add_argument("--coeff_scale",      type=float, default=1.0)
-    p.add_argument("--include_endpoints", action="store_true")
-    p.add_argument("--no_endpoints",     action="store_true")
+    p.add_argument("--test_size",      type=int, default=2000)
 
     p.add_argument("--lr",           type=float, default=1e-3)
     p.add_argument("--weight_decay", type=float, default=0.0)
@@ -631,7 +633,7 @@ def main() -> None:
     p.add_argument("--dropout",      type=float, default=0.0)
 
     p.add_argument("--agop_batch",        type=int, default=256)
-    p.add_argument("--agop_proj_samples", type=int, default=16)
+    p.add_argument("--agop_proj_samples", type=int, default=32)
 
     p.add_argument("--seed", type=int, default=0)
 
@@ -644,17 +646,11 @@ def main() -> None:
     cfg.max_width      = int(args.max_width)
     cfg.width_multiple = int(args.width_multiple)
 
-    cfg.modes           = int(args.modes)
-    cfg.out_grid        = int(args.out_grid)
-    cfg.alpha           = float(args.alpha)
-    cfg.t_max           = float(args.t_max)
-    cfg.train_size      = int(args.train_size)
-    cfg.test_size       = int(args.test_size)
-    cfg.coeff_std_decay = float(args.coeff_std_decay)
-    cfg.coeff_scale     = float(args.coeff_scale)
-    cfg.include_endpoints = True
-    if args.no_endpoints:      cfg.include_endpoints = False
-    if args.include_endpoints: cfg.include_endpoints = True
+    cfg.in_dim         = int(args.in_dim)
+    cfg.out_dim        = int(args.out_dim)
+    cfg.teacher_hidden = int(args.teacher_hidden)
+    cfg.train_size     = int(args.train_size)
+    cfg.test_size      = int(args.test_size)
 
     cfg.lr           = float(args.lr)
     cfg.weight_decay = float(args.weight_decay)
@@ -681,10 +677,10 @@ def main() -> None:
 
     # Auto train_size: unique scalars ≈ D = 20N
     if cfg.train_size <= 0:
-        cfg.train_size = int(math.ceil(cfg.data_ratio * cfg.target_params / float(cfg.out_grid)))
+        cfg.train_size = int(math.ceil(cfg.data_ratio * cfg.target_params / float(cfg.out_dim)))
 
-    # Auto steps: D = steps × batch × out_grid ≈ 20N
-    tokens_per_step = int(cfg.batch_size) * int(cfg.out_grid)
+    # Auto steps: D = steps × batch × out_dim ≈ 20N
+    tokens_per_step = int(cfg.batch_size) * int(cfg.out_dim)
     if cfg.steps <= 0:
         cfg.steps = int(math.ceil(cfg.data_ratio * cfg.target_params / float(tokens_per_step)))
     if cfg.warmup_steps <= 0:
@@ -693,30 +689,31 @@ def main() -> None:
         cfg.eval_every = max(50, cfg.steps // 100)
 
     D_actual       = int(cfg.steps) * tokens_per_step
-    unique_tokens  = int(cfg.train_size) * int(cfg.out_grid)
+    unique_tokens  = int(cfg.train_size) * int(cfg.out_dim)
     approx_epochs  = float(cfg.steps) * float(cfg.batch_size) / float(cfg.train_size)
 
-    print("========== Budget (MLP / supervised PDE) ==========")
+    print("========== Budget (MLP / teacher-student regression) ==========")
     print(f"target_params N     = {cfg.target_params:,}")
+    print(f"in_dim / out_dim    = {cfg.in_dim} / {cfg.out_dim}")
+    print(f"teacher_hidden      = {cfg.teacher_hidden}")
     print(f"train_size          = {cfg.train_size:,}  samples")
-    print(f"tokens_per_step     = batch×out_grid = {cfg.batch_size}×{cfg.out_grid} = {tokens_per_step:,}")
+    print(f"tokens_per_step     = batch×out_dim = {cfg.batch_size}×{cfg.out_dim} = {tokens_per_step:,}")
     print(f"base steps          = {cfg.steps:,}")
     print(f"approx epochs       = {approx_epochs:.1f}")
     print(f"D (base)            = {D_actual:,}   D/N = {D_actual/cfg.target_params:.1f}×")
     print(f"unique targets      = {unique_tokens:,}   {unique_tokens/cfg.target_params:.1f}×N")
-    print("====================================================")
+    print("===============================================================")
 
-    train_ds = HeatEquationOperatorDataset(
-        size=cfg.train_size, modes=cfg.modes, out_grid=cfg.out_grid,
-        alpha=cfg.alpha, t_max=cfg.t_max, seed=cfg.seed + 123,
-        coeff_std_decay=cfg.coeff_std_decay, coeff_scale=cfg.coeff_scale,
-        include_endpoints=cfg.include_endpoints,
+    teacher_seed = cfg.seed + 99999   # fixed teacher — same for all shapes and runs
+    train_ds = TeacherStudentDataset(
+        size=cfg.train_size, in_dim=cfg.in_dim, out_dim=cfg.out_dim,
+        teacher_hidden=cfg.teacher_hidden,
+        teacher_seed=teacher_seed, data_seed=cfg.seed + 123,
     )
-    test_ds = HeatEquationOperatorDataset(
-        size=cfg.test_size, modes=cfg.modes, out_grid=cfg.out_grid,
-        alpha=cfg.alpha, t_max=cfg.t_max, seed=cfg.seed + 456,
-        coeff_std_decay=cfg.coeff_std_decay, coeff_scale=cfg.coeff_scale,
-        include_endpoints=cfg.include_endpoints,
+    test_ds = TeacherStudentDataset(
+        size=cfg.test_size, in_dim=cfg.in_dim, out_dim=cfg.out_dim,
+        teacher_hidden=cfg.teacher_hidden,
+        teacher_seed=teacher_seed, data_seed=cfg.seed + 456,
     )
     train_loader = torch.utils.data.DataLoader(
         train_ds, batch_size=cfg.batch_size, shuffle=True, drop_last=True, num_workers=0)
@@ -793,7 +790,7 @@ def main() -> None:
         off_energy, test_mse,
         xlabel="AOFE  (AGOP off-diagonal energy)",
         ylabel="Test MSE (per scalar)",
-        title=f"PDE-MLP: test MSE vs AOFE  [N={cfg.target_params}]",
+        title=f"Teacher-Student MLP: test MSE vs AOFE  [N={cfg.target_params}]",
         outpath=os.path.join(args.out_dir, "scatter_testmse_vs_aofe_energy.png"),
         depths=depths_arr,
         r=p_aofe, r_label="Pearson r (AOFE, loss)",
@@ -802,7 +799,7 @@ def main() -> None:
         off_ratio, test_mse,
         xlabel="AOFE ratio  (AGOP off-diagonal ratio)",
         ylabel="Test MSE (per scalar)",
-        title=f"PDE-MLP: test MSE vs AOFE ratio  [N={cfg.target_params}]",
+        title=f"Teacher-Student MLP: test MSE vs AOFE ratio  [N={cfg.target_params}]",
         outpath=os.path.join(args.out_dir, "scatter_testmse_vs_aofe_ratio.png"),
         depths=depths_arr,
         r=p_aofe_ratio, r_label="Pearson r (AOFE_ratio, loss)",
