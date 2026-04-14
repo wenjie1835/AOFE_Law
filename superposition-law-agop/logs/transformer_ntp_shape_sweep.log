@@ -1,0 +1,1745 @@
+
+[transformer_ntp] /venv/main/bin/python3 /workspace/AOFE_Law/superposition-law-agop/experiments/transformer_ntp_shape_sweep.py --out_dir /workspace/AOFE_Law/superposition-law-agop/results/transformer_ntp_shape_sweep --data_dir /workspace/AOFE_Law/superposition-law-agop/data --param_groups 300000,1000000,3000000 --depth_list 1,2,3,4,5,6,8,10,12,16,20,24 --data_ratio 60.0 --device cuda
+Device : cuda
+N      : [300000, 1000000, 3000000]
+depths : [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24]
+D=ratio×N: 60.0×N bytes  (≈ 20×N BPE-tokens)
+Out    : /workspace/AOFE_Law/superposition-law-agop/results/transformer_ntp_shape_sweep
+
+Loading WikiText-103 ...
+  [train     ] loaded 541.1M bytes from /workspace/AOFE_Law/superposition-law-agop/data/wikitext103_train.bin
+  [validation] loaded 1.1M bytes from /workspace/AOFE_Law/superposition-law-agop/data/wikitext103_validation.bin
+  [test      ] loaded 1.3M bytes from /workspace/AOFE_Law/superposition-law-agop/data/wikitext103_test.bin
+  train=541.1M  val=1.1M  test=1.3M bytes
+
+Shape preview (no training):
+         N   depth   d_model      active    pad%         α
+--------------------------------------------------------
+    300,000       1       128     295,680   1.4%    0.0078
+    300,000       2        96     295,872   1.4%    0.0208
+    300,000       3        80     292,960   2.3%    0.0375
+    300,000       4        68     275,400   8.2%    0.0588
+    300,000       5        64     296,320   1.2%    0.0781
+    300,000       6        56     270,256   9.9%    0.1071
+    300,000       8        48     259,680  13.4%    0.1667
+    300,000      10        44     267,960  10.7%    0.2273
+    300,000      12        40     263,120  12.3%    0.3000
+    300,000      16        36     278,856   7.0%    0.4444
+    300,000      20        32     272,960   9.0%    0.6250
+    300,000      24        28     250,040  16.7%    0.8571
+  1,000,000       1       256     984,576   1.5%    0.0039
+  1,000,000       2       188     994,520   0.5%    0.0106
+  1,000,000       3       156     998,088   0.2%    0.0192
+  1,000,000       4       136     994,704   0.5%    0.0294
+  1,000,000       5       120     958,800   4.1%    0.0417
+  1,000,000       6       112     992,096   0.8%    0.0536
+  1,000,000       8        96     961,728   3.8%    0.0833
+  1,000,000      10        84     914,760   8.5%    0.1190
+  1,000,000      12        80     987,040   1.3%    0.1500
+  1,000,000      16        68     944,520   5.5%    0.2353
+  1,000,000      20        60     915,000   8.5%    0.3333
+  1,000,000      24        56     951,664   4.8%    0.4286
+  3,000,000       1       468   2,990,520   0.3%    0.0021
+  3,000,000       2       336   2,970,912   1.0%    0.0060
+  3,000,000       3       276   2,958,168   1.4%    0.0109
+  3,000,000       4       240   2,953,440   1.6%    0.0167
+  3,000,000       5       216   2,970,000   1.0%    0.0231
+  3,000,000       6       196   2,921,576   2.6%    0.0306
+  3,000,000       8       172   2,978,008   0.7%    0.0465
+  3,000,000      10       152   2,895,600   3.5%    0.0658
+  3,000,000      12       140   2,936,920   2.1%    0.0857
+  3,000,000      16       120   2,864,880   4.5%    0.1333
+  3,000,000      20       108   2,891,160   3.6%    0.1852
+  3,000,000      24       100   2,966,600   1.1%    0.2400
+
+
+========================================================================
+N = 300,000   D = 18,000,000 bytes   windows=70,312   base_steps=1,098
+========================================================================
+
+  ── depth=1 ──
+  d_model=128  n_heads=32  d_ff=512  active=295,680  pad=1.4%  α=0.0078
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=2.7544  val=2.7560  test=2.7592 nats  t=5s
+    step    400/1647  lr=2.96e-04  train=2.4804  val=2.4763  test=2.4830 nats  t=10s
+    step    600/1647  lr=2.65e-04  train=2.4162  val=2.4146  test=2.4198 nats  t=15s
+    step    800/1647  lr=2.09e-04  train=2.3497  val=2.3487  test=2.3547 nats  t=19s
+    step   1000/1647  lr=1.41e-04  train=2.2909  val=2.2907  test=2.2980 nats  t=24s
+    step   1200/1647  lr=7.47e-05  train=2.2397  val=2.2424  test=2.2500 nats  t=29s
+    step   1400/1647  lr=2.44e-05  train=2.2237  val=2.2185  test=2.2261 nats  t=34s
+    step   1600/1647  lr=9.39e-07  train=2.2114  val=2.2109  test=2.2188 nats  t=38s
+    step   1647/1647  lr=4.08e-10  train=2.2117  val=2.2108  test=2.2186 nats  t=40s
+  → test_ce=2.2186 nats  AOFE_ratio=0.9495  α=0.0078  t=49s
+
+  ── depth=2 ──
+  d_model=96  n_heads=24  d_ff=384  active=295,872  pad=1.4%  α=0.0208
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=2.9987  val=2.9979  test=2.9992 nats  t=7s
+    step    400/1647  lr=2.96e-04  train=2.5134  val=2.5172  test=2.5227 nats  t=14s
+    step    600/1647  lr=2.65e-04  train=2.4317  val=2.4335  test=2.4383 nats  t=21s
+    step    800/1647  lr=2.09e-04  train=2.3711  val=2.3690  test=2.3738 nats  t=28s
+    step   1000/1647  lr=1.41e-04  train=2.3065  val=2.3060  test=2.3123 nats  t=35s
+    step   1200/1647  lr=7.47e-05  train=2.2677  val=2.2623  test=2.2687 nats  t=41s
+    step   1400/1647  lr=2.44e-05  train=2.2382  val=2.2360  test=2.2431 nats  t=48s
+    step   1600/1647  lr=9.39e-07  train=2.2272  val=2.2283  test=2.2354 nats  t=55s
+    step   1647/1647  lr=4.08e-10  train=2.2350  val=2.2282  test=2.2353 nats  t=58s
+  → test_ce=2.2353 nats  AOFE_ratio=0.9415  α=0.0208  t=70s
+
+  ── depth=3 ──
+  d_model=80  n_heads=20  d_ff=320  active=292,960  pad=2.3%  α=0.0375
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=3.2262  val=3.2278  test=3.2267 nats  t=8s
+    step    400/1647  lr=2.96e-04  train=2.5576  val=2.5575  test=2.5620 nats  t=17s
+    step    600/1647  lr=2.65e-04  train=2.4540  val=2.4582  test=2.4627 nats  t=25s
+    step    800/1647  lr=2.09e-04  train=2.3799  val=2.3788  test=2.3836 nats  t=33s
+    step   1000/1647  lr=1.41e-04  train=2.3171  val=2.3196  test=2.3250 nats  t=42s
+    step   1200/1647  lr=7.47e-05  train=2.2732  val=2.2725  test=2.2801 nats  t=50s
+    step   1400/1647  lr=2.44e-05  train=2.2494  val=2.2482  test=2.2554 nats  t=58s
+    step   1600/1647  lr=9.39e-07  train=2.2408  val=2.2400  test=2.2473 nats  t=67s
+    step   1647/1647  lr=4.08e-10  train=2.2427  val=2.2399  test=2.2472 nats  t=70s
+  → test_ce=2.2472 nats  AOFE_ratio=0.9417  α=0.0375  t=85s
+
+  ── depth=4 ──
+  d_model=68  n_heads=17  d_ff=272  active=275,400  pad=8.2%  α=0.0588
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=3.4210  val=3.4244  test=3.4233 nats  t=10s
+    step    400/1647  lr=2.96e-04  train=2.5934  val=2.5930  test=2.5978 nats  t=19s
+    step    600/1647  lr=2.65e-04  train=2.4713  val=2.4716  test=2.4760 nats  t=29s
+    step    800/1647  lr=2.09e-04  train=2.3966  val=2.3946  test=2.3994 nats  t=39s
+    step   1000/1647  lr=1.41e-04  train=2.3351  val=2.3330  test=2.3383 nats  t=49s
+    step   1200/1647  lr=7.47e-05  train=2.2961  val=2.2961  test=2.3013 nats  t=58s
+    step   1400/1647  lr=2.44e-05  train=2.2783  val=2.2754  test=2.2809 nats  t=68s
+    step   1600/1647  lr=9.39e-07  train=2.2618  val=2.2674  test=2.2731 nats  t=78s
+    step   1647/1647  lr=4.08e-10  train=2.2744  val=2.2674  test=2.2729 nats  t=82s
+  → test_ce=2.2729 nats  AOFE_ratio=0.9394  α=0.0588  t=98s
+
+  ── depth=5 ──
+  d_model=64  n_heads=16  d_ff=256  active=296,320  pad=1.2%  α=0.0781
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=3.4658  val=3.4656  test=3.4635 nats  t=11s
+    step    400/1647  lr=2.96e-04  train=2.6301  val=2.6282  test=2.6327 nats  t=21s
+    step    600/1647  lr=2.65e-04  train=2.4836  val=2.4815  test=2.4866 nats  t=32s
+    step    800/1647  lr=2.09e-04  train=2.4030  val=2.4037  test=2.4095 nats  t=42s
+    step   1000/1647  lr=1.41e-04  train=2.3340  val=2.3341  test=2.3396 nats  t=53s
+    step   1200/1647  lr=7.47e-05  train=2.2877  val=2.2858  test=2.2899 nats  t=63s
+    step   1400/1647  lr=2.44e-05  train=2.2613  val=2.2605  test=2.2649 nats  t=74s
+    step   1600/1647  lr=9.39e-07  train=2.2479  val=2.2520  test=2.2567 nats  t=84s
+    step   1647/1647  lr=4.08e-10  train=2.2531  val=2.2520  test=2.2566 nats  t=89s
+  → test_ce=2.2566 nats  AOFE_ratio=0.9418  α=0.0781  t=107s
+
+  ── depth=6 ──
+  d_model=56  n_heads=14  d_ff=224  active=270,256  pad=9.9%  α=0.1071
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=3.6381  val=3.6450  test=3.6430 nats  t=12s
+    step    400/1647  lr=2.96e-04  train=2.6717  val=2.6750  test=2.6792 nats  t=24s
+    step    600/1647  lr=2.65e-04  train=2.5056  val=2.5070  test=2.5115 nats  t=35s
+    step    800/1647  lr=2.09e-04  train=2.4256  val=2.4301  test=2.4344 nats  t=47s
+    step   1000/1647  lr=1.41e-04  train=2.3565  val=2.3567  test=2.3619 nats  t=59s
+    step   1200/1647  lr=7.47e-05  train=2.3095  val=2.3115  test=2.3168 nats  t=71s
+    step   1400/1647  lr=2.44e-05  train=2.2878  val=2.2867  test=2.2931 nats  t=83s
+    step   1600/1647  lr=9.39e-07  train=2.2827  val=2.2790  test=2.2851 nats  t=95s
+    step   1647/1647  lr=4.08e-10  train=2.2788  val=2.2789  test=2.2851 nats  t=99s
+  → test_ce=2.2851 nats  AOFE_ratio=0.9405  α=0.1071  t=119s
+
+  ── depth=8 ──
+  d_model=48  n_heads=12  d_ff=192  active=259,680  pad=13.4%  α=0.1667
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=3.7930  val=3.7994  test=3.7971 nats  t=14s
+    step    400/1647  lr=2.96e-04  train=2.7540  val=2.7535  test=2.7571 nats  t=28s
+    step    600/1647  lr=2.65e-04  train=2.5467  val=2.5442  test=2.5497 nats  t=41s
+    step    800/1647  lr=2.09e-04  train=2.4644  val=2.4639  test=2.4695 nats  t=55s
+    step   1000/1647  lr=1.41e-04  train=2.4150  val=2.4114  test=2.4162 nats  t=69s
+    step   1200/1647  lr=7.47e-05  train=2.3728  val=2.3734  test=2.3780 nats  t=83s
+    step   1400/1647  lr=2.44e-05  train=2.3468  val=2.3508  test=2.3562 nats  t=97s
+    step   1600/1647  lr=9.39e-07  train=2.3369  val=2.3438  test=2.3490 nats  t=110s
+    step   1647/1647  lr=4.08e-10  train=2.3440  val=2.3437  test=2.3490 nats  t=116s
+  → test_ce=2.3490 nats  AOFE_ratio=0.9425  α=0.1667  t=139s
+
+  ── depth=10 ──
+  d_model=44  n_heads=11  d_ff=176  active=267,960  pad=10.7%  α=0.2273
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=3.9163  val=3.9194  test=3.9167 nats  t=16s
+    step    400/1647  lr=2.96e-04  train=2.8270  val=2.8198  test=2.8211 nats  t=32s
+    step    600/1647  lr=2.65e-04  train=2.5731  val=2.5744  test=2.5787 nats  t=48s
+    step    800/1647  lr=2.09e-04  train=2.4741  val=2.4744  test=2.4794 nats  t=65s
+    step   1000/1647  lr=1.41e-04  train=2.4015  val=2.4020  test=2.4071 nats  t=81s
+    step   1200/1647  lr=7.47e-05  train=2.3541  val=2.3513  test=2.3570 nats  t=97s
+    step   1400/1647  lr=2.44e-05  train=2.3263  val=2.3277  test=2.3333 nats  t=113s
+    step   1600/1647  lr=9.39e-07  train=2.3260  val=2.3193  test=2.3247 nats  t=129s
+    step   1647/1647  lr=4.08e-10  train=2.3226  val=2.3191  test=2.3245 nats  t=136s
+  → test_ce=2.3245 nats  AOFE_ratio=0.9368  α=0.2273  t=162s
+
+  ── depth=12 ──
+  d_model=40  n_heads=10  d_ff=160  active=263,120  pad=12.3%  α=0.3000
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=4.0340  val=4.0367  test=4.0348 nats  t=18s
+    step    400/1647  lr=2.96e-04  train=2.8640  val=2.8681  test=2.8690 nats  t=36s
+    step    600/1647  lr=2.65e-04  train=2.6066  val=2.6043  test=2.6087 nats  t=53s
+    step    800/1647  lr=2.09e-04  train=2.4975  val=2.5028  test=2.5071 nats  t=71s
+    step   1000/1647  lr=1.41e-04  train=2.4455  val=2.4443  test=2.4494 nats  t=89s
+    step   1200/1647  lr=7.47e-05  train=2.4085  val=2.4140  test=2.4189 nats  t=107s
+    step   1400/1647  lr=2.44e-05  train=2.3984  val=2.3978  test=2.4029 nats  t=125s
+    step   1600/1647  lr=9.39e-07  train=2.3876  val=2.3930  test=2.3979 nats  t=143s
+    step   1647/1647  lr=4.08e-10  train=2.3889  val=2.3929  test=2.3979 nats  t=150s
+  → test_ce=2.3979 nats  AOFE_ratio=0.9371  α=0.3000  t=179s
+
+  ── depth=16 ──
+  d_model=36  n_heads=9  d_ff=144  active=278,856  pad=7.0%  α=0.4444
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=4.1406  val=4.1401  test=4.1382 nats  t=22s
+    step    400/1647  lr=2.96e-04  train=2.9883  val=2.9902  test=2.9904 nats  t=44s
+    step    600/1647  lr=2.65e-04  train=2.6791  val=2.6835  test=2.6875 nats  t=67s
+    step    800/1647  lr=2.09e-04  train=2.5439  val=2.5457  test=2.5502 nats  t=89s
+    step   1000/1647  lr=1.41e-04  train=2.4769  val=2.4716  test=2.4762 nats  t=111s
+    step   1200/1647  lr=7.47e-05  train=2.4228  val=2.4261  test=2.4312 nats  t=133s
+    step   1400/1647  lr=2.44e-05  train=2.4027  val=2.4036  test=2.4095 nats  t=156s
+    step   1600/1647  lr=9.39e-07  train=2.3961  val=2.3978  test=2.4036 nats  t=178s
+    step   1647/1647  lr=4.08e-10  train=2.3990  val=2.3975  test=2.4035 nats  t=187s
+  → test_ce=2.4035 nats  AOFE_ratio=0.9408  α=0.4444  t=222s
+
+  ── depth=20 ──
+  d_model=32  n_heads=8  d_ff=128  active=272,960  pad=9.0%  α=0.6250
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=4.2620  val=4.2607  test=4.2589 nats  t=23s
+    step    400/1647  lr=2.96e-04  train=3.0927  val=3.0903  test=3.0894 nats  t=45s
+    step    600/1647  lr=2.65e-04  train=2.7480  val=2.7529  test=2.7552 nats  t=68s
+    step    800/1647  lr=2.09e-04  train=2.5918  val=2.5942  test=2.5981 nats  t=90s
+    step   1000/1647  lr=1.41e-04  train=2.5034  val=2.5077  test=2.5122 nats  t=113s
+    step   1200/1647  lr=7.47e-05  train=2.4613  val=2.4638  test=2.4678 nats  t=135s
+    step   1400/1647  lr=2.44e-05  train=2.4465  val=2.4409  test=2.4453 nats  t=158s
+    step   1600/1647  lr=9.39e-07  train=2.4375  val=2.4340  test=2.4384 nats  t=180s
+    step   1647/1647  lr=4.08e-10  train=2.4291  val=2.4339  test=2.4383 nats  t=189s
+  → test_ce=2.4383 nats  AOFE_ratio=0.9407  α=0.6250  t=227s
+
+  ── depth=24 ──
+  d_model=28  n_heads=7  d_ff=112  active=250,040  pad=16.7%  α=0.8571
+  Total params (padded): 300,000
+    step    200/1647  lr=2.00e-04  train=4.4340  val=4.4361  test=4.4345 nats  t=26s
+    step    400/1647  lr=2.96e-04  train=3.1793  val=3.1807  test=3.1794 nats  t=52s
+    step    600/1647  lr=2.65e-04  train=2.8189  val=2.8241  test=2.8257 nats  t=78s
+    step    800/1647  lr=2.09e-04  train=2.6453  val=2.6420  test=2.6450 nats  t=104s
+    step   1000/1647  lr=1.41e-04  train=2.5462  val=2.5509  test=2.5554 nats  t=130s
+    step   1200/1647  lr=7.47e-05  train=2.5039  val=2.5071  test=2.5110 nats  t=156s
+    step   1400/1647  lr=2.44e-05  train=2.4795  val=2.4848  test=2.4892 nats  t=182s
+    step   1600/1647  lr=9.39e-07  train=2.4830  val=2.4787  test=2.4831 nats  t=208s
+    step   1647/1647  lr=4.08e-10  train=2.4760  val=2.4786  test=2.4830 nats  t=219s
+  → test_ce=2.4830 nats  AOFE_ratio=0.9395  α=0.8571  t=259s
+
+========================================================================
+N = 1,000,000   D = 60,000,000 bytes   windows=234,375   base_steps=3,662
+========================================================================
+
+  ── depth=1 ──
+  d_model=256  n_heads=64  d_ff=1024  active=984,576  pad=1.5%  α=0.0039
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=2.5211  val=2.5162  test=2.5223 nats  t=9s
+    step    400/5493  lr=3.00e-04  train=2.4224  val=2.4232  test=2.4283 nats  t=18s
+    step    600/5493  lr=2.98e-04  train=2.3327  val=2.3307  test=2.3367 nats  t=27s
+    step    800/5493  lr=2.93e-04  train=2.1843  val=2.1856  test=2.1941 nats  t=36s
+    step   1000/5493  lr=2.87e-04  train=2.1459  val=2.1352  test=2.1469 nats  t=45s
+    step   1200/5493  lr=2.78e-04  train=2.0194  val=2.0081  test=2.0206 nats  t=54s
+    step   1400/5493  lr=2.68e-04  train=1.9450  val=1.9332  test=1.9491 nats  t=63s
+    step   1600/5493  lr=2.56e-04  train=1.8691  val=1.8603  test=1.8774 nats  t=72s
+    step   1800/5493  lr=2.42e-04  train=1.8205  val=1.8050  test=1.8231 nats  t=81s
+    step   2000/5493  lr=2.28e-04  train=1.7824  val=1.7663  test=1.7872 nats  t=90s
+    step   2200/5493  lr=2.11e-04  train=1.7378  val=1.7229  test=1.7449 nats  t=99s
+    step   2400/5493  lr=1.94e-04  train=1.7155  val=1.7056  test=1.7264 nats  t=108s
+    step   2600/5493  lr=1.77e-04  train=1.6984  val=1.6776  test=1.6980 nats  t=117s
+    step   2800/5493  lr=1.59e-04  train=1.6765  val=1.6598  test=1.6811 nats  t=126s
+    step   3000/5493  lr=1.41e-04  train=1.6639  val=1.6443  test=1.6657 nats  t=134s
+    step   3200/5493  lr=1.23e-04  train=1.6508  val=1.6245  test=1.6471 nats  t=143s
+    step   3400/5493  lr=1.05e-04  train=1.6204  val=1.6087  test=1.6308 nats  t=152s
+    step   3600/5493  lr=8.82e-05  train=1.6271  val=1.5956  test=1.6174 nats  t=161s
+    step   3800/5493  lr=7.21e-05  train=1.6029  val=1.5855  test=1.6078 nats  t=170s
+    step   4000/5493  lr=5.72e-05  train=1.5900  val=1.5762  test=1.5979 nats  t=179s
+    step   4200/5493  lr=4.37e-05  train=1.5844  val=1.5675  test=1.5909 nats  t=188s
+    step   4400/5493  lr=3.17e-05  train=1.5843  val=1.5614  test=1.5850 nats  t=197s
+    step   4600/5493  lr=2.14e-05  train=1.5708  val=1.5543  test=1.5775 nats  t=206s
+    step   4800/5493  lr=1.30e-05  train=1.5698  val=1.5507  test=1.5742 nats  t=215s
+    step   5000/5493  lr=6.65e-06  train=1.5708  val=1.5474  test=1.5704 nats  t=224s
+    step   5200/5493  lr=2.37e-06  train=1.5642  val=1.5460  test=1.5689 nats  t=233s
+    step   5400/5493  lr=2.42e-07  train=1.5574  val=1.5452  test=1.5680 nats  t=242s
+    step   5493/5493  lr=2.74e-11  train=1.5717  val=1.5451  test=1.5680 nats  t=247s
+  → test_ce=1.5680 nats  AOFE_ratio=0.9294  α=0.0039  t=295s
+
+  ── depth=2 ──
+  d_model=188  n_heads=47  d_ff=752  active=994,520  pad=0.5%  α=0.0106
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=2.5695  val=2.5715  test=2.5768 nats  t=13s
+    step    400/5493  lr=3.00e-04  train=2.4155  val=2.4104  test=2.4147 nats  t=26s
+    step    600/5493  lr=2.98e-04  train=2.3196  val=2.3237  test=2.3289 nats  t=39s
+    step    800/5493  lr=2.93e-04  train=2.2221  val=2.2143  test=2.2200 nats  t=53s
+    step   1000/5493  lr=2.87e-04  train=2.0962  val=2.0868  test=2.0955 nats  t=66s
+    step   1200/5493  lr=2.78e-04  train=2.0011  val=1.9880  test=1.9981 nats  t=79s
+    step   1400/5493  lr=2.68e-04  train=1.9084  val=1.9032  test=1.9176 nats  t=92s
+    step   1600/5493  lr=2.56e-04  train=1.8509  val=1.8408  test=1.8551 nats  t=105s
+    step   1800/5493  lr=2.42e-04  train=1.7996  val=1.7847  test=1.7995 nats  t=118s
+    step   2000/5493  lr=2.28e-04  train=1.7456  val=1.7374  test=1.7532 nats  t=132s
+    step   2200/5493  lr=2.11e-04  train=1.7227  val=1.7032  test=1.7209 nats  t=145s
+    step   2400/5493  lr=1.94e-04  train=1.6918  val=1.6743  test=1.6916 nats  t=158s
+    step   2600/5493  lr=1.77e-04  train=1.6664  val=1.6497  test=1.6678 nats  t=171s
+    step   2800/5493  lr=1.59e-04  train=1.6505  val=1.6319  test=1.6526 nats  t=184s
+    step   3000/5493  lr=1.41e-04  train=1.6332  val=1.6105  test=1.6294 nats  t=197s
+    step   3200/5493  lr=1.23e-04  train=1.6181  val=1.5971  test=1.6188 nats  t=210s
+    step   3400/5493  lr=1.05e-04  train=1.5970  val=1.5820  test=1.6019 nats  t=224s
+    step   3600/5493  lr=8.82e-05  train=1.5910  val=1.5701  test=1.5915 nats  t=237s
+    step   3800/5493  lr=7.21e-05  train=1.5823  val=1.5620  test=1.5838 nats  t=250s
+    step   4000/5493  lr=5.72e-05  train=1.5645  val=1.5528  test=1.5729 nats  t=263s
+    step   4200/5493  lr=4.37e-05  train=1.5642  val=1.5450  test=1.5667 nats  t=276s
+    step   4400/5493  lr=3.17e-05  train=1.5589  val=1.5397  test=1.5607 nats  t=289s
+    step   4600/5493  lr=2.14e-05  train=1.5603  val=1.5347  test=1.5564 nats  t=303s
+    step   4800/5493  lr=1.30e-05  train=1.5561  val=1.5315  test=1.5535 nats  t=316s
+    step   5000/5493  lr=6.65e-06  train=1.5446  val=1.5285  test=1.5502 nats  t=329s
+    step   5200/5493  lr=2.37e-06  train=1.5440  val=1.5268  test=1.5486 nats  t=342s
+    step   5400/5493  lr=2.42e-07  train=1.5460  val=1.5260  test=1.5480 nats  t=355s
+    step   5493/5493  lr=2.74e-11  train=1.5435  val=1.5260  test=1.5480 nats  t=363s
+  → test_ce=1.5480 nats  AOFE_ratio=0.9251  α=0.0106  t=433s
+
+  ── depth=3 ──
+  d_model=156  n_heads=39  d_ff=624  active=998,088  pad=0.2%  α=0.0192
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=2.6327  val=2.6287  test=2.6337 nats  t=16s
+    step    400/5493  lr=3.00e-04  train=2.4162  val=2.4179  test=2.4230 nats  t=32s
+    step    600/5493  lr=2.98e-04  train=2.2821  val=2.2774  test=2.2839 nats  t=48s
+    step    800/5493  lr=2.93e-04  train=2.1159  val=2.1144  test=2.1221 nats  t=64s
+    step   1000/5493  lr=2.87e-04  train=1.9907  val=1.9866  test=1.9967 nats  t=81s
+    step   1200/5493  lr=2.78e-04  train=1.8836  val=1.8784  test=1.8951 nats  t=97s
+    step   1400/5493  lr=2.68e-04  train=1.8103  val=1.7951  test=1.8126 nats  t=113s
+    step   1600/5493  lr=2.56e-04  train=1.7578  val=1.7429  test=1.7624 nats  t=129s
+    step   1800/5493  lr=2.42e-04  train=1.7056  val=1.6896  test=1.7086 nats  t=145s
+    step   2000/5493  lr=2.28e-04  train=1.6624  val=1.6453  test=1.6656 nats  t=161s
+    step   2200/5493  lr=2.11e-04  train=1.6347  val=1.6116  test=1.6336 nats  t=177s
+    step   2400/5493  lr=1.94e-04  train=1.6026  val=1.5826  test=1.6055 nats  t=193s
+    step   2600/5493  lr=1.77e-04  train=1.5788  val=1.5589  test=1.5814 nats  t=210s
+    step   2800/5493  lr=1.59e-04  train=1.5568  val=1.5345  test=1.5569 nats  t=226s
+    step   3000/5493  lr=1.41e-04  train=1.5445  val=1.5191  test=1.5411 nats  t=242s
+    step   3200/5493  lr=1.23e-04  train=1.5217  val=1.5058  test=1.5273 nats  t=258s
+    step   3400/5493  lr=1.05e-04  train=1.5124  val=1.4863  test=1.5092 nats  t=274s
+    step   3600/5493  lr=8.82e-05  train=1.4965  val=1.4781  test=1.5011 nats  t=290s
+    step   3800/5493  lr=7.21e-05  train=1.4731  val=1.4663  test=1.4892 nats  t=306s
+    step   4000/5493  lr=5.72e-05  train=1.4784  val=1.4580  test=1.4805 nats  t=322s
+    step   4200/5493  lr=4.37e-05  train=1.4669  val=1.4511  test=1.4727 nats  t=338s
+    step   4400/5493  lr=3.17e-05  train=1.4603  val=1.4438  test=1.4656 nats  t=355s
+    step   4600/5493  lr=2.14e-05  train=1.4567  val=1.4386  test=1.4609 nats  t=371s
+    step   4800/5493  lr=1.30e-05  train=1.4501  val=1.4348  test=1.4574 nats  t=387s
+    step   5000/5493  lr=6.65e-06  train=1.4454  val=1.4309  test=1.4536 nats  t=403s
+    step   5200/5493  lr=2.37e-06  train=1.4565  val=1.4292  test=1.4520 nats  t=419s
+    step   5400/5493  lr=2.42e-07  train=1.4510  val=1.4286  test=1.4514 nats  t=435s
+    step   5493/5493  lr=2.74e-11  train=1.4441  val=1.4285  test=1.4514 nats  t=445s
+  → test_ce=1.4514 nats  AOFE_ratio=0.9251  α=0.0192  t=530s
+
+  ── depth=4 ──
+  d_model=136  n_heads=34  d_ff=544  active=994,704  pad=0.5%  α=0.0294
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=2.6987  val=2.7007  test=2.7056 nats  t=19s
+    step    400/5493  lr=3.00e-04  train=2.4426  val=2.4465  test=2.4504 nats  t=37s
+    step    600/5493  lr=2.98e-04  train=2.2842  val=2.2835  test=2.2883 nats  t=56s
+    step    800/5493  lr=2.93e-04  train=2.1092  val=2.1100  test=2.1160 nats  t=75s
+    step   1000/5493  lr=2.87e-04  train=1.9766  val=1.9701  test=1.9801 nats  t=93s
+    step   1200/5493  lr=2.78e-04  train=1.8770  val=1.8666  test=1.8788 nats  t=112s
+    step   1400/5493  lr=2.68e-04  train=1.7975  val=1.7843  test=1.8002 nats  t=131s
+    step   1600/5493  lr=2.56e-04  train=1.7341  val=1.7168  test=1.7331 nats  t=149s
+    step   1800/5493  lr=2.42e-04  train=1.6781  val=1.6624  test=1.6821 nats  t=168s
+    step   2000/5493  lr=2.28e-04  train=1.6439  val=1.6273  test=1.6470 nats  t=187s
+    step   2200/5493  lr=2.11e-04  train=1.6213  val=1.6004  test=1.6208 nats  t=205s
+    step   2400/5493  lr=1.94e-04  train=1.5825  val=1.5651  test=1.5865 nats  t=224s
+    step   2600/5493  lr=1.77e-04  train=1.5590  val=1.5449  test=1.5686 nats  t=243s
+    step   2800/5493  lr=1.59e-04  train=1.5438  val=1.5230  test=1.5440 nats  t=261s
+    step   3000/5493  lr=1.41e-04  train=1.5279  val=1.5057  test=1.5280 nats  t=280s
+    step   3200/5493  lr=1.23e-04  train=1.5089  val=1.4937  test=1.5131 nats  t=299s
+    step   3400/5493  lr=1.05e-04  train=1.5063  val=1.4778  test=1.5002 nats  t=317s
+    step   3600/5493  lr=8.82e-05  train=1.4949  val=1.4712  test=1.4921 nats  t=336s
+    step   3800/5493  lr=7.21e-05  train=1.4803  val=1.4588  test=1.4800 nats  t=355s
+    step   4000/5493  lr=5.72e-05  train=1.4681  val=1.4506  test=1.4711 nats  t=373s
+    step   4200/5493  lr=4.37e-05  train=1.4647  val=1.4451  test=1.4658 nats  t=392s
+    step   4400/5493  lr=3.17e-05  train=1.4598  val=1.4394  test=1.4596 nats  t=411s
+    step   4600/5493  lr=2.14e-05  train=1.4455  val=1.4340  test=1.4549 nats  t=430s
+    step   4800/5493  lr=1.30e-05  train=1.4408  val=1.4292  test=1.4507 nats  t=448s
+    step   5000/5493  lr=6.65e-06  train=1.4468  val=1.4268  test=1.4478 nats  t=467s
+    step   5200/5493  lr=2.37e-06  train=1.4499  val=1.4249  test=1.4464 nats  t=486s
+    step   5400/5493  lr=2.42e-07  train=1.4414  val=1.4244  test=1.4459 nats  t=504s
+    step   5493/5493  lr=2.74e-11  train=1.4452  val=1.4244  test=1.4459 nats  t=515s
+  → test_ce=1.4459 nats  AOFE_ratio=0.9234  α=0.0294  t=614s
+
+  ── depth=5 ──
+  d_model=120  n_heads=30  d_ff=480  active=958,800  pad=4.1%  α=0.0417
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=2.7730  val=2.7747  test=2.7782 nats  t=21s
+    step    400/5493  lr=3.00e-04  train=2.4562  val=2.4543  test=2.4589 nats  t=42s
+    step    600/5493  lr=2.98e-04  train=2.3185  val=2.3188  test=2.3230 nats  t=64s
+    step    800/5493  lr=2.93e-04  train=2.1500  val=2.1501  test=2.1553 nats  t=85s
+    step   1000/5493  lr=2.87e-04  train=2.0247  val=2.0215  test=2.0296 nats  t=106s
+    step   1200/5493  lr=2.78e-04  train=1.9295  val=1.9149  test=1.9252 nats  t=127s
+    step   1400/5493  lr=2.68e-04  train=1.8390  val=1.8290  test=1.8417 nats  t=148s
+    step   1600/5493  lr=2.56e-04  train=1.7580  val=1.7456  test=1.7592 nats  t=169s
+    step   1800/5493  lr=2.42e-04  train=1.6945  val=1.6831  test=1.6993 nats  t=191s
+    step   2000/5493  lr=2.28e-04  train=1.6628  val=1.6417  test=1.6593 nats  t=212s
+    step   2200/5493  lr=2.11e-04  train=1.6276  val=1.6085  test=1.6269 nats  t=233s
+    step   2400/5493  lr=1.94e-04  train=1.5969  val=1.5798  test=1.5981 nats  t=254s
+    step   2600/5493  lr=1.77e-04  train=1.5675  val=1.5495  test=1.5703 nats  t=275s
+    step   2800/5493  lr=1.59e-04  train=1.5489  val=1.5296  test=1.5520 nats  t=296s
+    step   3000/5493  lr=1.41e-04  train=1.5326  val=1.5156  test=1.5355 nats  t=318s
+    step   3200/5493  lr=1.23e-04  train=1.5185  val=1.4964  test=1.5183 nats  t=339s
+    step   3400/5493  lr=1.05e-04  train=1.5030  val=1.4813  test=1.5035 nats  t=360s
+    step   3600/5493  lr=8.82e-05  train=1.4837  val=1.4713  test=1.4927 nats  t=381s
+    step   3800/5493  lr=7.21e-05  train=1.4831  val=1.4614  test=1.4831 nats  t=402s
+    step   4000/5493  lr=5.72e-05  train=1.4754  val=1.4500  test=1.4730 nats  t=424s
+    step   4200/5493  lr=4.37e-05  train=1.4643  val=1.4430  test=1.4656 nats  t=445s
+    step   4400/5493  lr=3.17e-05  train=1.4573  val=1.4372  test=1.4604 nats  t=466s
+    step   4600/5493  lr=2.14e-05  train=1.4553  val=1.4321  test=1.4554 nats  t=487s
+    step   4800/5493  lr=1.30e-05  train=1.4484  val=1.4272  test=1.4509 nats  t=508s
+    step   5000/5493  lr=6.65e-06  train=1.4407  val=1.4247  test=1.4484 nats  t=529s
+    step   5200/5493  lr=2.37e-06  train=1.4364  val=1.4227  test=1.4464 nats  t=551s
+    step   5400/5493  lr=2.42e-07  train=1.4377  val=1.4221  test=1.4459 nats  t=572s
+    step   5493/5493  lr=2.74e-11  train=1.4367  val=1.4220  test=1.4459 nats  t=584s
+  → test_ce=1.4459 nats  AOFE_ratio=0.9230  α=0.0417  t=691s
+
+  ── depth=6 ──
+  d_model=112  n_heads=28  d_ff=448  active=992,096  pad=0.8%  α=0.0536
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=2.8442  val=2.8409  test=2.8438 nats  t=24s
+    step    400/5493  lr=3.00e-04  train=2.4668  val=2.4636  test=2.4703 nats  t=47s
+    step    600/5493  lr=2.98e-04  train=2.3113  val=2.3133  test=2.3197 nats  t=71s
+    step    800/5493  lr=2.93e-04  train=2.1763  val=2.1718  test=2.1768 nats  t=94s
+    step   1000/5493  lr=2.87e-04  train=2.0622  val=2.0580  test=2.0676 nats  t=118s
+    step   1200/5493  lr=2.78e-04  train=1.9571  val=1.9534  test=1.9630 nats  t=141s
+    step   1400/5493  lr=2.68e-04  train=1.8642  val=1.8629  test=1.8769 nats  t=165s
+    step   1600/5493  lr=2.56e-04  train=1.7856  val=1.7810  test=1.7979 nats  t=189s
+    step   1800/5493  lr=2.42e-04  train=1.7334  val=1.7162  test=1.7355 nats  t=212s
+    step   2000/5493  lr=2.28e-04  train=1.6783  val=1.6707  test=1.6933 nats  t=236s
+    step   2200/5493  lr=2.11e-04  train=1.6497  val=1.6276  test=1.6516 nats  t=259s
+    step   2400/5493  lr=1.94e-04  train=1.6149  val=1.6009  test=1.6258 nats  t=283s
+    step   2600/5493  lr=1.77e-04  train=1.5876  val=1.5675  test=1.5933 nats  t=307s
+    step   2800/5493  lr=1.59e-04  train=1.5687  val=1.5510  test=1.5761 nats  t=330s
+    step   3000/5493  lr=1.41e-04  train=1.5442  val=1.5269  test=1.5525 nats  t=354s
+    step   3200/5493  lr=1.23e-04  train=1.5308  val=1.5104  test=1.5363 nats  t=377s
+    step   3400/5493  lr=1.05e-04  train=1.5176  val=1.4983  test=1.5238 nats  t=401s
+    step   3600/5493  lr=8.82e-05  train=1.5099  val=1.4832  test=1.5083 nats  t=424s
+    step   3800/5493  lr=7.21e-05  train=1.5004  val=1.4743  test=1.5004 nats  t=448s
+    step   4000/5493  lr=5.72e-05  train=1.4796  val=1.4627  test=1.4897 nats  t=472s
+    step   4200/5493  lr=4.37e-05  train=1.4871  val=1.4568  test=1.4837 nats  t=495s
+    step   4400/5493  lr=3.17e-05  train=1.4752  val=1.4505  test=1.4765 nats  t=519s
+    step   4600/5493  lr=2.14e-05  train=1.4652  val=1.4443  test=1.4703 nats  t=542s
+    step   4800/5493  lr=1.30e-05  train=1.4638  val=1.4409  test=1.4673 nats  t=566s
+    step   5000/5493  lr=6.65e-06  train=1.4593  val=1.4372  test=1.4644 nats  t=590s
+    step   5200/5493  lr=2.37e-06  train=1.4519  val=1.4358  test=1.4623 nats  t=613s
+    step   5400/5493  lr=2.42e-07  train=1.4555  val=1.4349  test=1.4616 nats  t=637s
+    step   5493/5493  lr=2.74e-11  train=1.4608  val=1.4348  test=1.4616 nats  t=650s
+  → test_ce=1.4616 nats  AOFE_ratio=0.9219  α=0.0536  t=770s
+
+  ── depth=8 ──
+  d_model=96  n_heads=24  d_ff=384  active=961,728  pad=3.8%  α=0.0833
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=2.9972  val=3.0022  test=3.0038 nats  t=26s
+    step    400/5493  lr=3.00e-04  train=2.4866  val=2.4819  test=2.4868 nats  t=53s
+    step    600/5493  lr=2.98e-04  train=2.3343  val=2.3322  test=2.3378 nats  t=79s
+    step    800/5493  lr=2.93e-04  train=2.1780  val=2.1808  test=2.1858 nats  t=106s
+    step   1000/5493  lr=2.87e-04  train=2.0490  val=2.0469  test=2.0560 nats  t=132s
+    step   1200/5493  lr=2.78e-04  train=1.9449  val=1.9418  test=1.9510 nats  t=159s
+    step   1400/5493  lr=2.68e-04  train=1.8608  val=1.8555  test=1.8691 nats  t=185s
+    step   1600/5493  lr=2.56e-04  train=1.7946  val=1.7778  test=1.7943 nats  t=211s
+    step   1800/5493  lr=2.42e-04  train=1.7323  val=1.7220  test=1.7377 nats  t=238s
+    step   2000/5493  lr=2.28e-04  train=1.6902  val=1.6770  test=1.6952 nats  t=264s
+    step   2200/5493  lr=2.11e-04  train=1.6452  val=1.6326  test=1.6527 nats  t=291s
+    step   2400/5493  lr=1.94e-04  train=1.6116  val=1.6013  test=1.6218 nats  t=317s
+    step   2600/5493  lr=1.77e-04  train=1.5849  val=1.5732  test=1.5947 nats  t=343s
+    step   2800/5493  lr=1.59e-04  train=1.5667  val=1.5509  test=1.5738 nats  t=370s
+    step   3000/5493  lr=1.41e-04  train=1.5570  val=1.5345  test=1.5575 nats  t=396s
+    step   3200/5493  lr=1.23e-04  train=1.5390  val=1.5156  test=1.5389 nats  t=423s
+    step   3400/5493  lr=1.05e-04  train=1.5209  val=1.5028  test=1.5248 nats  t=449s
+    step   3600/5493  lr=8.82e-05  train=1.5101  val=1.4903  test=1.5139 nats  t=476s
+    step   3800/5493  lr=7.21e-05  train=1.4937  val=1.4801  test=1.5026 nats  t=502s
+    step   4000/5493  lr=5.72e-05  train=1.4808  val=1.4691  test=1.4911 nats  t=528s
+    step   4200/5493  lr=4.37e-05  train=1.4737  val=1.4622  test=1.4855 nats  t=555s
+    step   4400/5493  lr=3.17e-05  train=1.4793  val=1.4560  test=1.4788 nats  t=581s
+    step   4600/5493  lr=2.14e-05  train=1.4661  val=1.4497  test=1.4731 nats  t=608s
+    step   4800/5493  lr=1.30e-05  train=1.4689  val=1.4455  test=1.4691 nats  t=634s
+    step   5000/5493  lr=6.65e-06  train=1.4599  val=1.4424  test=1.4656 nats  t=661s
+    step   5200/5493  lr=2.37e-06  train=1.4650  val=1.4407  test=1.4642 nats  t=687s
+    step   5400/5493  lr=2.42e-07  train=1.4625  val=1.4400  test=1.4636 nats  t=713s
+    step   5493/5493  lr=2.74e-11  train=1.4629  val=1.4400  test=1.4635 nats  t=729s
+  → test_ce=1.4635 nats  AOFE_ratio=0.9275  α=0.0833  t=866s
+
+  ── depth=10 ──
+  d_model=84  n_heads=21  d_ff=336  active=914,760  pad=8.5%  α=0.1190
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=3.1361  val=3.1395  test=3.1397 nats  t=28s
+    step    400/5493  lr=3.00e-04  train=2.5182  val=2.5222  test=2.5271 nats  t=56s
+    step    600/5493  lr=2.98e-04  train=2.3986  val=2.3903  test=2.3956 nats  t=85s
+    step    800/5493  lr=2.93e-04  train=2.2424  val=2.2385  test=2.2432 nats  t=113s
+    step   1000/5493  lr=2.87e-04  train=2.1262  val=2.1082  test=2.1151 nats  t=141s
+    step   1200/5493  lr=2.78e-04  train=2.0027  val=1.9971  test=2.0068 nats  t=169s
+    step   1400/5493  lr=2.68e-04  train=1.9156  val=1.9103  test=1.9240 nats  t=197s
+    step   1600/5493  lr=2.56e-04  train=1.8544  val=1.8404  test=1.8578 nats  t=226s
+    step   1800/5493  lr=2.42e-04  train=1.7997  val=1.7812  test=1.7993 nats  t=254s
+    step   2000/5493  lr=2.28e-04  train=1.7480  val=1.7348  test=1.7545 nats  t=282s
+    step   2200/5493  lr=2.11e-04  train=1.7048  val=1.6915  test=1.7111 nats  t=310s
+    step   2400/5493  lr=1.94e-04  train=1.6639  val=1.6537  test=1.6773 nats  t=338s
+    step   2600/5493  lr=1.77e-04  train=1.6513  val=1.6263  test=1.6475 nats  t=367s
+    step   2800/5493  lr=1.59e-04  train=1.6273  val=1.6027  test=1.6236 nats  t=395s
+    step   3000/5493  lr=1.41e-04  train=1.6056  val=1.5826  test=1.6026 nats  t=423s
+    step   3200/5493  lr=1.23e-04  train=1.5780  val=1.5632  test=1.5836 nats  t=451s
+    step   3400/5493  lr=1.05e-04  train=1.5718  val=1.5477  test=1.5694 nats  t=479s
+    step   3600/5493  lr=8.82e-05  train=1.5513  val=1.5367  test=1.5574 nats  t=508s
+    step   3800/5493  lr=7.21e-05  train=1.5454  val=1.5226  test=1.5443 nats  t=536s
+    step   4000/5493  lr=5.72e-05  train=1.5389  val=1.5128  test=1.5330 nats  t=564s
+    step   4200/5493  lr=4.37e-05  train=1.5244  val=1.5038  test=1.5256 nats  t=592s
+    step   4400/5493  lr=3.17e-05  train=1.5152  val=1.4968  test=1.5187 nats  t=620s
+    step   4600/5493  lr=2.14e-05  train=1.5120  val=1.4902  test=1.5119 nats  t=649s
+    step   4800/5493  lr=1.30e-05  train=1.5075  val=1.4857  test=1.5076 nats  t=677s
+    step   5000/5493  lr=6.65e-06  train=1.4985  val=1.4820  test=1.5034 nats  t=705s
+    step   5200/5493  lr=2.37e-06  train=1.5043  val=1.4800  test=1.5013 nats  t=733s
+    step   5400/5493  lr=2.42e-07  train=1.5058  val=1.4791  test=1.5006 nats  t=761s
+    step   5493/5493  lr=2.74e-11  train=1.4978  val=1.4791  test=1.5005 nats  t=778s
+  → test_ce=1.5005 nats  AOFE_ratio=0.9225  α=0.1190  t=926s
+
+  ── depth=12 ──
+  d_model=80  n_heads=20  d_ff=320  active=987,040  pad=1.3%  α=0.1500
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=3.2243  val=3.2218  test=3.2221 nats  t=32s
+    step    400/5493  lr=3.00e-04  train=2.5323  val=2.5339  test=2.5404 nats  t=64s
+    step    600/5493  lr=2.98e-04  train=2.3881  val=2.3851  test=2.3905 nats  t=96s
+    step    800/5493  lr=2.93e-04  train=2.2205  val=2.2206  test=2.2254 nats  t=128s
+    step   1000/5493  lr=2.87e-04  train=2.1150  val=2.1138  test=2.1210 nats  t=160s
+    step   1200/5493  lr=2.78e-04  train=2.0081  val=2.0018  test=2.0116 nats  t=192s
+    step   1400/5493  lr=2.68e-04  train=1.9149  val=1.9079  test=1.9199 nats  t=224s
+    step   1600/5493  lr=2.56e-04  train=1.8492  val=1.8401  test=1.8556 nats  t=256s
+    step   1800/5493  lr=2.42e-04  train=1.7880  val=1.7824  test=1.7973 nats  t=288s
+    step   2000/5493  lr=2.28e-04  train=1.7485  val=1.7290  test=1.7462 nats  t=320s
+    step   2200/5493  lr=2.11e-04  train=1.6968  val=1.6862  test=1.7044 nats  t=352s
+    step   2400/5493  lr=1.94e-04  train=1.6628  val=1.6494  test=1.6671 nats  t=384s
+    step   2600/5493  lr=1.77e-04  train=1.6402  val=1.6212  test=1.6415 nats  t=416s
+    step   2800/5493  lr=1.59e-04  train=1.6114  val=1.5986  test=1.6166 nats  t=448s
+    step   3000/5493  lr=1.41e-04  train=1.5949  val=1.5778  test=1.5978 nats  t=480s
+    step   3200/5493  lr=1.23e-04  train=1.5848  val=1.5573  test=1.5759 nats  t=512s
+    step   3400/5493  lr=1.05e-04  train=1.5702  val=1.5397  test=1.5599 nats  t=544s
+    step   3600/5493  lr=8.82e-05  train=1.5486  val=1.5271  test=1.5459 nats  t=576s
+    step   3800/5493  lr=7.21e-05  train=1.5316  val=1.5143  test=1.5347 nats  t=608s
+    step   4000/5493  lr=5.72e-05  train=1.5218  val=1.5049  test=1.5262 nats  t=640s
+    step   4200/5493  lr=4.37e-05  train=1.5185  val=1.4928  test=1.5133 nats  t=672s
+    step   4400/5493  lr=3.17e-05  train=1.5033  val=1.4851  test=1.5068 nats  t=704s
+    step   4600/5493  lr=2.14e-05  train=1.5015  val=1.4801  test=1.5009 nats  t=736s
+    step   4800/5493  lr=1.30e-05  train=1.4983  val=1.4744  test=1.4955 nats  t=768s
+    step   5000/5493  lr=6.65e-06  train=1.4900  val=1.4710  test=1.4925 nats  t=800s
+    step   5200/5493  lr=2.37e-06  train=1.4926  val=1.4687  test=1.4901 nats  t=832s
+    step   5400/5493  lr=2.42e-07  train=1.4931  val=1.4678  test=1.4891 nats  t=864s
+    step   5493/5493  lr=2.74e-11  train=1.4869  val=1.4678  test=1.4890 nats  t=883s
+  → test_ce=1.4890 nats  AOFE_ratio=0.9248  α=0.1500  t=1052s
+
+  ── depth=16 ──
+  d_model=68  n_heads=17  d_ff=272  active=944,520  pad=5.5%  α=0.2353
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=3.3733  val=3.3790  test=3.3779 nats  t=38s
+    step    400/5493  lr=3.00e-04  train=2.5677  val=2.5725  test=2.5772 nats  t=75s
+    step    600/5493  lr=2.98e-04  train=2.4154  val=2.4132  test=2.4178 nats  t=113s
+    step    800/5493  lr=2.93e-04  train=2.3079  val=2.3007  test=2.3049 nats  t=150s
+    step   1000/5493  lr=2.87e-04  train=2.1714  val=2.1727  test=2.1793 nats  t=188s
+    step   1200/5493  lr=2.78e-04  train=2.0945  val=2.0952  test=2.1038 nats  t=225s
+    step   1400/5493  lr=2.68e-04  train=2.0158  val=2.0179  test=2.0272 nats  t=263s
+    step   1600/5493  lr=2.56e-04  train=1.9482  val=1.9383  test=1.9529 nats  t=301s
+    step   1800/5493  lr=2.42e-04  train=1.8898  val=1.8828  test=1.8963 nats  t=338s
+    step   2000/5493  lr=2.28e-04  train=1.8402  val=1.8297  test=1.8490 nats  t=376s
+    step   2200/5493  lr=2.11e-04  train=1.7948  val=1.7807  test=1.8013 nats  t=413s
+    step   2400/5493  lr=1.94e-04  train=1.7594  val=1.7432  test=1.7623 nats  t=451s
+    step   2600/5493  lr=1.77e-04  train=1.7163  val=1.7056  test=1.7239 nats  t=488s
+    step   2800/5493  lr=1.59e-04  train=1.6946  val=1.6753  test=1.6935 nats  t=526s
+    step   3000/5493  lr=1.41e-04  train=1.6664  val=1.6479  test=1.6671 nats  t=564s
+    step   3200/5493  lr=1.23e-04  train=1.6534  val=1.6254  test=1.6460 nats  t=601s
+    step   3400/5493  lr=1.05e-04  train=1.6286  val=1.6080  test=1.6285 nats  t=639s
+    step   3600/5493  lr=8.82e-05  train=1.6087  val=1.5900  test=1.6116 nats  t=676s
+    step   3800/5493  lr=7.21e-05  train=1.6045  val=1.5773  test=1.5962 nats  t=714s
+    step   4000/5493  lr=5.72e-05  train=1.5743  val=1.5649  test=1.5853 nats  t=752s
+    step   4200/5493  lr=4.37e-05  train=1.5701  val=1.5567  test=1.5759 nats  t=789s
+    step   4400/5493  lr=3.17e-05  train=1.5666  val=1.5462  test=1.5665 nats  t=827s
+    step   4600/5493  lr=2.14e-05  train=1.5619  val=1.5389  test=1.5598 nats  t=864s
+    step   4800/5493  lr=1.30e-05  train=1.5525  val=1.5341  test=1.5544 nats  t=902s
+    step   5000/5493  lr=6.65e-06  train=1.5496  val=1.5285  test=1.5493 nats  t=939s
+    step   5200/5493  lr=2.37e-06  train=1.5444  val=1.5263  test=1.5469 nats  t=977s
+    step   5400/5493  lr=2.42e-07  train=1.5468  val=1.5257  test=1.5459 nats  t=1015s
+    step   5493/5493  lr=2.74e-11  train=1.5479  val=1.5256  test=1.5458 nats  t=1037s
+  → test_ce=1.5458 nats  AOFE_ratio=0.9211  α=0.2353  t=1231s
+
+  ── depth=20 ──
+  d_model=60  n_heads=15  d_ff=240  active=915,000  pad=8.5%  α=0.3333
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=3.5173  val=3.5214  test=3.5197 nats  t=41s
+    step    400/5493  lr=3.00e-04  train=2.6241  val=2.6223  test=2.6265 nats  t=82s
+    step    600/5493  lr=2.98e-04  train=2.4432  val=2.4439  test=2.4490 nats  t=123s
+    step    800/5493  lr=2.93e-04  train=2.3415  val=2.3486  test=2.3520 nats  t=164s
+    step   1000/5493  lr=2.87e-04  train=2.2466  val=2.2438  test=2.2469 nats  t=204s
+    step   1200/5493  lr=2.78e-04  train=2.1363  val=2.1346  test=2.1428 nats  t=245s
+    step   1400/5493  lr=2.68e-04  train=2.0558  val=2.0521  test=2.0616 nats  t=286s
+    step   1600/5493  lr=2.56e-04  train=1.9989  val=1.9869  test=1.9994 nats  t=327s
+    step   1800/5493  lr=2.42e-04  train=1.9450  val=1.9334  test=1.9467 nats  t=368s
+    step   2000/5493  lr=2.28e-04  train=1.8935  val=1.8833  test=1.8975 nats  t=409s
+    step   2200/5493  lr=2.11e-04  train=1.8545  val=1.8369  test=1.8534 nats  t=450s
+    step   2400/5493  lr=1.94e-04  train=1.8166  val=1.8074  test=1.8260 nats  t=491s
+    step   2600/5493  lr=1.77e-04  train=1.7846  val=1.7695  test=1.7881 nats  t=531s
+    step   2800/5493  lr=1.59e-04  train=1.7498  val=1.7435  test=1.7637 nats  t=572s
+    step   3000/5493  lr=1.41e-04  train=1.7197  val=1.7169  test=1.7373 nats  t=613s
+    step   3200/5493  lr=1.23e-04  train=1.7067  val=1.6940  test=1.7138 nats  t=654s
+    step   3400/5493  lr=1.05e-04  train=1.6950  val=1.6720  test=1.6950 nats  t=695s
+    step   3600/5493  lr=8.82e-05  train=1.6797  val=1.6580  test=1.6789 nats  t=736s
+    step   3800/5493  lr=7.21e-05  train=1.6564  val=1.6414  test=1.6638 nats  t=777s
+    step   4000/5493  lr=5.72e-05  train=1.6424  val=1.6296  test=1.6509 nats  t=818s
+    step   4200/5493  lr=4.37e-05  train=1.6302  val=1.6178  test=1.6397 nats  t=858s
+    step   4400/5493  lr=3.17e-05  train=1.6259  val=1.6079  test=1.6296 nats  t=899s
+    step   4600/5493  lr=2.14e-05  train=1.6151  val=1.6018  test=1.6227 nats  t=940s
+    step   4800/5493  lr=1.30e-05  train=1.6220  val=1.5947  test=1.6163 nats  t=981s
+    step   5000/5493  lr=6.65e-06  train=1.6058  val=1.5906  test=1.6117 nats  t=1022s
+    step   5200/5493  lr=2.37e-06  train=1.6027  val=1.5881  test=1.6091 nats  t=1063s
+    step   5400/5493  lr=2.42e-07  train=1.6099  val=1.5870  test=1.6082 nats  t=1104s
+    step   5493/5493  lr=2.74e-11  train=1.6134  val=1.5870  test=1.6081 nats  t=1128s
+  → test_ce=1.6081 nats  AOFE_ratio=0.9261  α=0.3333  t=1338s
+
+  ── depth=24 ──
+  d_model=56  n_heads=14  d_ff=224  active=951,664  pad=4.8%  α=0.4286
+  Total params (padded): 1,000,000
+    step    200/5493  lr=2.00e-04  train=3.6293  val=3.6359  test=3.6340 nats  t=46s
+    step    400/5493  lr=3.00e-04  train=2.6682  val=2.6683  test=2.6701 nats  t=92s
+    step    600/5493  lr=2.98e-04  train=2.4576  val=2.4583  test=2.4622 nats  t=138s
+    step    800/5493  lr=2.93e-04  train=2.3594  val=2.3617  test=2.3657 nats  t=184s
+    step   1000/5493  lr=2.87e-04  train=2.2544  val=2.2517  test=2.2564 nats  t=230s
+    step   1200/5493  lr=2.78e-04  train=2.1536  val=2.1480  test=2.1547 nats  t=276s
+    step   1400/5493  lr=2.68e-04  train=2.0803  val=2.0736  test=2.0844 nats  t=322s
+    step   1600/5493  lr=2.56e-04  train=2.0006  val=2.0003  test=2.0128 nats  t=368s
+    step   1800/5493  lr=2.42e-04  train=1.9592  val=1.9489  test=1.9611 nats  t=414s
+    step   2000/5493  lr=2.28e-04  train=1.9142  val=1.9068  test=1.9216 nats  t=460s
+    step   2200/5493  lr=2.11e-04  train=1.8713  val=1.8610  test=1.8766 nats  t=506s
+    step   2400/5493  lr=1.94e-04  train=1.8384  val=1.8228  test=1.8413 nats  t=552s
+    step   2600/5493  lr=1.77e-04  train=1.8035  val=1.7930  test=1.8109 nats  t=597s
+    step   2800/5493  lr=1.59e-04  train=1.7744  val=1.7636  test=1.7811 nats  t=643s
+    step   3000/5493  lr=1.41e-04  train=1.7525  val=1.7387  test=1.7570 nats  t=689s
+    step   3200/5493  lr=1.23e-04  train=1.7285  val=1.7140  test=1.7327 nats  t=735s
+    step   3400/5493  lr=1.05e-04  train=1.7098  val=1.6957  test=1.7150 nats  t=781s
+    step   3600/5493  lr=8.82e-05  train=1.6960  val=1.6770  test=1.6960 nats  t=827s
+    step   3800/5493  lr=7.21e-05  train=1.6764  val=1.6643  test=1.6838 nats  t=873s
+    step   4000/5493  lr=5.72e-05  train=1.6785  val=1.6497  test=1.6687 nats  t=919s
+    step   4200/5493  lr=4.37e-05  train=1.6502  val=1.6362  test=1.6566 nats  t=965s
+    step   4400/5493  lr=3.17e-05  train=1.6433  val=1.6268  test=1.6466 nats  t=1011s
+    step   4600/5493  lr=2.14e-05  train=1.6392  val=1.6194  test=1.6387 nats  t=1057s
+    step   4800/5493  lr=1.30e-05  train=1.6297  val=1.6139  test=1.6328 nats  t=1103s
+    step   5000/5493  lr=6.65e-06  train=1.6202  val=1.6094  test=1.6287 nats  t=1149s
+    step   5200/5493  lr=2.37e-06  train=1.6323  val=1.6059  test=1.6256 nats  t=1195s
+    step   5400/5493  lr=2.42e-07  train=1.6202  val=1.6046  test=1.6242 nats  t=1241s
+    step   5493/5493  lr=2.74e-11  train=1.6166  val=1.6046  test=1.6241 nats  t=1268s
+  → test_ce=1.6241 nats  AOFE_ratio=0.9248  α=0.4286  t=1504s
+
+========================================================================
+N = 3,000,000   D = 180,000,000 bytes   windows=703,125   base_steps=10,986
+========================================================================
+
+  ── depth=1 ──
+  d_model=468  n_heads=117  d_ff=1872  active=2,990,520  pad=0.3%  α=0.0021
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.4624  val=2.4635  test=2.4689 nats  t=18s
+    step    400/16479  lr=3.00e-04  train=2.3936  val=2.3946  test=2.4008 nats  t=35s
+    step    600/16479  lr=3.00e-04  train=2.2491  val=2.2480  test=2.2546 nats  t=53s
+    step    800/16479  lr=2.99e-04  train=2.1113  val=2.1047  test=2.1165 nats  t=70s
+    step   1000/16479  lr=2.99e-04  train=1.9110  val=1.9002  test=1.9148 nats  t=87s
+    step   1200/16479  lr=2.98e-04  train=1.7930  val=1.7777  test=1.7962 nats  t=105s
+    step   1400/16479  lr=2.97e-04  train=1.7082  val=1.6915  test=1.7134 nats  t=122s
+    step   1600/16479  lr=2.95e-04  train=1.6448  val=1.6303  test=1.6526 nats  t=140s
+    step   1800/16479  lr=2.94e-04  train=1.6163  val=1.5937  test=1.6165 nats  t=157s
+    step   2000/16479  lr=2.92e-04  train=1.5856  val=1.5642  test=1.5873 nats  t=175s
+    step   2200/16479  lr=2.90e-04  train=1.5501  val=1.5344  test=1.5575 nats  t=192s
+    step   2400/16479  lr=2.88e-04  train=1.5284  val=1.5094  test=1.5332 nats  t=210s
+    step   2600/16479  lr=2.85e-04  train=1.5124  val=1.4942  test=1.5173 nats  t=227s
+    step   2800/16479  lr=2.83e-04  train=1.4927  val=1.4783  test=1.5018 nats  t=245s
+    step   3000/16479  lr=2.80e-04  train=1.4832  val=1.4608  test=1.4844 nats  t=262s
+    step   3200/16479  lr=2.77e-04  train=1.4633  val=1.4449  test=1.4681 nats  t=280s
+    step   3400/16479  lr=2.74e-04  train=1.4536  val=1.4399  test=1.4639 nats  t=297s
+    step   3600/16479  lr=2.70e-04  train=1.4497  val=1.4306  test=1.4537 nats  t=315s
+    step   3800/16479  lr=2.67e-04  train=1.4464  val=1.4251  test=1.4471 nats  t=332s
+    step   4000/16479  lr=2.63e-04  train=1.4288  val=1.4174  test=1.4411 nats  t=350s
+    step   4200/16479  lr=2.59e-04  train=1.4307  val=1.4094  test=1.4333 nats  t=367s
+    step   4400/16479  lr=2.55e-04  train=1.4206  val=1.4033  test=1.4277 nats  t=385s
+    step   4600/16479  lr=2.51e-04  train=1.4146  val=1.3985  test=1.4224 nats  t=402s
+    step   4800/16479  lr=2.46e-04  train=1.4066  val=1.3888  test=1.4123 nats  t=420s
+    step   5000/16479  lr=2.42e-04  train=1.4064  val=1.3835  test=1.4061 nats  t=437s
+    step   5200/16479  lr=2.37e-04  train=1.4089  val=1.3817  test=1.4052 nats  t=455s
+    step   5400/16479  lr=2.32e-04  train=1.4034  val=1.3771  test=1.4016 nats  t=472s
+    step   5600/16479  lr=2.27e-04  train=1.3967  val=1.3739  test=1.3974 nats  t=490s
+    step   5800/16479  lr=2.22e-04  train=1.3872  val=1.3686  test=1.3923 nats  t=507s
+    step   6000/16479  lr=2.17e-04  train=1.3832  val=1.3639  test=1.3872 nats  t=525s
+    step   6200/16479  lr=2.12e-04  train=1.3774  val=1.3600  test=1.3837 nats  t=542s
+    step   6400/16479  lr=2.07e-04  train=1.3759  val=1.3575  test=1.3802 nats  t=560s
+    step   6600/16479  lr=2.01e-04  train=1.3728  val=1.3546  test=1.3764 nats  t=577s
+    step   6800/16479  lr=1.96e-04  train=1.3679  val=1.3519  test=1.3756 nats  t=595s
+    step   7000/16479  lr=1.90e-04  train=1.3713  val=1.3477  test=1.3697 nats  t=612s
+    step   7200/16479  lr=1.84e-04  train=1.3629  val=1.3454  test=1.3668 nats  t=630s
+    step   7400/16479  lr=1.79e-04  train=1.3629  val=1.3428  test=1.3661 nats  t=647s
+    step   7600/16479  lr=1.73e-04  train=1.3581  val=1.3425  test=1.3647 nats  t=665s
+    step   7800/16479  lr=1.67e-04  train=1.3477  val=1.3379  test=1.3597 nats  t=682s
+    step   8000/16479  lr=1.61e-04  train=1.3473  val=1.3347  test=1.3571 nats  t=699s
+    step   8200/16479  lr=1.56e-04  train=1.3559  val=1.3336  test=1.3550 nats  t=717s
+    step   8400/16479  lr=1.50e-04  train=1.3450  val=1.3330  test=1.3544 nats  t=734s
+    step   8600/16479  lr=1.44e-04  train=1.3470  val=1.3266  test=1.3496 nats  t=752s
+    step   8800/16479  lr=1.38e-04  train=1.3418  val=1.3251  test=1.3481 nats  t=769s
+    step   9000/16479  lr=1.32e-04  train=1.3353  val=1.3216  test=1.3431 nats  t=787s
+    step   9200/16479  lr=1.27e-04  train=1.3383  val=1.3207  test=1.3439 nats  t=804s
+    step   9400/16479  lr=1.21e-04  train=1.3305  val=1.3193  test=1.3415 nats  t=822s
+    step   9600/16479  lr=1.15e-04  train=1.3390  val=1.3150  test=1.3376 nats  t=839s
+    step   9800/16479  lr=1.09e-04  train=1.3296  val=1.3136  test=1.3355 nats  t=857s
+    step  10000/16479  lr=1.04e-04  train=1.3323  val=1.3123  test=1.3345 nats  t=874s
+    step  10200/16479  lr=9.84e-05  train=1.3272  val=1.3096  test=1.3322 nats  t=892s
+    step  10400/16479  lr=9.29e-05  train=1.3241  val=1.3078  test=1.3300 nats  t=909s
+    step  10600/16479  lr=8.76e-05  train=1.3300  val=1.3070  test=1.3286 nats  t=927s
+    step  10800/16479  lr=8.24e-05  train=1.3211  val=1.3059  test=1.3258 nats  t=944s
+    step  11000/16479  lr=7.72e-05  train=1.3188  val=1.3026  test=1.3249 nats  t=962s
+    step  11200/16479  lr=7.22e-05  train=1.3214  val=1.3010  test=1.3226 nats  t=979s
+    step  11400/16479  lr=6.72e-05  train=1.3193  val=1.2999  test=1.3216 nats  t=997s
+    step  11600/16479  lr=6.25e-05  train=1.3102  val=1.2985  test=1.3202 nats  t=1014s
+    step  11800/16479  lr=5.78e-05  train=1.3132  val=1.2975  test=1.3192 nats  t=1032s
+    step  12000/16479  lr=5.33e-05  train=1.3156  val=1.2964  test=1.3177 nats  t=1049s
+    step  12200/16479  lr=4.89e-05  train=1.3063  val=1.2950  test=1.3155 nats  t=1067s
+    step  12400/16479  lr=4.47e-05  train=1.3148  val=1.2927  test=1.3138 nats  t=1084s
+    step  12600/16479  lr=4.06e-05  train=1.3106  val=1.2919  test=1.3133 nats  t=1102s
+    step  12800/16479  lr=3.67e-05  train=1.3148  val=1.2907  test=1.3120 nats  t=1119s
+    step  13000/16479  lr=3.30e-05  train=1.3043  val=1.2890  test=1.3102 nats  t=1137s
+    step  13200/16479  lr=2.94e-05  train=1.3055  val=1.2888  test=1.3099 nats  t=1154s
+    step  13400/16479  lr=2.60e-05  train=1.3123  val=1.2872  test=1.3089 nats  t=1172s
+    step  13600/16479  lr=2.29e-05  train=1.3060  val=1.2867  test=1.3078 nats  t=1189s
+    step  13800/16479  lr=1.99e-05  train=1.3069  val=1.2856  test=1.3072 nats  t=1207s
+    step  14000/16479  lr=1.71e-05  train=1.3052  val=1.2850  test=1.3061 nats  t=1224s
+    step  14200/16479  lr=1.45e-05  train=1.3022  val=1.2842  test=1.3054 nats  t=1242s
+    step  14400/16479  lr=1.21e-05  train=1.2999  val=1.2835  test=1.3050 nats  t=1259s
+    step  14600/16479  lr=9.88e-06  train=1.2982  val=1.2827  test=1.3038 nats  t=1277s
+    step  14800/16479  lr=7.91e-06  train=1.3018  val=1.2823  test=1.3038 nats  t=1294s
+    step  15000/16479  lr=6.15e-06  train=1.2993  val=1.2818  test=1.3032 nats  t=1312s
+    step  15200/16479  lr=4.61e-06  train=1.2986  val=1.2817  test=1.3031 nats  t=1329s
+    step  15400/16479  lr=3.29e-06  train=1.2991  val=1.2813  test=1.3025 nats  t=1346s
+    step  15600/16479  lr=2.18e-06  train=1.3006  val=1.2811  test=1.3026 nats  t=1364s
+    step  15800/16479  lr=1.31e-06  train=1.2874  val=1.2809  test=1.3023 nats  t=1381s
+    step  16000/16479  lr=6.51e-07  train=1.2969  val=1.2808  test=1.3021 nats  t=1399s
+    step  16200/16479  lr=2.22e-07  train=1.2919  val=1.2807  test=1.3020 nats  t=1416s
+    step  16400/16479  lr=1.81e-08  train=1.2980  val=1.2807  test=1.3020 nats  t=1434s
+    step  16479/16479  lr=2.83e-12  train=1.3005  val=1.2807  test=1.3020 nats  t=1443s
+  → test_ce=1.3020 nats  AOFE_ratio=0.9086  α=0.0021  t=1724s
+
+  ── depth=2 ──
+  d_model=336  n_heads=84  d_ff=1344  active=2,970,912  pad=1.0%  α=0.0060
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.4746  val=2.4725  test=2.4791 nats  t=24s
+    step    400/16479  lr=3.00e-04  train=2.3573  val=2.3544  test=2.3615 nats  t=48s
+    step    600/16479  lr=3.00e-04  train=2.1126  val=2.1033  test=2.1132 nats  t=71s
+    step    800/16479  lr=2.99e-04  train=1.9459  val=1.9325  test=1.9436 nats  t=95s
+    step   1000/16479  lr=2.99e-04  train=1.8302  val=1.8180  test=1.8327 nats  t=119s
+    step   1200/16479  lr=2.98e-04  train=1.7339  val=1.7231  test=1.7411 nats  t=143s
+    step   1400/16479  lr=2.97e-04  train=1.6738  val=1.6552  test=1.6733 nats  t=166s
+    step   1600/16479  lr=2.95e-04  train=1.6303  val=1.6062  test=1.6268 nats  t=190s
+    step   1800/16479  lr=2.94e-04  train=1.5856  val=1.5710  test=1.5923 nats  t=214s
+    step   2000/16479  lr=2.92e-04  train=1.5660  val=1.5374  test=1.5595 nats  t=238s
+    step   2200/16479  lr=2.90e-04  train=1.5365  val=1.5141  test=1.5393 nats  t=261s
+    step   2400/16479  lr=2.88e-04  train=1.5093  val=1.4919  test=1.5145 nats  t=285s
+    step   2600/16479  lr=2.85e-04  train=1.5060  val=1.4785  test=1.5001 nats  t=309s
+    step   2800/16479  lr=2.83e-04  train=1.4849  val=1.4645  test=1.4900 nats  t=333s
+    step   3000/16479  lr=2.80e-04  train=1.4742  val=1.4514  test=1.4766 nats  t=356s
+    step   3200/16479  lr=2.77e-04  train=1.4690  val=1.4467  test=1.4693 nats  t=380s
+    step   3400/16479  lr=2.74e-04  train=1.4482  val=1.4293  test=1.4545 nats  t=404s
+    step   3600/16479  lr=2.70e-04  train=1.4373  val=1.4171  test=1.4438 nats  t=428s
+    step   3800/16479  lr=2.67e-04  train=1.4362  val=1.4095  test=1.4327 nats  t=451s
+    step   4000/16479  lr=2.63e-04  train=1.4288  val=1.4022  test=1.4244 nats  t=475s
+    step   4200/16479  lr=2.59e-04  train=1.4187  val=1.3981  test=1.4236 nats  t=499s
+    step   4400/16479  lr=2.55e-04  train=1.4094  val=1.3939  test=1.4169 nats  t=523s
+    step   4600/16479  lr=2.51e-04  train=1.4027  val=1.3849  test=1.4071 nats  t=546s
+    step   4800/16479  lr=2.46e-04  train=1.4043  val=1.3778  test=1.4008 nats  t=570s
+    step   5000/16479  lr=2.42e-04  train=1.3878  val=1.3743  test=1.3960 nats  t=594s
+    step   5200/16479  lr=2.37e-04  train=1.3916  val=1.3705  test=1.3907 nats  t=618s
+    step   5400/16479  lr=2.32e-04  train=1.3817  val=1.3654  test=1.3876 nats  t=642s
+    step   5600/16479  lr=2.27e-04  train=1.3773  val=1.3618  test=1.3865 nats  t=665s
+    step   5800/16479  lr=2.22e-04  train=1.3791  val=1.3547  test=1.3769 nats  t=689s
+    step   6000/16479  lr=2.17e-04  train=1.3786  val=1.3534  test=1.3739 nats  t=713s
+    step   6200/16479  lr=2.12e-04  train=1.3637  val=1.3460  test=1.3688 nats  t=737s
+    step   6400/16479  lr=2.07e-04  train=1.3623  val=1.3452  test=1.3695 nats  t=760s
+    step   6600/16479  lr=2.01e-04  train=1.3637  val=1.3445  test=1.3656 nats  t=784s
+    step   6800/16479  lr=1.96e-04  train=1.3505  val=1.3352  test=1.3573 nats  t=808s
+    step   7000/16479  lr=1.90e-04  train=1.3594  val=1.3334  test=1.3571 nats  t=832s
+    step   7200/16479  lr=1.84e-04  train=1.3569  val=1.3319  test=1.3525 nats  t=855s
+    step   7400/16479  lr=1.79e-04  train=1.3462  val=1.3283  test=1.3489 nats  t=879s
+    step   7600/16479  lr=1.73e-04  train=1.3442  val=1.3238  test=1.3462 nats  t=903s
+    step   7800/16479  lr=1.67e-04  train=1.3449  val=1.3238  test=1.3460 nats  t=927s
+    step   8000/16479  lr=1.61e-04  train=1.3346  val=1.3182  test=1.3399 nats  t=950s
+    step   8200/16479  lr=1.56e-04  train=1.3351  val=1.3164  test=1.3397 nats  t=974s
+    step   8400/16479  lr=1.50e-04  train=1.3430  val=1.3128  test=1.3353 nats  t=998s
+    step   8600/16479  lr=1.44e-04  train=1.3320  val=1.3108  test=1.3327 nats  t=1022s
+    step   8800/16479  lr=1.38e-04  train=1.3207  val=1.3096  test=1.3320 nats  t=1046s
+    step   9000/16479  lr=1.32e-04  train=1.3311  val=1.3051  test=1.3279 nats  t=1069s
+    step   9200/16479  lr=1.27e-04  train=1.3293  val=1.3050  test=1.3265 nats  t=1093s
+    step   9400/16479  lr=1.21e-04  train=1.3147  val=1.3015  test=1.3236 nats  t=1117s
+    step   9600/16479  lr=1.15e-04  train=1.3219  val=1.2993  test=1.3210 nats  t=1141s
+    step   9800/16479  lr=1.09e-04  train=1.3084  val=1.2971  test=1.3195 nats  t=1164s
+    step  10000/16479  lr=1.04e-04  train=1.3116  val=1.2954  test=1.3177 nats  t=1188s
+    step  10200/16479  lr=9.84e-05  train=1.3090  val=1.2927  test=1.3145 nats  t=1212s
+    step  10400/16479  lr=9.29e-05  train=1.3085  val=1.2913  test=1.3136 nats  t=1236s
+    step  10600/16479  lr=8.76e-05  train=1.3108  val=1.2884  test=1.3114 nats  t=1259s
+    step  10800/16479  lr=8.24e-05  train=1.3041  val=1.2861  test=1.3084 nats  t=1283s
+    step  11000/16479  lr=7.72e-05  train=1.2965  val=1.2844  test=1.3065 nats  t=1307s
+    step  11200/16479  lr=7.22e-05  train=1.2994  val=1.2845  test=1.3067 nats  t=1331s
+    step  11400/16479  lr=6.72e-05  train=1.2928  val=1.2804  test=1.3020 nats  t=1354s
+    step  11600/16479  lr=6.25e-05  train=1.3019  val=1.2800  test=1.3025 nats  t=1378s
+    step  11800/16479  lr=5.78e-05  train=1.2952  val=1.2772  test=1.2991 nats  t=1402s
+    step  12000/16479  lr=5.33e-05  train=1.2960  val=1.2763  test=1.2981 nats  t=1426s
+    step  12200/16479  lr=4.89e-05  train=1.2995  val=1.2754  test=1.2981 nats  t=1450s
+    step  12400/16479  lr=4.47e-05  train=1.2947  val=1.2735  test=1.2968 nats  t=1473s
+    step  12600/16479  lr=4.06e-05  train=1.2931  val=1.2719  test=1.2942 nats  t=1497s
+    step  12800/16479  lr=3.67e-05  train=1.2953  val=1.2717  test=1.2940 nats  t=1521s
+    step  13000/16479  lr=3.30e-05  train=1.2875  val=1.2698  test=1.2919 nats  t=1545s
+    step  13200/16479  lr=2.94e-05  train=1.2916  val=1.2685  test=1.2902 nats  t=1568s
+    step  13400/16479  lr=2.60e-05  train=1.2873  val=1.2673  test=1.2899 nats  t=1592s
+    step  13600/16479  lr=2.29e-05  train=1.2880  val=1.2666  test=1.2887 nats  t=1616s
+    step  13800/16479  lr=1.99e-05  train=1.2783  val=1.2657  test=1.2877 nats  t=1640s
+    step  14000/16479  lr=1.71e-05  train=1.2804  val=1.2650  test=1.2867 nats  t=1663s
+    step  14200/16479  lr=1.45e-05  train=1.2784  val=1.2635  test=1.2857 nats  t=1687s
+    step  14400/16479  lr=1.21e-05  train=1.2902  val=1.2633  test=1.2853 nats  t=1711s
+    step  14600/16479  lr=9.88e-06  train=1.2833  val=1.2626  test=1.2843 nats  t=1735s
+    step  14800/16479  lr=7.91e-06  train=1.2831  val=1.2616  test=1.2838 nats  t=1758s
+    step  15000/16479  lr=6.15e-06  train=1.2811  val=1.2615  test=1.2833 nats  t=1782s
+    step  15200/16479  lr=4.61e-06  train=1.2802  val=1.2613  test=1.2829 nats  t=1806s
+    step  15400/16479  lr=3.29e-06  train=1.2845  val=1.2608  test=1.2825 nats  t=1830s
+    step  15600/16479  lr=2.18e-06  train=1.2784  val=1.2605  test=1.2822 nats  t=1853s
+    step  15800/16479  lr=1.31e-06  train=1.2717  val=1.2603  test=1.2819 nats  t=1877s
+    step  16000/16479  lr=6.51e-07  train=1.2754  val=1.2601  test=1.2818 nats  t=1901s
+    step  16200/16479  lr=2.22e-07  train=1.2733  val=1.2600  test=1.2818 nats  t=1925s
+    step  16400/16479  lr=1.81e-08  train=1.2870  val=1.2600  test=1.2817 nats  t=1948s
+    step  16479/16479  lr=2.83e-12  train=1.2703  val=1.2600  test=1.2817 nats  t=1961s
+  → test_ce=1.2817 nats  AOFE_ratio=0.9312  α=0.0060  t=2339s
+
+  ── depth=3 ──
+  d_model=276  n_heads=69  d_ff=1104  active=2,958,168  pad=1.4%  α=0.0109
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.4877  val=2.4892  test=2.4945 nats  t=29s
+    step    400/16479  lr=3.00e-04  train=2.3079  val=2.3093  test=2.3152 nats  t=58s
+    step    600/16479  lr=3.00e-04  train=2.0325  val=2.0214  test=2.0344 nats  t=88s
+    step    800/16479  lr=2.99e-04  train=1.8434  val=1.8386  test=1.8526 nats  t=117s
+    step   1000/16479  lr=2.99e-04  train=1.7223  val=1.7086  test=1.7247 nats  t=146s
+    step   1200/16479  lr=2.98e-04  train=1.6262  val=1.6154  test=1.6396 nats  t=175s
+    step   1400/16479  lr=2.97e-04  train=1.5768  val=1.5505  test=1.5751 nats  t=205s
+    step   1600/16479  lr=2.95e-04  train=1.5292  val=1.5094  test=1.5311 nats  t=234s
+    step   1800/16479  lr=2.94e-04  train=1.4978  val=1.4758  test=1.5008 nats  t=263s
+    step   2000/16479  lr=2.92e-04  train=1.4750  val=1.4536  test=1.4783 nats  t=292s
+    step   2200/16479  lr=2.90e-04  train=1.4489  val=1.4256  test=1.4493 nats  t=322s
+    step   2400/16479  lr=2.88e-04  train=1.4207  val=1.4020  test=1.4266 nats  t=351s
+    step   2600/16479  lr=2.85e-04  train=1.4070  val=1.3890  test=1.4120 nats  t=380s
+    step   2800/16479  lr=2.83e-04  train=1.3946  val=1.3830  test=1.4061 nats  t=409s
+    step   3000/16479  lr=2.80e-04  train=1.3883  val=1.3680  test=1.3915 nats  t=439s
+    step   3200/16479  lr=2.77e-04  train=1.3858  val=1.3530  test=1.3790 nats  t=468s
+    step   3400/16479  lr=2.74e-04  train=1.3709  val=1.3463  test=1.3724 nats  t=497s
+    step   3600/16479  lr=2.70e-04  train=1.3558  val=1.3353  test=1.3569 nats  t=526s
+    step   3800/16479  lr=2.67e-04  train=1.3448  val=1.3251  test=1.3489 nats  t=555s
+    step   4000/16479  lr=2.63e-04  train=1.3415  val=1.3183  test=1.3441 nats  t=585s
+    step   4200/16479  lr=2.59e-04  train=1.3380  val=1.3132  test=1.3379 nats  t=614s
+    step   4400/16479  lr=2.55e-04  train=1.3178  val=1.3065  test=1.3313 nats  t=643s
+    step   4600/16479  lr=2.51e-04  train=1.3208  val=1.3012  test=1.3232 nats  t=672s
+    step   4800/16479  lr=2.46e-04  train=1.3080  val=1.2954  test=1.3190 nats  t=702s
+    step   5000/16479  lr=2.42e-04  train=1.3104  val=1.2882  test=1.3127 nats  t=731s
+    step   5200/16479  lr=2.37e-04  train=1.3002  val=1.2822  test=1.3054 nats  t=760s
+    step   5400/16479  lr=2.32e-04  train=1.2970  val=1.2773  test=1.3004 nats  t=789s
+    step   5600/16479  lr=2.27e-04  train=1.2909  val=1.2729  test=1.2969 nats  t=818s
+    step   5800/16479  lr=2.22e-04  train=1.2950  val=1.2680  test=1.2923 nats  t=848s
+    step   6000/16479  lr=2.17e-04  train=1.2666  val=1.2643  test=1.2885 nats  t=877s
+    step   6200/16479  lr=2.12e-04  train=1.2807  val=1.2595  test=1.2811 nats  t=906s
+    step   6400/16479  lr=2.07e-04  train=1.2753  val=1.2549  test=1.2780 nats  t=935s
+    step   6600/16479  lr=2.01e-04  train=1.2776  val=1.2536  test=1.2763 nats  t=965s
+    step   6800/16479  lr=1.96e-04  train=1.2746  val=1.2509  test=1.2733 nats  t=994s
+    step   7000/16479  lr=1.90e-04  train=1.2607  val=1.2440  test=1.2664 nats  t=1023s
+    step   7200/16479  lr=1.84e-04  train=1.2626  val=1.2388  test=1.2624 nats  t=1052s
+    step   7400/16479  lr=1.79e-04  train=1.2641  val=1.2383  test=1.2631 nats  t=1082s
+    step   7600/16479  lr=1.73e-04  train=1.2502  val=1.2342  test=1.2578 nats  t=1111s
+    step   7800/16479  lr=1.67e-04  train=1.2483  val=1.2307  test=1.2538 nats  t=1140s
+    step   8000/16479  lr=1.61e-04  train=1.2520  val=1.2304  test=1.2519 nats  t=1169s
+    step   8200/16479  lr=1.56e-04  train=1.2428  val=1.2261  test=1.2484 nats  t=1198s
+    step   8400/16479  lr=1.50e-04  train=1.2419  val=1.2230  test=1.2450 nats  t=1228s
+    step   8600/16479  lr=1.44e-04  train=1.2424  val=1.2215  test=1.2443 nats  t=1257s
+    step   8800/16479  lr=1.38e-04  train=1.2339  val=1.2176  test=1.2404 nats  t=1286s
+    step   9000/16479  lr=1.32e-04  train=1.2340  val=1.2152  test=1.2381 nats  t=1315s
+    step   9200/16479  lr=1.27e-04  train=1.2282  val=1.2122  test=1.2344 nats  t=1345s
+    step   9400/16479  lr=1.21e-04  train=1.2268  val=1.2123  test=1.2327 nats  t=1374s
+    step   9600/16479  lr=1.15e-04  train=1.2260  val=1.2080  test=1.2289 nats  t=1403s
+    step   9800/16479  lr=1.09e-04  train=1.2220  val=1.2056  test=1.2261 nats  t=1432s
+    step  10000/16479  lr=1.04e-04  train=1.2182  val=1.2016  test=1.2235 nats  t=1461s
+    step  10200/16479  lr=9.84e-05  train=1.2170  val=1.1997  test=1.2226 nats  t=1491s
+    step  10400/16479  lr=9.29e-05  train=1.2205  val=1.1991  test=1.2213 nats  t=1520s
+    step  10600/16479  lr=8.76e-05  train=1.2102  val=1.1962  test=1.2186 nats  t=1549s
+    step  10800/16479  lr=8.24e-05  train=1.2101  val=1.1940  test=1.2166 nats  t=1578s
+    step  11000/16479  lr=7.72e-05  train=1.2121  val=1.1921  test=1.2141 nats  t=1608s
+    step  11200/16479  lr=7.22e-05  train=1.2076  val=1.1907  test=1.2128 nats  t=1637s
+    step  11400/16479  lr=6.72e-05  train=1.2102  val=1.1888  test=1.2107 nats  t=1666s
+    step  11600/16479  lr=6.25e-05  train=1.2057  val=1.1887  test=1.2106 nats  t=1695s
+    step  11800/16479  lr=5.78e-05  train=1.2048  val=1.1864  test=1.2078 nats  t=1725s
+    step  12000/16479  lr=5.33e-05  train=1.1954  val=1.1855  test=1.2065 nats  t=1754s
+    step  12200/16479  lr=4.89e-05  train=1.2011  val=1.1839  test=1.2053 nats  t=1783s
+    step  12400/16479  lr=4.47e-05  train=1.1910  val=1.1814  test=1.2031 nats  t=1812s
+    step  12600/16479  lr=4.06e-05  train=1.2028  val=1.1794  test=1.2001 nats  t=1842s
+    step  12800/16479  lr=3.67e-05  train=1.1928  val=1.1787  test=1.2001 nats  t=1871s
+    step  13000/16479  lr=3.30e-05  train=1.1887  val=1.1770  test=1.1984 nats  t=1900s
+    step  13200/16479  lr=2.94e-05  train=1.1976  val=1.1763  test=1.1976 nats  t=1929s
+    step  13400/16479  lr=2.60e-05  train=1.1910  val=1.1751  test=1.1967 nats  t=1958s
+    step  13600/16479  lr=2.29e-05  train=1.1838  val=1.1741  test=1.1946 nats  t=1988s
+    step  13800/16479  lr=1.99e-05  train=1.1979  val=1.1732  test=1.1944 nats  t=2017s
+    step  14000/16479  lr=1.71e-05  train=1.1807  val=1.1729  test=1.1933 nats  t=2046s
+    step  14200/16479  lr=1.45e-05  train=1.1860  val=1.1713  test=1.1920 nats  t=2075s
+    step  14400/16479  lr=1.21e-05  train=1.1882  val=1.1707  test=1.1916 nats  t=2105s
+    step  14600/16479  lr=9.88e-06  train=1.1932  val=1.1697  test=1.1909 nats  t=2134s
+    step  14800/16479  lr=7.91e-06  train=1.1876  val=1.1693  test=1.1906 nats  t=2163s
+    step  15000/16479  lr=6.15e-06  train=1.1822  val=1.1688  test=1.1900 nats  t=2192s
+    step  15200/16479  lr=4.61e-06  train=1.1811  val=1.1683  test=1.1897 nats  t=2221s
+    step  15400/16479  lr=3.29e-06  train=1.1797  val=1.1678  test=1.1894 nats  t=2251s
+    step  15600/16479  lr=2.18e-06  train=1.1865  val=1.1675  test=1.1890 nats  t=2280s
+    step  15800/16479  lr=1.31e-06  train=1.1779  val=1.1673  test=1.1887 nats  t=2309s
+    step  16000/16479  lr=6.51e-07  train=1.1846  val=1.1672  test=1.1886 nats  t=2338s
+    step  16200/16479  lr=2.22e-07  train=1.1816  val=1.1672  test=1.1886 nats  t=2368s
+    step  16400/16479  lr=1.81e-08  train=1.1814  val=1.1671  test=1.1885 nats  t=2397s
+    step  16479/16479  lr=2.83e-12  train=1.1774  val=1.1671  test=1.1885 nats  t=2413s
+  → test_ce=1.1885 nats  AOFE_ratio=0.9356  α=0.0109  t=2879s
+
+  ── depth=4 ──
+  d_model=240  n_heads=60  d_ff=960  active=2,953,440  pad=1.6%  α=0.0167
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.5081  val=2.5060  test=2.5128 nats  t=33s
+    step    400/16479  lr=3.00e-04  train=2.2969  val=2.2943  test=2.3001 nats  t=65s
+    step    600/16479  lr=3.00e-04  train=2.0306  val=2.0239  test=2.0327 nats  t=98s
+    step    800/16479  lr=2.99e-04  train=1.8365  val=1.8206  test=1.8374 nats  t=130s
+    step   1000/16479  lr=2.99e-04  train=1.6853  val=1.6719  test=1.6908 nats  t=163s
+    step   1200/16479  lr=2.98e-04  train=1.6025  val=1.5825  test=1.6024 nats  t=195s
+    step   1400/16479  lr=2.97e-04  train=1.5474  val=1.5314  test=1.5510 nats  t=228s
+    step   1600/16479  lr=2.95e-04  train=1.5077  val=1.4826  test=1.5043 nats  t=260s
+    step   1800/16479  lr=2.94e-04  train=1.4644  val=1.4479  test=1.4684 nats  t=293s
+    step   2000/16479  lr=2.92e-04  train=1.4347  val=1.4224  test=1.4460 nats  t=326s
+    step   2200/16479  lr=2.90e-04  train=1.4247  val=1.4033  test=1.4249 nats  t=358s
+    step   2400/16479  lr=2.88e-04  train=1.4048  val=1.3818  test=1.4036 nats  t=391s
+    step   2600/16479  lr=2.85e-04  train=1.3814  val=1.3731  test=1.3966 nats  t=423s
+    step   2800/16479  lr=2.83e-04  train=1.3865  val=1.3620  test=1.3832 nats  t=456s
+    step   3000/16479  lr=2.80e-04  train=1.3739  val=1.3483  test=1.3719 nats  t=488s
+    step   3200/16479  lr=2.77e-04  train=1.3706  val=1.3401  test=1.3609 nats  t=521s
+    step   3400/16479  lr=2.74e-04  train=1.3452  val=1.3224  test=1.3450 nats  t=553s
+    step   3600/16479  lr=2.70e-04  train=1.3390  val=1.3180  test=1.3386 nats  t=586s
+    step   3800/16479  lr=2.67e-04  train=1.3416  val=1.3115  test=1.3322 nats  t=619s
+    step   4000/16479  lr=2.63e-04  train=1.3212  val=1.3052  test=1.3282 nats  t=651s
+    step   4200/16479  lr=2.59e-04  train=1.3137  val=1.2966  test=1.3197 nats  t=684s
+    step   4400/16479  lr=2.55e-04  train=1.3109  val=1.2928  test=1.3132 nats  t=716s
+    step   4600/16479  lr=2.51e-04  train=1.3065  val=1.2822  test=1.3033 nats  t=749s
+    step   4800/16479  lr=2.46e-04  train=1.2907  val=1.2782  test=1.2986 nats  t=781s
+    step   5000/16479  lr=2.42e-04  train=1.2919  val=1.2724  test=1.2916 nats  t=814s
+    step   5200/16479  lr=2.37e-04  train=1.2899  val=1.2711  test=1.2929 nats  t=846s
+    step   5400/16479  lr=2.32e-04  train=1.2851  val=1.2610  test=1.2846 nats  t=879s
+    step   5600/16479  lr=2.27e-04  train=1.2673  val=1.2590  test=1.2815 nats  t=912s
+    step   5800/16479  lr=2.22e-04  train=1.2688  val=1.2535  test=1.2759 nats  t=944s
+    step   6000/16479  lr=2.17e-04  train=1.2763  val=1.2486  test=1.2698 nats  t=977s
+    step   6200/16479  lr=2.12e-04  train=1.2624  val=1.2460  test=1.2683 nats  t=1009s
+    step   6400/16479  lr=2.07e-04  train=1.2686  val=1.2411  test=1.2632 nats  t=1042s
+    step   6600/16479  lr=2.01e-04  train=1.2651  val=1.2396  test=1.2593 nats  t=1074s
+    step   6800/16479  lr=1.96e-04  train=1.2435  val=1.2336  test=1.2547 nats  t=1107s
+    step   7000/16479  lr=1.90e-04  train=1.2491  val=1.2309  test=1.2491 nats  t=1139s
+    step   7200/16479  lr=1.84e-04  train=1.2454  val=1.2278  test=1.2464 nats  t=1172s
+    step   7400/16479  lr=1.79e-04  train=1.2343  val=1.2245  test=1.2439 nats  t=1205s
+    step   7600/16479  lr=1.73e-04  train=1.2413  val=1.2226  test=1.2418 nats  t=1237s
+    step   7800/16479  lr=1.67e-04  train=1.2370  val=1.2175  test=1.2386 nats  t=1270s
+    step   8000/16479  lr=1.61e-04  train=1.2319  val=1.2142  test=1.2357 nats  t=1302s
+    step   8200/16479  lr=1.56e-04  train=1.2216  val=1.2128  test=1.2329 nats  t=1335s
+    step   8400/16479  lr=1.50e-04  train=1.2287  val=1.2095  test=1.2312 nats  t=1367s
+    step   8600/16479  lr=1.44e-04  train=1.2264  val=1.2075  test=1.2278 nats  t=1400s
+    step   8800/16479  lr=1.38e-04  train=1.2233  val=1.2026  test=1.2230 nats  t=1432s
+    step   9000/16479  lr=1.32e-04  train=1.2294  val=1.2012  test=1.2211 nats  t=1465s
+    step   9200/16479  lr=1.27e-04  train=1.2152  val=1.1996  test=1.2200 nats  t=1497s
+    step   9400/16479  lr=1.21e-04  train=1.2130  val=1.1968  test=1.2167 nats  t=1530s
+    step   9600/16479  lr=1.15e-04  train=1.2065  val=1.1934  test=1.2147 nats  t=1563s
+    step   9800/16479  lr=1.09e-04  train=1.2091  val=1.1909  test=1.2119 nats  t=1595s
+    step  10000/16479  lr=1.04e-04  train=1.2003  val=1.1914  test=1.2133 nats  t=1628s
+    step  10200/16479  lr=9.84e-05  train=1.2108  val=1.1884  test=1.2081 nats  t=1660s
+    step  10400/16479  lr=9.29e-05  train=1.1998  val=1.1857  test=1.2063 nats  t=1693s
+    step  10600/16479  lr=8.76e-05  train=1.2097  val=1.1837  test=1.2046 nats  t=1725s
+    step  10800/16479  lr=8.24e-05  train=1.2000  val=1.1810  test=1.2022 nats  t=1758s
+    step  11000/16479  lr=7.72e-05  train=1.2066  val=1.1805  test=1.2000 nats  t=1791s
+    step  11200/16479  lr=7.22e-05  train=1.1881  val=1.1786  test=1.1988 nats  t=1823s
+    step  11400/16479  lr=6.72e-05  train=1.1975  val=1.1771  test=1.1972 nats  t=1856s
+    step  11600/16479  lr=6.25e-05  train=1.1891  val=1.1753  test=1.1963 nats  t=1888s
+    step  11800/16479  lr=5.78e-05  train=1.1841  val=1.1734  test=1.1930 nats  t=1921s
+    step  12000/16479  lr=5.33e-05  train=1.1873  val=1.1718  test=1.1930 nats  t=1953s
+    step  12200/16479  lr=4.89e-05  train=1.1865  val=1.1694  test=1.1909 nats  t=1986s
+    step  12400/16479  lr=4.47e-05  train=1.1785  val=1.1681  test=1.1884 nats  t=2018s
+    step  12600/16479  lr=4.06e-05  train=1.1745  val=1.1666  test=1.1871 nats  t=2051s
+    step  12800/16479  lr=3.67e-05  train=1.1917  val=1.1653  test=1.1859 nats  t=2083s
+    step  13000/16479  lr=3.30e-05  train=1.1748  val=1.1634  test=1.1842 nats  t=2116s
+    step  13200/16479  lr=2.94e-05  train=1.1803  val=1.1627  test=1.1831 nats  t=2149s
+    step  13400/16479  lr=2.60e-05  train=1.1744  val=1.1613  test=1.1814 nats  t=2181s
+    step  13600/16479  lr=2.29e-05  train=1.1687  val=1.1604  test=1.1807 nats  t=2214s
+    step  13800/16479  lr=1.99e-05  train=1.1744  val=1.1597  test=1.1796 nats  t=2246s
+    step  14000/16479  lr=1.71e-05  train=1.1758  val=1.1590  test=1.1790 nats  t=2279s
+    step  14200/16479  lr=1.45e-05  train=1.1867  val=1.1579  test=1.1781 nats  t=2311s
+    step  14400/16479  lr=1.21e-05  train=1.1740  val=1.1573  test=1.1775 nats  t=2344s
+    step  14600/16479  lr=9.88e-06  train=1.1778  val=1.1565  test=1.1768 nats  t=2376s
+    step  14800/16479  lr=7.91e-06  train=1.1690  val=1.1558  test=1.1759 nats  t=2409s
+    step  15000/16479  lr=6.15e-06  train=1.1734  val=1.1554  test=1.1756 nats  t=2442s
+    step  15200/16479  lr=4.61e-06  train=1.1714  val=1.1550  test=1.1753 nats  t=2474s
+    step  15400/16479  lr=3.29e-06  train=1.1685  val=1.1548  test=1.1750 nats  t=2507s
+    step  15600/16479  lr=2.18e-06  train=1.1719  val=1.1545  test=1.1747 nats  t=2539s
+    step  15800/16479  lr=1.31e-06  train=1.1658  val=1.1543  test=1.1745 nats  t=2572s
+    step  16000/16479  lr=6.51e-07  train=1.1741  val=1.1542  test=1.1743 nats  t=2604s
+    step  16200/16479  lr=2.22e-07  train=1.1745  val=1.1541  test=1.1743 nats  t=2637s
+    step  16400/16479  lr=1.81e-08  train=1.1731  val=1.1541  test=1.1743 nats  t=2669s
+    step  16479/16479  lr=2.83e-12  train=1.1686  val=1.1541  test=1.1743 nats  t=2687s
+  → test_ce=1.1743 nats  AOFE_ratio=0.9348  α=0.0167  t=3198s
+
+  ── depth=5 ──
+  d_model=216  n_heads=54  d_ff=864  active=2,970,000  pad=1.0%  α=0.0231
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.5288  val=2.5264  test=2.5327 nats  t=37s
+    step    400/16479  lr=3.00e-04  train=2.3427  val=2.3428  test=2.3477 nats  t=73s
+    step    600/16479  lr=3.00e-04  train=2.0367  val=2.0328  test=2.0393 nats  t=110s
+    step    800/16479  lr=2.99e-04  train=1.8387  val=1.8269  test=1.8386 nats  t=146s
+    step   1000/16479  lr=2.99e-04  train=1.6964  val=1.6864  test=1.7067 nats  t=183s
+    step   1200/16479  lr=2.98e-04  train=1.6193  val=1.5985  test=1.6207 nats  t=219s
+    step   1400/16479  lr=2.97e-04  train=1.5532  val=1.5323  test=1.5528 nats  t=256s
+    step   1600/16479  lr=2.95e-04  train=1.4891  val=1.4795  test=1.4992 nats  t=292s
+    step   1800/16479  lr=2.94e-04  train=1.4803  val=1.4498  test=1.4714 nats  t=329s
+    step   2000/16479  lr=2.92e-04  train=1.4425  val=1.4214  test=1.4429 nats  t=366s
+    step   2200/16479  lr=2.90e-04  train=1.4190  val=1.4009  test=1.4215 nats  t=402s
+    step   2400/16479  lr=2.88e-04  train=1.4026  val=1.3789  test=1.4002 nats  t=439s
+    step   2600/16479  lr=2.85e-04  train=1.3802  val=1.3607  test=1.3823 nats  t=475s
+    step   2800/16479  lr=2.83e-04  train=1.3659  val=1.3482  test=1.3717 nats  t=512s
+    step   3000/16479  lr=2.80e-04  train=1.3616  val=1.3382  test=1.3606 nats  t=548s
+    step   3200/16479  lr=2.77e-04  train=1.3450  val=1.3263  test=1.3485 nats  t=585s
+    step   3400/16479  lr=2.74e-04  train=1.3473  val=1.3168  test=1.3375 nats  t=622s
+    step   3600/16479  lr=2.70e-04  train=1.3284  val=1.3089  test=1.3303 nats  t=658s
+    step   3800/16479  lr=2.67e-04  train=1.3179  val=1.2981  test=1.3195 nats  t=695s
+    step   4000/16479  lr=2.63e-04  train=1.3165  val=1.2945  test=1.3139 nats  t=731s
+    step   4200/16479  lr=2.59e-04  train=1.3090  val=1.2882  test=1.3064 nats  t=768s
+    step   4400/16479  lr=2.55e-04  train=1.3021  val=1.2798  test=1.3009 nats  t=804s
+    step   4600/16479  lr=2.51e-04  train=1.2914  val=1.2753  test=1.2953 nats  t=841s
+    step   4800/16479  lr=2.46e-04  train=1.2697  val=1.2652  test=1.2869 nats  t=878s
+    step   5000/16479  lr=2.42e-04  train=1.2833  val=1.2604  test=1.2801 nats  t=914s
+    step   5200/16479  lr=2.37e-04  train=1.2701  val=1.2538  test=1.2737 nats  t=951s
+    step   5400/16479  lr=2.32e-04  train=1.2643  val=1.2487  test=1.2690 nats  t=987s
+    step   5600/16479  lr=2.27e-04  train=1.2635  val=1.2451  test=1.2652 nats  t=1024s
+    step   5800/16479  lr=2.22e-04  train=1.2653  val=1.2432  test=1.2616 nats  t=1060s
+    step   6000/16479  lr=2.17e-04  train=1.2528  val=1.2364  test=1.2565 nats  t=1097s
+    step   6200/16479  lr=2.12e-04  train=1.2526  val=1.2349  test=1.2519 nats  t=1133s
+    step   6400/16479  lr=2.07e-04  train=1.2464  val=1.2277  test=1.2467 nats  t=1170s
+    step   6600/16479  lr=2.01e-04  train=1.2392  val=1.2234  test=1.2450 nats  t=1207s
+    step   6800/16479  lr=1.96e-04  train=1.2478  val=1.2225  test=1.2446 nats  t=1243s
+    step   7000/16479  lr=1.90e-04  train=1.2323  val=1.2184  test=1.2385 nats  t=1280s
+    step   7200/16479  lr=1.84e-04  train=1.2371  val=1.2152  test=1.2364 nats  t=1316s
+    step   7400/16479  lr=1.79e-04  train=1.2203  val=1.2102  test=1.2326 nats  t=1353s
+    step   7600/16479  lr=1.73e-04  train=1.2195  val=1.2085  test=1.2301 nats  t=1389s
+    step   7800/16479  lr=1.67e-04  train=1.2244  val=1.2060  test=1.2271 nats  t=1426s
+    step   8000/16479  lr=1.61e-04  train=1.2258  val=1.2017  test=1.2218 nats  t=1462s
+    step   8200/16479  lr=1.56e-04  train=1.2178  val=1.1998  test=1.2199 nats  t=1499s
+    step   8400/16479  lr=1.50e-04  train=1.2138  val=1.1969  test=1.2180 nats  t=1536s
+    step   8600/16479  lr=1.44e-04  train=1.2169  val=1.1938  test=1.2140 nats  t=1572s
+    step   8800/16479  lr=1.38e-04  train=1.2057  val=1.1893  test=1.2106 nats  t=1609s
+    step   9000/16479  lr=1.32e-04  train=1.2108  val=1.1892  test=1.2095 nats  t=1645s
+    step   9200/16479  lr=1.27e-04  train=1.1898  val=1.1860  test=1.2048 nats  t=1682s
+    step   9400/16479  lr=1.21e-04  train=1.2037  val=1.1843  test=1.2036 nats  t=1718s
+    step   9600/16479  lr=1.15e-04  train=1.2035  val=1.1814  test=1.2008 nats  t=1755s
+    step   9800/16479  lr=1.09e-04  train=1.1907  val=1.1786  test=1.1982 nats  t=1792s
+    step  10000/16479  lr=1.04e-04  train=1.2002  val=1.1765  test=1.1958 nats  t=1828s
+    step  10200/16479  lr=9.84e-05  train=1.1953  val=1.1748  test=1.1945 nats  t=1865s
+    step  10400/16479  lr=9.29e-05  train=1.1868  val=1.1708  test=1.1933 nats  t=1901s
+    step  10600/16479  lr=8.76e-05  train=1.1863  val=1.1697  test=1.1903 nats  t=1938s
+    step  10800/16479  lr=8.24e-05  train=1.1862  val=1.1678  test=1.1871 nats  t=1974s
+    step  11000/16479  lr=7.72e-05  train=1.1812  val=1.1657  test=1.1871 nats  t=2011s
+    step  11200/16479  lr=7.22e-05  train=1.1787  val=1.1651  test=1.1849 nats  t=2048s
+    step  11400/16479  lr=6.72e-05  train=1.1820  val=1.1620  test=1.1822 nats  t=2084s
+    step  11600/16479  lr=6.25e-05  train=1.1789  val=1.1622  test=1.1807 nats  t=2121s
+    step  11800/16479  lr=5.78e-05  train=1.1817  val=1.1586  test=1.1787 nats  t=2157s
+    step  12000/16479  lr=5.33e-05  train=1.1669  val=1.1565  test=1.1776 nats  t=2194s
+    step  12200/16479  lr=4.89e-05  train=1.1689  val=1.1564  test=1.1769 nats  t=2230s
+    step  12400/16479  lr=4.47e-05  train=1.1755  val=1.1548  test=1.1754 nats  t=2267s
+    step  12600/16479  lr=4.06e-05  train=1.1687  val=1.1528  test=1.1730 nats  t=2303s
+    step  12800/16479  lr=3.67e-05  train=1.1706  val=1.1520  test=1.1720 nats  t=2340s
+    step  13000/16479  lr=3.30e-05  train=1.1597  val=1.1496  test=1.1704 nats  t=2377s
+    step  13200/16479  lr=2.94e-05  train=1.1587  val=1.1488  test=1.1689 nats  t=2413s
+    step  13400/16479  lr=2.60e-05  train=1.1609  val=1.1480  test=1.1675 nats  t=2450s
+    step  13600/16479  lr=2.29e-05  train=1.1606  val=1.1467  test=1.1663 nats  t=2486s
+    step  13800/16479  lr=1.99e-05  train=1.1650  val=1.1454  test=1.1653 nats  t=2523s
+    step  14000/16479  lr=1.71e-05  train=1.1580  val=1.1444  test=1.1644 nats  t=2559s
+    step  14200/16479  lr=1.45e-05  train=1.1628  val=1.1438  test=1.1640 nats  t=2596s
+    step  14400/16479  lr=1.21e-05  train=1.1538  val=1.1426  test=1.1626 nats  t=2633s
+    step  14600/16479  lr=9.88e-06  train=1.1528  val=1.1422  test=1.1623 nats  t=2669s
+    step  14800/16479  lr=7.91e-06  train=1.1567  val=1.1415  test=1.1616 nats  t=2706s
+    step  15000/16479  lr=6.15e-06  train=1.1608  val=1.1412  test=1.1611 nats  t=2742s
+    step  15200/16479  lr=4.61e-06  train=1.1539  val=1.1409  test=1.1608 nats  t=2779s
+    step  15400/16479  lr=3.29e-06  train=1.1576  val=1.1405  test=1.1605 nats  t=2815s
+    step  15600/16479  lr=2.18e-06  train=1.1524  val=1.1402  test=1.1601 nats  t=2852s
+    step  15800/16479  lr=1.31e-06  train=1.1539  val=1.1399  test=1.1600 nats  t=2888s
+    step  16000/16479  lr=6.51e-07  train=1.1418  val=1.1398  test=1.1599 nats  t=2925s
+    step  16200/16479  lr=2.22e-07  train=1.1607  val=1.1398  test=1.1598 nats  t=2962s
+    step  16400/16479  lr=1.81e-08  train=1.1531  val=1.1398  test=1.1598 nats  t=2998s
+    step  16479/16479  lr=2.83e-12  train=1.1515  val=1.1398  test=1.1598 nats  t=3018s
+  → test_ce=1.1598 nats  AOFE_ratio=0.9388  α=0.0231  t=3591s
+
+  ── depth=6 ──
+  d_model=196  n_heads=49  d_ff=784  active=2,921,576  pad=2.6%  α=0.0306
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.5465  val=2.5486  test=2.5554 nats  t=40s
+    step    400/16479  lr=3.00e-04  train=2.3575  val=2.3549  test=2.3599 nats  t=80s
+    step    600/16479  lr=3.00e-04  train=2.0711  val=2.0630  test=2.0726 nats  t=120s
+    step    800/16479  lr=2.99e-04  train=1.8567  val=1.8560  test=1.8709 nats  t=160s
+    step   1000/16479  lr=2.99e-04  train=1.7202  val=1.7091  test=1.7286 nats  t=200s
+    step   1200/16479  lr=2.98e-04  train=1.6287  val=1.6075  test=1.6283 nats  t=240s
+    step   1400/16479  lr=2.97e-04  train=1.5579  val=1.5402  test=1.5645 nats  t=280s
+    step   1600/16479  lr=2.95e-04  train=1.5099  val=1.4872  test=1.5095 nats  t=319s
+    step   1800/16479  lr=2.94e-04  train=1.4828  val=1.4553  test=1.4789 nats  t=359s
+    step   2000/16479  lr=2.92e-04  train=1.4438  val=1.4262  test=1.4523 nats  t=399s
+    step   2200/16479  lr=2.90e-04  train=1.4200  val=1.4048  test=1.4278 nats  t=439s
+    step   2400/16479  lr=2.88e-04  train=1.4006  val=1.3852  test=1.4114 nats  t=479s
+    step   2600/16479  lr=2.85e-04  train=1.3909  val=1.3665  test=1.3932 nats  t=519s
+    step   2800/16479  lr=2.83e-04  train=1.3723  val=1.3530  test=1.3800 nats  t=559s
+    step   3000/16479  lr=2.80e-04  train=1.3701  val=1.3427  test=1.3679 nats  t=599s
+    step   3200/16479  lr=2.77e-04  train=1.3514  val=1.3340  test=1.3586 nats  t=639s
+    step   3400/16479  lr=2.74e-04  train=1.3404  val=1.3221  test=1.3486 nats  t=679s
+    step   3600/16479  lr=2.70e-04  train=1.3328  val=1.3162  test=1.3392 nats  t=719s
+    step   3800/16479  lr=2.67e-04  train=1.3249  val=1.3042  test=1.3281 nats  t=759s
+    step   4000/16479  lr=2.63e-04  train=1.3208  val=1.2964  test=1.3233 nats  t=799s
+    step   4200/16479  lr=2.59e-04  train=1.3109  val=1.2887  test=1.3149 nats  t=839s
+    step   4400/16479  lr=2.55e-04  train=1.3080  val=1.2799  test=1.3075 nats  t=879s
+    step   4600/16479  lr=2.51e-04  train=1.2894  val=1.2756  test=1.2999 nats  t=918s
+    step   4800/16479  lr=2.46e-04  train=1.2930  val=1.2705  test=1.2936 nats  t=958s
+    step   5000/16479  lr=2.42e-04  train=1.2955  val=1.2652  test=1.2890 nats  t=998s
+    step   5200/16479  lr=2.37e-04  train=1.2788  val=1.2630  test=1.2860 nats  t=1038s
+    step   5400/16479  lr=2.32e-04  train=1.2847  val=1.2547  test=1.2813 nats  t=1078s
+    step   5600/16479  lr=2.27e-04  train=1.2721  val=1.2497  test=1.2730 nats  t=1118s
+    step   5800/16479  lr=2.22e-04  train=1.2703  val=1.2469  test=1.2724 nats  t=1158s
+    step   6000/16479  lr=2.17e-04  train=1.2615  val=1.2434  test=1.2655 nats  t=1198s
+    step   6200/16479  lr=2.12e-04  train=1.2609  val=1.2356  test=1.2580 nats  t=1238s
+    step   6400/16479  lr=2.07e-04  train=1.2613  val=1.2347  test=1.2575 nats  t=1278s
+    step   6600/16479  lr=2.01e-04  train=1.2533  val=1.2302  test=1.2507 nats  t=1318s
+    step   6800/16479  lr=1.96e-04  train=1.2468  val=1.2267  test=1.2510 nats  t=1358s
+    step   7000/16479  lr=1.90e-04  train=1.2382  val=1.2219  test=1.2463 nats  t=1397s
+    step   7200/16479  lr=1.84e-04  train=1.2429  val=1.2190  test=1.2406 nats  t=1437s
+    step   7400/16479  lr=1.79e-04  train=1.2334  val=1.2148  test=1.2374 nats  t=1477s
+    step   7600/16479  lr=1.73e-04  train=1.2321  val=1.2144  test=1.2356 nats  t=1517s
+    step   7800/16479  lr=1.67e-04  train=1.2262  val=1.2094  test=1.2297 nats  t=1557s
+    step   8000/16479  lr=1.61e-04  train=1.2254  val=1.2081  test=1.2281 nats  t=1597s
+    step   8200/16479  lr=1.56e-04  train=1.2245  val=1.2049  test=1.2265 nats  t=1637s
+    step   8400/16479  lr=1.50e-04  train=1.2163  val=1.2030  test=1.2255 nats  t=1677s
+    step   8600/16479  lr=1.44e-04  train=1.2189  val=1.1987  test=1.2203 nats  t=1717s
+    step   8800/16479  lr=1.38e-04  train=1.2074  val=1.1944  test=1.2162 nats  t=1757s
+    step   9000/16479  lr=1.32e-04  train=1.2202  val=1.1946  test=1.2163 nats  t=1797s
+    step   9200/16479  lr=1.27e-04  train=1.2081  val=1.1906  test=1.2128 nats  t=1837s
+    step   9400/16479  lr=1.21e-04  train=1.2059  val=1.1885  test=1.2111 nats  t=1877s
+    step   9600/16479  lr=1.15e-04  train=1.1943  val=1.1876  test=1.2100 nats  t=1916s
+    step   9800/16479  lr=1.09e-04  train=1.2042  val=1.1833  test=1.2054 nats  t=1956s
+    step  10000/16479  lr=1.04e-04  train=1.2078  val=1.1819  test=1.2033 nats  t=1996s
+    step  10200/16479  lr=9.84e-05  train=1.1986  val=1.1804  test=1.2021 nats  t=2036s
+    step  10400/16479  lr=9.29e-05  train=1.2029  val=1.1788  test=1.2006 nats  t=2076s
+    step  10600/16479  lr=8.76e-05  train=1.2000  val=1.1757  test=1.1979 nats  t=2116s
+    step  10800/16479  lr=8.24e-05  train=1.1873  val=1.1730  test=1.1950 nats  t=2156s
+    step  11000/16479  lr=7.72e-05  train=1.1904  val=1.1705  test=1.1942 nats  t=2196s
+    step  11200/16479  lr=7.22e-05  train=1.1859  val=1.1701  test=1.1923 nats  t=2236s
+    step  11400/16479  lr=6.72e-05  train=1.1824  val=1.1685  test=1.1905 nats  t=2276s
+    step  11600/16479  lr=6.25e-05  train=1.1801  val=1.1658  test=1.1880 nats  t=2316s
+    step  11800/16479  lr=5.78e-05  train=1.1847  val=1.1645  test=1.1861 nats  t=2356s
+    step  12000/16479  lr=5.33e-05  train=1.1764  val=1.1626  test=1.1851 nats  t=2396s
+    step  12200/16479  lr=4.89e-05  train=1.1731  val=1.1622  test=1.1834 nats  t=2435s
+    step  12400/16479  lr=4.47e-05  train=1.1808  val=1.1606  test=1.1826 nats  t=2475s
+    step  12600/16479  lr=4.06e-05  train=1.1786  val=1.1588  test=1.1802 nats  t=2515s
+    step  12800/16479  lr=3.67e-05  train=1.1833  val=1.1574  test=1.1790 nats  t=2555s
+    step  13000/16479  lr=3.30e-05  train=1.1691  val=1.1554  test=1.1775 nats  t=2595s
+    step  13200/16479  lr=2.94e-05  train=1.1721  val=1.1539  test=1.1764 nats  t=2635s
+    step  13400/16479  lr=2.60e-05  train=1.1712  val=1.1531  test=1.1748 nats  t=2675s
+    step  13600/16479  lr=2.29e-05  train=1.1609  val=1.1524  test=1.1749 nats  t=2715s
+    step  13800/16479  lr=1.99e-05  train=1.1593  val=1.1514  test=1.1735 nats  t=2755s
+    step  14000/16479  lr=1.71e-05  train=1.1653  val=1.1502  test=1.1720 nats  t=2795s
+    step  14200/16479  lr=1.45e-05  train=1.1667  val=1.1493  test=1.1717 nats  t=2835s
+    step  14400/16479  lr=1.21e-05  train=1.1685  val=1.1489  test=1.1708 nats  t=2875s
+    step  14600/16479  lr=9.88e-06  train=1.1580  val=1.1481  test=1.1699 nats  t=2915s
+    step  14800/16479  lr=7.91e-06  train=1.1617  val=1.1475  test=1.1695 nats  t=2955s
+    step  15000/16479  lr=6.15e-06  train=1.1654  val=1.1472  test=1.1690 nats  t=2994s
+    step  15200/16479  lr=4.61e-06  train=1.1670  val=1.1464  test=1.1685 nats  t=3034s
+    step  15400/16479  lr=3.29e-06  train=1.1653  val=1.1465  test=1.1681 nats  t=3074s
+    step  15600/16479  lr=2.18e-06  train=1.1620  val=1.1460  test=1.1679 nats  t=3114s
+    step  15800/16479  lr=1.31e-06  train=1.1595  val=1.1460  test=1.1678 nats  t=3154s
+    step  16000/16479  lr=6.51e-07  train=1.1716  val=1.1458  test=1.1676 nats  t=3194s
+    step  16200/16479  lr=2.22e-07  train=1.1651  val=1.1457  test=1.1675 nats  t=3234s
+    step  16400/16479  lr=1.81e-08  train=1.1688  val=1.1457  test=1.1675 nats  t=3274s
+    step  16479/16479  lr=2.83e-12  train=1.1598  val=1.1457  test=1.1675 nats  t=3295s
+  → test_ce=1.1675 nats  AOFE_ratio=0.9368  α=0.0306  t=3920s
+
+  ── depth=8 ──
+  d_model=172  n_heads=43  d_ff=688  active=2,978,008  pad=0.7%  α=0.0465
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.5842  val=2.5848  test=2.5905 nats  t=47s
+    step    400/16479  lr=3.00e-04  train=2.3761  val=2.3778  test=2.3821 nats  t=94s
+    step    600/16479  lr=3.00e-04  train=2.1041  val=2.1002  test=2.1080 nats  t=141s
+    step    800/16479  lr=2.99e-04  train=1.9123  val=1.9010  test=1.9132 nats  t=188s
+    step   1000/16479  lr=2.99e-04  train=1.7663  val=1.7459  test=1.7631 nats  t=235s
+    step   1200/16479  lr=2.98e-04  train=1.6532  val=1.6327  test=1.6542 nats  t=282s
+    step   1400/16479  lr=2.97e-04  train=1.5805  val=1.5614  test=1.5851 nats  t=329s
+    step   1600/16479  lr=2.95e-04  train=1.5376  val=1.5097  test=1.5321 nats  t=376s
+    step   1800/16479  lr=2.94e-04  train=1.4986  val=1.4722  test=1.4964 nats  t=423s
+    step   2000/16479  lr=2.92e-04  train=1.4574  val=1.4412  test=1.4654 nats  t=470s
+    step   2200/16479  lr=2.90e-04  train=1.4403  val=1.4172  test=1.4416 nats  t=517s
+    step   2400/16479  lr=2.88e-04  train=1.4126  val=1.3963  test=1.4201 nats  t=564s
+    step   2600/16479  lr=2.85e-04  train=1.4018  val=1.3828  test=1.4056 nats  t=611s
+    step   2800/16479  lr=2.83e-04  train=1.3866  val=1.3682  test=1.3912 nats  t=658s
+    step   3000/16479  lr=2.80e-04  train=1.3656  val=1.3541  test=1.3763 nats  t=705s
+    step   3200/16479  lr=2.77e-04  train=1.3570  val=1.3390  test=1.3603 nats  t=752s
+    step   3400/16479  lr=2.74e-04  train=1.3489  val=1.3283  test=1.3480 nats  t=799s
+    step   3600/16479  lr=2.70e-04  train=1.3393  val=1.3172  test=1.3403 nats  t=846s
+    step   3800/16479  lr=2.67e-04  train=1.3221  val=1.3098  test=1.3322 nats  t=893s
+    step   4000/16479  lr=2.63e-04  train=1.3223  val=1.3000  test=1.3216 nats  t=940s
+    step   4200/16479  lr=2.59e-04  train=1.3078  val=1.2931  test=1.3137 nats  t=987s
+    step   4400/16479  lr=2.55e-04  train=1.3048  val=1.2860  test=1.3102 nats  t=1034s
+    step   4600/16479  lr=2.51e-04  train=1.2957  val=1.2813  test=1.3031 nats  t=1081s
+    step   4800/16479  lr=2.46e-04  train=1.2961  val=1.2731  test=1.2939 nats  t=1128s
+    step   5000/16479  lr=2.42e-04  train=1.2816  val=1.2682  test=1.2889 nats  t=1175s
+    step   5200/16479  lr=2.37e-04  train=1.2881  val=1.2643  test=1.2857 nats  t=1222s
+    step   5400/16479  lr=2.32e-04  train=1.2850  val=1.2602  test=1.2798 nats  t=1269s
+    step   5600/16479  lr=2.27e-04  train=1.2769  val=1.2528  test=1.2742 nats  t=1316s
+    step   5800/16479  lr=2.22e-04  train=1.2656  val=1.2494  test=1.2702 nats  t=1363s
+    step   6000/16479  lr=2.17e-04  train=1.2670  val=1.2455  test=1.2664 nats  t=1410s
+    step   6200/16479  lr=2.12e-04  train=1.2539  val=1.2379  test=1.2600 nats  t=1457s
+    step   6400/16479  lr=2.07e-04  train=1.2518  val=1.2330  test=1.2566 nats  t=1504s
+    step   6600/16479  lr=2.01e-04  train=1.2505  val=1.2325  test=1.2543 nats  t=1551s
+    step   6800/16479  lr=1.96e-04  train=1.2478  val=1.2285  test=1.2486 nats  t=1598s
+    step   7000/16479  lr=1.90e-04  train=1.2379  val=1.2240  test=1.2446 nats  t=1645s
+    step   7200/16479  lr=1.84e-04  train=1.2473  val=1.2213  test=1.2436 nats  t=1692s
+    step   7400/16479  lr=1.79e-04  train=1.2399  val=1.2173  test=1.2394 nats  t=1739s
+    step   7600/16479  lr=1.73e-04  train=1.2261  val=1.2131  test=1.2341 nats  t=1786s
+    step   7800/16479  lr=1.67e-04  train=1.2326  val=1.2121  test=1.2338 nats  t=1833s
+    step   8000/16479  lr=1.61e-04  train=1.2259  val=1.2110  test=1.2302 nats  t=1880s
+    step   8200/16479  lr=1.56e-04  train=1.2273  val=1.2055  test=1.2263 nats  t=1927s
+    step   8400/16479  lr=1.50e-04  train=1.2154  val=1.2023  test=1.2232 nats  t=1974s
+    step   8600/16479  lr=1.44e-04  train=1.2246  val=1.2005  test=1.2213 nats  t=2021s
+    step   8800/16479  lr=1.38e-04  train=1.2208  val=1.1974  test=1.2177 nats  t=2068s
+    step   9000/16479  lr=1.32e-04  train=1.2106  val=1.1945  test=1.2146 nats  t=2115s
+    step   9200/16479  lr=1.27e-04  train=1.2128  val=1.1924  test=1.2110 nats  t=2162s
+    step   9400/16479  lr=1.21e-04  train=1.2156  val=1.1892  test=1.2111 nats  t=2209s
+    step   9600/16479  lr=1.15e-04  train=1.2125  val=1.1866  test=1.2071 nats  t=2256s
+    step   9800/16479  lr=1.09e-04  train=1.2022  val=1.1859  test=1.2073 nats  t=2303s
+    step  10000/16479  lr=1.04e-04  train=1.1956  val=1.1835  test=1.2037 nats  t=2350s
+    step  10200/16479  lr=9.84e-05  train=1.1946  val=1.1800  test=1.1997 nats  t=2397s
+    step  10400/16479  lr=9.29e-05  train=1.2025  val=1.1780  test=1.1982 nats  t=2444s
+    step  10600/16479  lr=8.76e-05  train=1.1990  val=1.1761  test=1.1971 nats  t=2491s
+    step  10800/16479  lr=8.24e-05  train=1.2000  val=1.1747  test=1.1943 nats  t=2538s
+    step  11000/16479  lr=7.72e-05  train=1.1912  val=1.1716  test=1.1928 nats  t=2585s
+    step  11200/16479  lr=7.22e-05  train=1.1811  val=1.1710  test=1.1919 nats  t=2632s
+    step  11400/16479  lr=6.72e-05  train=1.1871  val=1.1693  test=1.1890 nats  t=2679s
+    step  11600/16479  lr=6.25e-05  train=1.1745  val=1.1676  test=1.1876 nats  t=2726s
+    step  11800/16479  lr=5.78e-05  train=1.1744  val=1.1653  test=1.1847 nats  t=2773s
+    step  12000/16479  lr=5.33e-05  train=1.1747  val=1.1626  test=1.1831 nats  t=2820s
+    step  12200/16479  lr=4.89e-05  train=1.1837  val=1.1619  test=1.1822 nats  t=2867s
+    step  12400/16479  lr=4.47e-05  train=1.1736  val=1.1601  test=1.1804 nats  t=2914s
+    step  12600/16479  lr=4.06e-05  train=1.1821  val=1.1587  test=1.1786 nats  t=2961s
+    step  12800/16479  lr=3.67e-05  train=1.1733  val=1.1563  test=1.1775 nats  t=3008s
+    step  13000/16479  lr=3.30e-05  train=1.1671  val=1.1554  test=1.1760 nats  t=3055s
+    step  13200/16479  lr=2.94e-05  train=1.1716  val=1.1547  test=1.1752 nats  t=3102s
+    step  13400/16479  lr=2.60e-05  train=1.1682  val=1.1535  test=1.1738 nats  t=3149s
+    step  13600/16479  lr=2.29e-05  train=1.1683  val=1.1523  test=1.1727 nats  t=3196s
+    step  13800/16479  lr=1.99e-05  train=1.1645  val=1.1518  test=1.1719 nats  t=3243s
+    step  14000/16479  lr=1.71e-05  train=1.1622  val=1.1510  test=1.1709 nats  t=3290s
+    step  14200/16479  lr=1.45e-05  train=1.1610  val=1.1497  test=1.1695 nats  t=3337s
+    step  14400/16479  lr=1.21e-05  train=1.1661  val=1.1489  test=1.1692 nats  t=3384s
+    step  14600/16479  lr=9.88e-06  train=1.1633  val=1.1483  test=1.1685 nats  t=3431s
+    step  14800/16479  lr=7.91e-06  train=1.1685  val=1.1476  test=1.1680 nats  t=3478s
+    step  15000/16479  lr=6.15e-06  train=1.1647  val=1.1472  test=1.1675 nats  t=3525s
+    step  15200/16479  lr=4.61e-06  train=1.1639  val=1.1467  test=1.1668 nats  t=3572s
+    step  15400/16479  lr=3.29e-06  train=1.1705  val=1.1466  test=1.1668 nats  t=3619s
+    step  15600/16479  lr=2.18e-06  train=1.1674  val=1.1462  test=1.1664 nats  t=3666s
+    step  15800/16479  lr=1.31e-06  train=1.1668  val=1.1460  test=1.1662 nats  t=3713s
+    step  16000/16479  lr=6.51e-07  train=1.1531  val=1.1459  test=1.1661 nats  t=3760s
+    step  16200/16479  lr=2.22e-07  train=1.1618  val=1.1458  test=1.1660 nats  t=3807s
+    step  16400/16479  lr=1.81e-08  train=1.1564  val=1.1458  test=1.1660 nats  t=3854s
+    step  16479/16479  lr=2.83e-12  train=1.1612  val=1.1458  test=1.1660 nats  t=3879s
+  → test_ce=1.1660 nats  AOFE_ratio=0.9397  α=0.0465  t=4605s
+
+  ── depth=10 ──
+  d_model=152  n_heads=38  d_ff=608  active=2,895,600  pad=3.5%  α=0.0658
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.6268  val=2.6289  test=2.6355 nats  t=51s
+    step    400/16479  lr=3.00e-04  train=2.3921  val=2.3941  test=2.3978 nats  t=102s
+    step    600/16479  lr=3.00e-04  train=2.1508  val=2.1494  test=2.1572 nats  t=153s
+    step    800/16479  lr=2.99e-04  train=1.9534  val=1.9485  test=1.9589 nats  t=203s
+    step   1000/16479  lr=2.99e-04  train=1.8029  val=1.7935  test=1.8104 nats  t=254s
+    step   1200/16479  lr=2.98e-04  train=1.6925  val=1.6717  test=1.6945 nats  t=305s
+    step   1400/16479  lr=2.97e-04  train=1.6150  val=1.5957  test=1.6177 nats  t=356s
+    step   1600/16479  lr=2.95e-04  train=1.5568  val=1.5375  test=1.5564 nats  t=407s
+    step   1800/16479  lr=2.94e-04  train=1.5130  val=1.4958  test=1.5170 nats  t=457s
+    step   2000/16479  lr=2.92e-04  train=1.4798  val=1.4619  test=1.4845 nats  t=508s
+    step   2200/16479  lr=2.90e-04  train=1.4556  val=1.4339  test=1.4586 nats  t=559s
+    step   2400/16479  lr=2.88e-04  train=1.4348  val=1.4172  test=1.4404 nats  t=610s
+    step   2600/16479  lr=2.85e-04  train=1.4182  val=1.3919  test=1.4166 nats  t=661s
+    step   2800/16479  lr=2.83e-04  train=1.3999  val=1.3757  test=1.4005 nats  t=711s
+    step   3000/16479  lr=2.80e-04  train=1.3870  val=1.3611  test=1.3887 nats  t=762s
+    step   3200/16479  lr=2.77e-04  train=1.3808  val=1.3541  test=1.3789 nats  t=813s
+    step   3400/16479  lr=2.74e-04  train=1.3636  val=1.3422  test=1.3652 nats  t=864s
+    step   3600/16479  lr=2.70e-04  train=1.3481  val=1.3318  test=1.3526 nats  t=915s
+    step   3800/16479  lr=2.67e-04  train=1.3438  val=1.3216  test=1.3431 nats  t=965s
+    step   4000/16479  lr=2.63e-04  train=1.3304  val=1.3117  test=1.3350 nats  t=1016s
+    step   4200/16479  lr=2.59e-04  train=1.3290  val=1.3040  test=1.3266 nats  t=1067s
+    step   4400/16479  lr=2.55e-04  train=1.3196  val=1.2946  test=1.3175 nats  t=1118s
+    step   4600/16479  lr=2.51e-04  train=1.3149  val=1.2895  test=1.3120 nats  t=1169s
+    step   4800/16479  lr=2.46e-04  train=1.3060  val=1.2829  test=1.3046 nats  t=1220s
+    step   5000/16479  lr=2.42e-04  train=1.2994  val=1.2751  test=1.2974 nats  t=1270s
+    step   5200/16479  lr=2.37e-04  train=1.2829  val=1.2745  test=1.2961 nats  t=1321s
+    step   5400/16479  lr=2.32e-04  train=1.2882  val=1.2646  test=1.2852 nats  t=1372s
+    step   5600/16479  lr=2.27e-04  train=1.2803  val=1.2610  test=1.2820 nats  t=1423s
+    step   5800/16479  lr=2.22e-04  train=1.2667  val=1.2547  test=1.2765 nats  t=1474s
+    step   6000/16479  lr=2.17e-04  train=1.2767  val=1.2526  test=1.2724 nats  t=1525s
+    step   6200/16479  lr=2.12e-04  train=1.2619  val=1.2468  test=1.2662 nats  t=1575s
+    step   6400/16479  lr=2.07e-04  train=1.2609  val=1.2413  test=1.2633 nats  t=1626s
+    step   6600/16479  lr=2.01e-04  train=1.2591  val=1.2375  test=1.2578 nats  t=1677s
+    step   6800/16479  lr=1.96e-04  train=1.2550  val=1.2336  test=1.2541 nats  t=1728s
+    step   7000/16479  lr=1.90e-04  train=1.2481  val=1.2281  test=1.2477 nats  t=1779s
+    step   7200/16479  lr=1.84e-04  train=1.2369  val=1.2275  test=1.2478 nats  t=1830s
+    step   7400/16479  lr=1.79e-04  train=1.2489  val=1.2238  test=1.2444 nats  t=1880s
+    step   7600/16479  lr=1.73e-04  train=1.2428  val=1.2201  test=1.2386 nats  t=1931s
+    step   7800/16479  lr=1.67e-04  train=1.2334  val=1.2167  test=1.2352 nats  t=1982s
+    step   8000/16479  lr=1.61e-04  train=1.2322  val=1.2125  test=1.2314 nats  t=2033s
+    step   8200/16479  lr=1.56e-04  train=1.2208  val=1.2100  test=1.2289 nats  t=2084s
+    step   8400/16479  lr=1.50e-04  train=1.2232  val=1.2062  test=1.2252 nats  t=2134s
+    step   8600/16479  lr=1.44e-04  train=1.2155  val=1.2032  test=1.2220 nats  t=2185s
+    step   8800/16479  lr=1.38e-04  train=1.2100  val=1.1998  test=1.2192 nats  t=2236s
+    step   9000/16479  lr=1.32e-04  train=1.2136  val=1.1986  test=1.2168 nats  t=2287s
+    step   9200/16479  lr=1.27e-04  train=1.2168  val=1.1950  test=1.2139 nats  t=2338s
+    step   9400/16479  lr=1.21e-04  train=1.2033  val=1.1932  test=1.2119 nats  t=2388s
+    step   9600/16479  lr=1.15e-04  train=1.2074  val=1.1896  test=1.2096 nats  t=2439s
+    step   9800/16479  lr=1.09e-04  train=1.2056  val=1.1860  test=1.2058 nats  t=2490s
+    step  10000/16479  lr=1.04e-04  train=1.1979  val=1.1842  test=1.2041 nats  t=2541s
+    step  10200/16479  lr=9.84e-05  train=1.1988  val=1.1828  test=1.2011 nats  t=2592s
+    step  10400/16479  lr=9.29e-05  train=1.1927  val=1.1820  test=1.2012 nats  t=2642s
+    step  10600/16479  lr=8.76e-05  train=1.1911  val=1.1786  test=1.1973 nats  t=2693s
+    step  10800/16479  lr=8.24e-05  train=1.1861  val=1.1765  test=1.1957 nats  t=2744s
+    step  11000/16479  lr=7.72e-05  train=1.1871  val=1.1746  test=1.1937 nats  t=2795s
+    step  11200/16479  lr=7.22e-05  train=1.1984  val=1.1733  test=1.1928 nats  t=2846s
+    step  11400/16479  lr=6.72e-05  train=1.1866  val=1.1704  test=1.1905 nats  t=2896s
+    step  11600/16479  lr=6.25e-05  train=1.1830  val=1.1679  test=1.1883 nats  t=2947s
+    step  11800/16479  lr=5.78e-05  train=1.1852  val=1.1661  test=1.1866 nats  t=2998s
+    step  12000/16479  lr=5.33e-05  train=1.1783  val=1.1645  test=1.1835 nats  t=3049s
+    step  12200/16479  lr=4.89e-05  train=1.1775  val=1.1634  test=1.1826 nats  t=3100s
+    step  12400/16479  lr=4.47e-05  train=1.1847  val=1.1626  test=1.1815 nats  t=3150s
+    step  12600/16479  lr=4.06e-05  train=1.1740  val=1.1600  test=1.1793 nats  t=3201s
+    step  12800/16479  lr=3.67e-05  train=1.1731  val=1.1587  test=1.1785 nats  t=3252s
+    step  13000/16479  lr=3.30e-05  train=1.1693  val=1.1571  test=1.1769 nats  t=3303s
+    step  13200/16479  lr=2.94e-05  train=1.1701  val=1.1558  test=1.1742 nats  t=3354s
+    step  13400/16479  lr=2.60e-05  train=1.1774  val=1.1550  test=1.1742 nats  t=3404s
+    step  13600/16479  lr=2.29e-05  train=1.1711  val=1.1540  test=1.1731 nats  t=3455s
+    step  13800/16479  lr=1.99e-05  train=1.1652  val=1.1529  test=1.1724 nats  t=3506s
+    step  14000/16479  lr=1.71e-05  train=1.1665  val=1.1522  test=1.1708 nats  t=3557s
+    step  14200/16479  lr=1.45e-05  train=1.1639  val=1.1512  test=1.1701 nats  t=3608s
+    step  14400/16479  lr=1.21e-05  train=1.1652  val=1.1505  test=1.1697 nats  t=3659s
+    step  14600/16479  lr=9.88e-06  train=1.1650  val=1.1501  test=1.1688 nats  t=3709s
+    step  14800/16479  lr=7.91e-06  train=1.1691  val=1.1492  test=1.1685 nats  t=3760s
+    step  15000/16479  lr=6.15e-06  train=1.1605  val=1.1489  test=1.1681 nats  t=3811s
+    step  15200/16479  lr=4.61e-06  train=1.1686  val=1.1484  test=1.1673 nats  t=3862s
+    step  15400/16479  lr=3.29e-06  train=1.1582  val=1.1480  test=1.1670 nats  t=3913s
+    step  15600/16479  lr=2.18e-06  train=1.1601  val=1.1477  test=1.1666 nats  t=3963s
+    step  15800/16479  lr=1.31e-06  train=1.1697  val=1.1475  test=1.1664 nats  t=4014s
+    step  16000/16479  lr=6.51e-07  train=1.1578  val=1.1474  test=1.1662 nats  t=4065s
+    step  16200/16479  lr=2.22e-07  train=1.1610  val=1.1473  test=1.1661 nats  t=4116s
+    step  16400/16479  lr=1.81e-08  train=1.1687  val=1.1472  test=1.1661 nats  t=4167s
+    step  16479/16479  lr=2.83e-12  train=1.1631  val=1.1472  test=1.1661 nats  t=4194s
+  → test_ce=1.1661 nats  AOFE_ratio=0.9367  α=0.0658  t=4980s
+
+  ── depth=12 ──
+  d_model=140  n_heads=35  d_ff=560  active=2,936,920  pad=2.1%  α=0.0857
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.6710  val=2.6702  test=2.6746 nats  t=56s
+    step    400/16479  lr=3.00e-04  train=2.3922  val=2.3900  test=2.3950 nats  t=112s
+    step    600/16479  lr=3.00e-04  train=2.1636  val=2.1555  test=2.1632 nats  t=169s
+    step    800/16479  lr=2.99e-04  train=1.9719  val=1.9599  test=1.9734 nats  t=225s
+    step   1000/16479  lr=2.99e-04  train=1.8103  val=1.7991  test=1.8144 nats  t=281s
+    step   1200/16479  lr=2.98e-04  train=1.7025  val=1.6846  test=1.7042 nats  t=337s
+    step   1400/16479  lr=2.97e-04  train=1.6291  val=1.6064  test=1.6272 nats  t=393s
+    step   1600/16479  lr=2.95e-04  train=1.5668  val=1.5431  test=1.5663 nats  t=450s
+    step   1800/16479  lr=2.94e-04  train=1.5294  val=1.5044  test=1.5274 nats  t=506s
+    step   2000/16479  lr=2.92e-04  train=1.4924  val=1.4671  test=1.4905 nats  t=562s
+    step   2200/16479  lr=2.90e-04  train=1.4652  val=1.4488  test=1.4699 nats  t=618s
+    step   2400/16479  lr=2.88e-04  train=1.4357  val=1.4159  test=1.4409 nats  t=674s
+    step   2600/16479  lr=2.85e-04  train=1.4238  val=1.3984  test=1.4214 nats  t=730s
+    step   2800/16479  lr=2.83e-04  train=1.4038  val=1.3840  test=1.4071 nats  t=787s
+    step   3000/16479  lr=2.80e-04  train=1.3991  val=1.3706  test=1.3931 nats  t=843s
+    step   3200/16479  lr=2.77e-04  train=1.3762  val=1.3573  test=1.3784 nats  t=899s
+    step   3400/16479  lr=2.74e-04  train=1.3682  val=1.3496  test=1.3710 nats  t=955s
+    step   3600/16479  lr=2.70e-04  train=1.3539  val=1.3351  test=1.3575 nats  t=1011s
+    step   3800/16479  lr=2.67e-04  train=1.3412  val=1.3255  test=1.3505 nats  t=1067s
+    step   4000/16479  lr=2.63e-04  train=1.3275  val=1.3175  test=1.3397 nats  t=1124s
+    step   4200/16479  lr=2.59e-04  train=1.3275  val=1.3106  test=1.3327 nats  t=1180s
+    step   4400/16479  lr=2.55e-04  train=1.3261  val=1.3015  test=1.3249 nats  t=1236s
+    step   4600/16479  lr=2.51e-04  train=1.3107  val=1.2956  test=1.3175 nats  t=1292s
+    step   4800/16479  lr=2.46e-04  train=1.3069  val=1.2882  test=1.3089 nats  t=1348s
+    step   5000/16479  lr=2.42e-04  train=1.2979  val=1.2803  test=1.3025 nats  t=1404s
+    step   5200/16479  lr=2.37e-04  train=1.2963  val=1.2760  test=1.2967 nats  t=1461s
+    step   5400/16479  lr=2.32e-04  train=1.3033  val=1.2724  test=1.2920 nats  t=1517s
+    step   5600/16479  lr=2.27e-04  train=1.2886  val=1.2659  test=1.2865 nats  t=1573s
+    step   5800/16479  lr=2.22e-04  train=1.2866  val=1.2600  test=1.2816 nats  t=1629s
+    step   6000/16479  lr=2.17e-04  train=1.2826  val=1.2575  test=1.2776 nats  t=1685s
+    step   6200/16479  lr=2.12e-04  train=1.2595  val=1.2510  test=1.2711 nats  t=1742s
+    step   6400/16479  lr=2.07e-04  train=1.2717  val=1.2489  test=1.2697 nats  t=1798s
+    step   6600/16479  lr=2.01e-04  train=1.2579  val=1.2419  test=1.2624 nats  t=1854s
+    step   6800/16479  lr=1.96e-04  train=1.2593  val=1.2418  test=1.2627 nats  t=1910s
+    step   7000/16479  lr=1.90e-04  train=1.2559  val=1.2355  test=1.2553 nats  t=1966s
+    step   7200/16479  lr=1.84e-04  train=1.2553  val=1.2321  test=1.2513 nats  t=2022s
+    step   7400/16479  lr=1.79e-04  train=1.2508  val=1.2294  test=1.2479 nats  t=2079s
+    step   7600/16479  lr=1.73e-04  train=1.2238  val=1.2260  test=1.2465 nats  t=2135s
+    step   7800/16479  lr=1.67e-04  train=1.2358  val=1.2206  test=1.2416 nats  t=2191s
+    step   8000/16479  lr=1.61e-04  train=1.2353  val=1.2186  test=1.2383 nats  t=2247s
+    step   8200/16479  lr=1.56e-04  train=1.2340  val=1.2147  test=1.2342 nats  t=2303s
+    step   8400/16479  lr=1.50e-04  train=1.2415  val=1.2121  test=1.2327 nats  t=2359s
+    step   8600/16479  lr=1.44e-04  train=1.2266  val=1.2112  test=1.2313 nats  t=2416s
+    step   8800/16479  lr=1.38e-04  train=1.2207  val=1.2076  test=1.2274 nats  t=2472s
+    step   9000/16479  lr=1.32e-04  train=1.2226  val=1.2068  test=1.2249 nats  t=2528s
+    step   9200/16479  lr=1.27e-04  train=1.2163  val=1.1990  test=1.2203 nats  t=2584s
+    step   9400/16479  lr=1.21e-04  train=1.2166  val=1.1986  test=1.2189 nats  t=2640s
+    step   9600/16479  lr=1.15e-04  train=1.2167  val=1.1979  test=1.2167 nats  t=2697s
+    step   9800/16479  lr=1.09e-04  train=1.2086  val=1.1934  test=1.2125 nats  t=2753s
+    step  10000/16479  lr=1.04e-04  train=1.2037  val=1.1914  test=1.2114 nats  t=2809s
+    step  10200/16479  lr=9.84e-05  train=1.1978  val=1.1900  test=1.2086 nats  t=2865s
+    step  10400/16479  lr=9.29e-05  train=1.2066  val=1.1873  test=1.2064 nats  t=2921s
+    step  10600/16479  lr=8.76e-05  train=1.1963  val=1.1847  test=1.2029 nats  t=2977s
+    step  10800/16479  lr=8.24e-05  train=1.1950  val=1.1822  test=1.2020 nats  t=3034s
+    step  11000/16479  lr=7.72e-05  train=1.1922  val=1.1799  test=1.2016 nats  t=3090s
+    step  11200/16479  lr=7.22e-05  train=1.2036  val=1.1791  test=1.1982 nats  t=3146s
+    step  11400/16479  lr=6.72e-05  train=1.1907  val=1.1776  test=1.1980 nats  t=3202s
+    step  11600/16479  lr=6.25e-05  train=1.1932  val=1.1763  test=1.1948 nats  t=3259s
+    step  11800/16479  lr=5.78e-05  train=1.1885  val=1.1736  test=1.1917 nats  t=3315s
+    step  12000/16479  lr=5.33e-05  train=1.1897  val=1.1707  test=1.1904 nats  t=3371s
+    step  12200/16479  lr=4.89e-05  train=1.1809  val=1.1697  test=1.1889 nats  t=3427s
+    step  12400/16479  lr=4.47e-05  train=1.1955  val=1.1683  test=1.1880 nats  t=3483s
+    step  12600/16479  lr=4.06e-05  train=1.1815  val=1.1671  test=1.1868 nats  t=3540s
+    step  12800/16479  lr=3.67e-05  train=1.1839  val=1.1663  test=1.1849 nats  t=3596s
+    step  13000/16479  lr=3.30e-05  train=1.1791  val=1.1632  test=1.1825 nats  t=3652s
+    step  13200/16479  lr=2.94e-05  train=1.1833  val=1.1628  test=1.1812 nats  t=3708s
+    step  13400/16479  lr=2.60e-05  train=1.1713  val=1.1621  test=1.1812 nats  t=3764s
+    step  13600/16479  lr=2.29e-05  train=1.1765  val=1.1603  test=1.1798 nats  t=3821s
+    step  13800/16479  lr=1.99e-05  train=1.1768  val=1.1596  test=1.1789 nats  t=3877s
+    step  14000/16479  lr=1.71e-05  train=1.1745  val=1.1583  test=1.1779 nats  t=3933s
+    step  14200/16479  lr=1.45e-05  train=1.1736  val=1.1573  test=1.1771 nats  t=3989s
+    step  14400/16479  lr=1.21e-05  train=1.1775  val=1.1566  test=1.1763 nats  t=4045s
+    step  14600/16479  lr=9.88e-06  train=1.1758  val=1.1565  test=1.1752 nats  t=4101s
+    step  14800/16479  lr=7.91e-06  train=1.1767  val=1.1555  test=1.1748 nats  t=4158s
+    step  15000/16479  lr=6.15e-06  train=1.1716  val=1.1551  test=1.1739 nats  t=4214s
+    step  15200/16479  lr=4.61e-06  train=1.1657  val=1.1546  test=1.1739 nats  t=4270s
+    step  15400/16479  lr=3.29e-06  train=1.1598  val=1.1540  test=1.1734 nats  t=4326s
+    step  15600/16479  lr=2.18e-06  train=1.1632  val=1.1539  test=1.1731 nats  t=4382s
+    step  15800/16479  lr=1.31e-06  train=1.1709  val=1.1537  test=1.1729 nats  t=4439s
+    step  16000/16479  lr=6.51e-07  train=1.1783  val=1.1535  test=1.1728 nats  t=4495s
+    step  16200/16479  lr=2.22e-07  train=1.1694  val=1.1534  test=1.1727 nats  t=4551s
+    step  16400/16479  lr=1.81e-08  train=1.1689  val=1.1534  test=1.1727 nats  t=4607s
+    step  16479/16479  lr=2.83e-12  train=1.1710  val=1.1534  test=1.1727 nats  t=4637s
+  → test_ce=1.1727 nats  AOFE_ratio=0.9396  α=0.0857  t=5510s
+
+  ── depth=16 ──
+  d_model=120  n_heads=30  d_ff=480  active=2,864,880  pad=4.5%  α=0.1333
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.7615  val=2.7665  test=2.7698 nats  t=67s
+    step    400/16479  lr=3.00e-04  train=2.4091  val=2.4109  test=2.4168 nats  t=133s
+    step    600/16479  lr=3.00e-04  train=2.2010  val=2.1977  test=2.2041 nats  t=200s
+    step    800/16479  lr=2.99e-04  train=2.0118  val=2.0030  test=2.0106 nats  t=266s
+    step   1000/16479  lr=2.99e-04  train=1.8672  val=1.8565  test=1.8701 nats  t=333s
+    step   1200/16479  lr=2.98e-04  train=1.7558  val=1.7420  test=1.7593 nats  t=400s
+    step   1400/16479  lr=2.97e-04  train=1.6782  val=1.6641  test=1.6833 nats  t=466s
+    step   1600/16479  lr=2.95e-04  train=1.6095  val=1.5980  test=1.6186 nats  t=533s
+    step   1800/16479  lr=2.94e-04  train=1.5697  val=1.5441  test=1.5647 nats  t=599s
+    step   2000/16479  lr=2.92e-04  train=1.5245  val=1.5039  test=1.5258 nats  t=666s
+    step   2200/16479  lr=2.90e-04  train=1.5003  val=1.4744  test=1.5008 nats  t=733s
+    step   2400/16479  lr=2.88e-04  train=1.4781  val=1.4501  test=1.4740 nats  t=799s
+    step   2600/16479  lr=2.85e-04  train=1.4603  val=1.4290  test=1.4541 nats  t=866s
+    step   2800/16479  lr=2.83e-04  train=1.4324  val=1.4095  test=1.4341 nats  t=932s
+    step   3000/16479  lr=2.80e-04  train=1.4095  val=1.3952  test=1.4196 nats  t=999s
+    step   3200/16479  lr=2.77e-04  train=1.3947  val=1.3810  test=1.4079 nats  t=1065s
+    step   3400/16479  lr=2.74e-04  train=1.3947  val=1.3660  test=1.3898 nats  t=1132s
+    step   3600/16479  lr=2.70e-04  train=1.3757  val=1.3573  test=1.3831 nats  t=1199s
+    step   3800/16479  lr=2.67e-04  train=1.3634  val=1.3485  test=1.3716 nats  t=1265s
+    step   4000/16479  lr=2.63e-04  train=1.3585  val=1.3361  test=1.3594 nats  t=1332s
+    step   4200/16479  lr=2.59e-04  train=1.3530  val=1.3282  test=1.3527 nats  t=1399s
+    step   4400/16479  lr=2.55e-04  train=1.3414  val=1.3206  test=1.3444 nats  t=1465s
+    step   4600/16479  lr=2.51e-04  train=1.3337  val=1.3143  test=1.3383 nats  t=1532s
+    step   4800/16479  lr=2.46e-04  train=1.3211  val=1.3046  test=1.3303 nats  t=1598s
+    step   5000/16479  lr=2.42e-04  train=1.3213  val=1.2998  test=1.3240 nats  t=1665s
+    step   5200/16479  lr=2.37e-04  train=1.3054  val=1.2933  test=1.3156 nats  t=1732s
+    step   5400/16479  lr=2.32e-04  train=1.3114  val=1.2870  test=1.3094 nats  t=1798s
+    step   5600/16479  lr=2.27e-04  train=1.3003  val=1.2841  test=1.3058 nats  t=1865s
+    step   5800/16479  lr=2.22e-04  train=1.2951  val=1.2776  test=1.2993 nats  t=1931s
+    step   6000/16479  lr=2.17e-04  train=1.2971  val=1.2728  test=1.2942 nats  t=1998s
+    step   6200/16479  lr=2.12e-04  train=1.2814  val=1.2679  test=1.2900 nats  t=2065s
+    step   6400/16479  lr=2.07e-04  train=1.2807  val=1.2622  test=1.2836 nats  t=2131s
+    step   6600/16479  lr=2.01e-04  train=1.2804  val=1.2586  test=1.2796 nats  t=2198s
+    step   6800/16479  lr=1.96e-04  train=1.2794  val=1.2520  test=1.2751 nats  t=2264s
+    step   7000/16479  lr=1.90e-04  train=1.2692  val=1.2504  test=1.2687 nats  t=2331s
+    step   7200/16479  lr=1.84e-04  train=1.2549  val=1.2461  test=1.2680 nats  t=2398s
+    step   7400/16479  lr=1.79e-04  train=1.2519  val=1.2414  test=1.2635 nats  t=2464s
+    step   7600/16479  lr=1.73e-04  train=1.2531  val=1.2389  test=1.2610 nats  t=2531s
+    step   7800/16479  lr=1.67e-04  train=1.2521  val=1.2338  test=1.2547 nats  t=2597s
+    step   8000/16479  lr=1.61e-04  train=1.2505  val=1.2292  test=1.2513 nats  t=2664s
+    step   8200/16479  lr=1.56e-04  train=1.2395  val=1.2256  test=1.2482 nats  t=2731s
+    step   8400/16479  lr=1.50e-04  train=1.2395  val=1.2240  test=1.2458 nats  t=2797s
+    step   8600/16479  lr=1.44e-04  train=1.2371  val=1.2225  test=1.2442 nats  t=2864s
+    step   8800/16479  lr=1.38e-04  train=1.2254  val=1.2182  test=1.2391 nats  t=2930s
+    step   9000/16479  lr=1.32e-04  train=1.2330  val=1.2174  test=1.2383 nats  t=2997s
+    step   9200/16479  lr=1.27e-04  train=1.2261  val=1.2118  test=1.2324 nats  t=3064s
+    step   9400/16479  lr=1.21e-04  train=1.2258  val=1.2089  test=1.2309 nats  t=3130s
+    step   9600/16479  lr=1.15e-04  train=1.2305  val=1.2072  test=1.2288 nats  t=3197s
+    step   9800/16479  lr=1.09e-04  train=1.2234  val=1.2041  test=1.2258 nats  t=3264s
+    step  10000/16479  lr=1.04e-04  train=1.2247  val=1.2027  test=1.2245 nats  t=3330s
+    step  10200/16479  lr=9.84e-05  train=1.2135  val=1.1993  test=1.2204 nats  t=3397s
+    step  10400/16479  lr=9.29e-05  train=1.2095  val=1.1973  test=1.2171 nats  t=3463s
+    step  10600/16479  lr=8.76e-05  train=1.2132  val=1.1953  test=1.2154 nats  t=3530s
+    step  10800/16479  lr=8.24e-05  train=1.2112  val=1.1950  test=1.2136 nats  t=3597s
+    step  11000/16479  lr=7.72e-05  train=1.2064  val=1.1912  test=1.2123 nats  t=3663s
+    step  11200/16479  lr=7.22e-05  train=1.2017  val=1.1879  test=1.2099 nats  t=3730s
+    step  11400/16479  lr=6.72e-05  train=1.2032  val=1.1852  test=1.2067 nats  t=3796s
+    step  11600/16479  lr=6.25e-05  train=1.2077  val=1.1854  test=1.2061 nats  t=3863s
+    step  11800/16479  lr=5.78e-05  train=1.2081  val=1.1822  test=1.2027 nats  t=3929s
+    step  12000/16479  lr=5.33e-05  train=1.2010  val=1.1798  test=1.2007 nats  t=3996s
+    step  12200/16479  lr=4.89e-05  train=1.2047  val=1.1797  test=1.2012 nats  t=4063s
+    step  12400/16479  lr=4.47e-05  train=1.1927  val=1.1774  test=1.1986 nats  t=4129s
+    step  12600/16479  lr=4.06e-05  train=1.1928  val=1.1754  test=1.1965 nats  t=4196s
+    step  12800/16479  lr=3.67e-05  train=1.1874  val=1.1750  test=1.1950 nats  t=4262s
+    step  13000/16479  lr=3.30e-05  train=1.1912  val=1.1726  test=1.1939 nats  t=4329s
+    step  13200/16479  lr=2.94e-05  train=1.1861  val=1.1718  test=1.1927 nats  t=4396s
+    step  13400/16479  lr=2.60e-05  train=1.1887  val=1.1702  test=1.1922 nats  t=4462s
+    step  13600/16479  lr=2.29e-05  train=1.1971  val=1.1689  test=1.1896 nats  t=4529s
+    step  13800/16479  lr=1.99e-05  train=1.1944  val=1.1679  test=1.1890 nats  t=4595s
+    step  14000/16479  lr=1.71e-05  train=1.1790  val=1.1669  test=1.1874 nats  t=4662s
+    step  14200/16479  lr=1.45e-05  train=1.1860  val=1.1666  test=1.1868 nats  t=4729s
+    step  14400/16479  lr=1.21e-05  train=1.1756  val=1.1654  test=1.1859 nats  t=4795s
+    step  14600/16479  lr=9.88e-06  train=1.1912  val=1.1648  test=1.1850 nats  t=4862s
+    step  14800/16479  lr=7.91e-06  train=1.1951  val=1.1638  test=1.1842 nats  t=4928s
+    step  15000/16479  lr=6.15e-06  train=1.1755  val=1.1637  test=1.1842 nats  t=4995s
+    step  15200/16479  lr=4.61e-06  train=1.1713  val=1.1634  test=1.1835 nats  t=5062s
+    step  15400/16479  lr=3.29e-06  train=1.1770  val=1.1629  test=1.1832 nats  t=5128s
+    step  15600/16479  lr=2.18e-06  train=1.1757  val=1.1624  test=1.1828 nats  t=5195s
+    step  15800/16479  lr=1.31e-06  train=1.1749  val=1.1621  test=1.1825 nats  t=5262s
+    step  16000/16479  lr=6.51e-07  train=1.1806  val=1.1620  test=1.1824 nats  t=5328s
+    step  16200/16479  lr=2.22e-07  train=1.1729  val=1.1620  test=1.1824 nats  t=5395s
+    step  16400/16479  lr=1.81e-08  train=1.1811  val=1.1619  test=1.1823 nats  t=5461s
+    step  16479/16479  lr=2.83e-12  train=1.1769  val=1.1619  test=1.1823 nats  t=5497s
+  → test_ce=1.1823 nats  AOFE_ratio=0.9337  α=0.1333  t=6478s
+
+  ── depth=20 ──
+  d_model=108  n_heads=27  d_ff=432  active=2,891,160  pad=3.6%  α=0.1852
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.8709  val=2.8772  test=2.8789 nats  t=76s
+    step    400/16479  lr=3.00e-04  train=2.4244  val=2.4249  test=2.4296 nats  t=151s
+    step    600/16479  lr=3.00e-04  train=2.2596  val=2.2618  test=2.2652 nats  t=226s
+    step    800/16479  lr=2.99e-04  train=2.0680  val=2.0663  test=2.0769 nats  t=302s
+    step   1000/16479  lr=2.99e-04  train=1.9280  val=1.9140  test=1.9258 nats  t=377s
+    step   1200/16479  lr=2.98e-04  train=1.8146  val=1.7994  test=1.8159 nats  t=453s
+    step   1400/16479  lr=2.97e-04  train=1.7221  val=1.7059  test=1.7223 nats  t=528s
+    step   1600/16479  lr=2.95e-04  train=1.6589  val=1.6367  test=1.6577 nats  t=604s
+    step   1800/16479  lr=2.94e-04  train=1.6100  val=1.5881  test=1.6110 nats  t=679s
+    step   2000/16479  lr=2.92e-04  train=1.5626  val=1.5440  test=1.5665 nats  t=754s
+    step   2200/16479  lr=2.90e-04  train=1.5249  val=1.5072  test=1.5277 nats  t=830s
+    step   2400/16479  lr=2.88e-04  train=1.5043  val=1.4786  test=1.5013 nats  t=905s
+    step   2600/16479  lr=2.85e-04  train=1.4752  val=1.4584  test=1.4788 nats  t=981s
+    step   2800/16479  lr=2.83e-04  train=1.4677  val=1.4357  test=1.4578 nats  t=1056s
+    step   3000/16479  lr=2.80e-04  train=1.4476  val=1.4219  test=1.4432 nats  t=1132s
+    step   3200/16479  lr=2.77e-04  train=1.4260  val=1.4012  test=1.4228 nats  t=1207s
+    step   3400/16479  lr=2.74e-04  train=1.4188  val=1.3909  test=1.4134 nats  t=1282s
+    step   3600/16479  lr=2.70e-04  train=1.4031  val=1.3781  test=1.4000 nats  t=1358s
+    step   3800/16479  lr=2.67e-04  train=1.3923  val=1.3681  test=1.3895 nats  t=1433s
+    step   4000/16479  lr=2.63e-04  train=1.3794  val=1.3592  test=1.3809 nats  t=1509s
+    step   4200/16479  lr=2.59e-04  train=1.3633  val=1.3449  test=1.3683 nats  t=1584s
+    step   4400/16479  lr=2.55e-04  train=1.3565  val=1.3407  test=1.3613 nats  t=1660s
+    step   4600/16479  lr=2.51e-04  train=1.3470  val=1.3297  test=1.3502 nats  t=1735s
+    step   4800/16479  lr=2.46e-04  train=1.3463  val=1.3255  test=1.3446 nats  t=1810s
+    step   5000/16479  lr=2.42e-04  train=1.3376  val=1.3193  test=1.3388 nats  t=1886s
+    step   5200/16479  lr=2.37e-04  train=1.3287  val=1.3083  test=1.3290 nats  t=1961s
+    step   5400/16479  lr=2.32e-04  train=1.3264  val=1.3052  test=1.3240 nats  t=2037s
+    step   5600/16479  lr=2.27e-04  train=1.3218  val=1.2982  test=1.3178 nats  t=2112s
+    step   5800/16479  lr=2.22e-04  train=1.3139  val=1.2935  test=1.3116 nats  t=2188s
+    step   6000/16479  lr=2.17e-04  train=1.3079  val=1.2864  test=1.3067 nats  t=2263s
+    step   6200/16479  lr=2.12e-04  train=1.2976  val=1.2845  test=1.3030 nats  t=2339s
+    step   6400/16479  lr=2.07e-04  train=1.3036  val=1.2776  test=1.2989 nats  t=2414s
+    step   6600/16479  lr=2.01e-04  train=1.2982  val=1.2730  test=1.2927 nats  t=2489s
+    step   6800/16479  lr=1.96e-04  train=1.2861  val=1.2689  test=1.2870 nats  t=2565s
+    step   7000/16479  lr=1.90e-04  train=1.2789  val=1.2636  test=1.2838 nats  t=2640s
+    step   7200/16479  lr=1.84e-04  train=1.2775  val=1.2611  test=1.2806 nats  t=2716s
+    step   7400/16479  lr=1.79e-04  train=1.2829  val=1.2556  test=1.2747 nats  t=2791s
+    step   7600/16479  lr=1.73e-04  train=1.2742  val=1.2520  test=1.2715 nats  t=2867s
+    step   7800/16479  lr=1.67e-04  train=1.2671  val=1.2486  test=1.2692 nats  t=2942s
+    step   8000/16479  lr=1.61e-04  train=1.2696  val=1.2448  test=1.2653 nats  t=3017s
+    step   8200/16479  lr=1.56e-04  train=1.2674  val=1.2412  test=1.2624 nats  t=3093s
+    step   8400/16479  lr=1.50e-04  train=1.2612  val=1.2379  test=1.2591 nats  t=3168s
+    step   8600/16479  lr=1.44e-04  train=1.2515  val=1.2352  test=1.2562 nats  t=3244s
+    step   8800/16479  lr=1.38e-04  train=1.2511  val=1.2319  test=1.2526 nats  t=3319s
+    step   9000/16479  lr=1.32e-04  train=1.2470  val=1.2299  test=1.2507 nats  t=3395s
+    step   9200/16479  lr=1.27e-04  train=1.2450  val=1.2252  test=1.2462 nats  t=3470s
+    step   9400/16479  lr=1.21e-04  train=1.2415  val=1.2241  test=1.2434 nats  t=3545s
+    step   9600/16479  lr=1.15e-04  train=1.2355  val=1.2204  test=1.2417 nats  t=3621s
+    step   9800/16479  lr=1.09e-04  train=1.2373  val=1.2185  test=1.2390 nats  t=3696s
+    step  10000/16479  lr=1.04e-04  train=1.2316  val=1.2182  test=1.2360 nats  t=3772s
+    step  10200/16479  lr=9.84e-05  train=1.2430  val=1.2146  test=1.2339 nats  t=3847s
+    step  10400/16479  lr=9.29e-05  train=1.2273  val=1.2108  test=1.2307 nats  t=3923s
+    step  10600/16479  lr=8.76e-05  train=1.2308  val=1.2092  test=1.2275 nats  t=3998s
+    step  10800/16479  lr=8.24e-05  train=1.2230  val=1.2054  test=1.2257 nats  t=4073s
+    step  11000/16479  lr=7.72e-05  train=1.2242  val=1.2037  test=1.2239 nats  t=4149s
+    step  11200/16479  lr=7.22e-05  train=1.2256  val=1.2018  test=1.2202 nats  t=4224s
+    step  11400/16479  lr=6.72e-05  train=1.2129  val=1.1992  test=1.2195 nats  t=4300s
+    step  11600/16479  lr=6.25e-05  train=1.2073  val=1.1977  test=1.2171 nats  t=4375s
+    step  11800/16479  lr=5.78e-05  train=1.2166  val=1.1962  test=1.2164 nats  t=4451s
+    step  12000/16479  lr=5.33e-05  train=1.2119  val=1.1949  test=1.2145 nats  t=4526s
+    step  12200/16479  lr=4.89e-05  train=1.2087  val=1.1925  test=1.2123 nats  t=4601s
+    step  12400/16479  lr=4.47e-05  train=1.2133  val=1.1900  test=1.2101 nats  t=4677s
+    step  12600/16479  lr=4.06e-05  train=1.2092  val=1.1903  test=1.2096 nats  t=4752s
+    step  12800/16479  lr=3.67e-05  train=1.2087  val=1.1886  test=1.2078 nats  t=4828s
+    step  13000/16479  lr=3.30e-05  train=1.2040  val=1.1865  test=1.2065 nats  t=4903s
+    step  13200/16479  lr=2.94e-05  train=1.2003  val=1.1850  test=1.2044 nats  t=4979s
+    step  13400/16479  lr=2.60e-05  train=1.1884  val=1.1837  test=1.2031 nats  t=5054s
+    step  13600/16479  lr=2.29e-05  train=1.1985  val=1.1828  test=1.2022 nats  t=5130s
+    step  13800/16479  lr=1.99e-05  train=1.2015  val=1.1814  test=1.2012 nats  t=5205s
+    step  14000/16479  lr=1.71e-05  train=1.1966  val=1.1807  test=1.2006 nats  t=5280s
+    step  14200/16479  lr=1.45e-05  train=1.2006  val=1.1796  test=1.1994 nats  t=5356s
+    step  14400/16479  lr=1.21e-05  train=1.1913  val=1.1788  test=1.1982 nats  t=5431s
+    step  14600/16479  lr=9.88e-06  train=1.1946  val=1.1777  test=1.1977 nats  t=5507s
+    step  14800/16479  lr=7.91e-06  train=1.1935  val=1.1775  test=1.1970 nats  t=5582s
+    step  15000/16479  lr=6.15e-06  train=1.1852  val=1.1771  test=1.1964 nats  t=5658s
+    step  15200/16479  lr=4.61e-06  train=1.1868  val=1.1764  test=1.1958 nats  t=5733s
+    step  15400/16479  lr=3.29e-06  train=1.1975  val=1.1759  test=1.1956 nats  t=5808s
+    step  15600/16479  lr=2.18e-06  train=1.1933  val=1.1757  test=1.1953 nats  t=5884s
+    step  15800/16479  lr=1.31e-06  train=1.1929  val=1.1754  test=1.1950 nats  t=5959s
+    step  16000/16479  lr=6.51e-07  train=1.1930  val=1.1753  test=1.1949 nats  t=6035s
+    step  16200/16479  lr=2.22e-07  train=1.1910  val=1.1752  test=1.1948 nats  t=6110s
+    step  16400/16479  lr=1.81e-08  train=1.1902  val=1.1752  test=1.1948 nats  t=6186s
+    step  16479/16479  lr=2.83e-12  train=1.2086  val=1.1752  test=1.1948 nats  t=6226s
+  → test_ce=1.1948 nats  AOFE_ratio=0.9375  α=0.1852  t=7334s
+
+  ── depth=24 ──
+  d_model=100  n_heads=25  d_ff=400  active=2,966,600  pad=1.1%  α=0.2400
+  Total params (padded): 3,000,000
+    step    200/16479  lr=2.00e-04  train=2.9540  val=2.9535  test=2.9552 nats  t=80s
+    step    400/16479  lr=3.00e-04  train=2.4398  val=2.4399  test=2.4466 nats  t=160s
+    step    600/16479  lr=3.00e-04  train=2.2908  val=2.2917  test=2.2966 nats  t=239s
+    step    800/16479  lr=2.99e-04  train=2.1331  val=2.1225  test=2.1314 nats  t=319s
+    step   1000/16479  lr=2.99e-04  train=1.9737  val=1.9633  test=1.9743 nats  t=399s
+    step   1200/16479  lr=2.98e-04  train=1.8552  val=1.8463  test=1.8601 nats  t=479s
+    step   1400/16479  lr=2.97e-04  train=1.7745  val=1.7566  test=1.7734 nats  t=558s
+    step   1600/16479  lr=2.95e-04  train=1.6853  val=1.6746  test=1.6920 nats  t=638s
+    step   1800/16479  lr=2.94e-04  train=1.6352  val=1.6156  test=1.6361 nats  t=718s
+    step   2000/16479  lr=2.92e-04  train=1.5949  val=1.5707  test=1.5927 nats  t=798s
+    step   2200/16479  lr=2.90e-04  train=1.5445  val=1.5269  test=1.5478 nats  t=877s
+    step   2400/16479  lr=2.88e-04  train=1.5149  val=1.4995  test=1.5211 nats  t=957s
+    step   2600/16479  lr=2.85e-04  train=1.4979  val=1.4754  test=1.4986 nats  t=1037s
+    step   2800/16479  lr=2.83e-04  train=1.4721  val=1.4566  test=1.4795 nats  t=1116s
+    step   3000/16479  lr=2.80e-04  train=1.4545  val=1.4346  test=1.4602 nats  t=1196s
+    step   3200/16479  lr=2.77e-04  train=1.4468  val=1.4181  test=1.4429 nats  t=1276s
+    step   3400/16479  lr=2.74e-04  train=1.4349  val=1.4058  test=1.4294 nats  t=1356s
+    step   3600/16479  lr=2.70e-04  train=1.4132  val=1.3958  test=1.4183 nats  t=1435s
+    step   3800/16479  lr=2.67e-04  train=1.4065  val=1.3781  test=1.4025 nats  t=1515s
+    step   4000/16479  lr=2.63e-04  train=1.3942  val=1.3710  test=1.3939 nats  t=1595s
+    step   4200/16479  lr=2.59e-04  train=1.3858  val=1.3597  test=1.3851 nats  t=1675s
+    step   4400/16479  lr=2.55e-04  train=1.3703  val=1.3511  test=1.3751 nats  t=1754s
+    step   4600/16479  lr=2.51e-04  train=1.3745  val=1.3458  test=1.3696 nats  t=1834s
+    step   4800/16479  lr=2.46e-04  train=1.3555  val=1.3372  test=1.3605 nats  t=1914s
+    step   5000/16479  lr=2.42e-04  train=1.3459  val=1.3269  test=1.3515 nats  t=1994s
+    step   5200/16479  lr=2.37e-04  train=1.3408  val=1.3208  test=1.3459 nats  t=2073s
+    step   5400/16479  lr=2.32e-04  train=1.3373  val=1.3105  test=1.3347 nats  t=2153s
+    step   5600/16479  lr=2.27e-04  train=1.3290  val=1.3058  test=1.3301 nats  t=2233s
+    step   5800/16479  lr=2.22e-04  train=1.3200  val=1.3007  test=1.3230 nats  t=2313s
+    step   6000/16479  lr=2.17e-04  train=1.3225  val=1.2952  test=1.3187 nats  t=2392s
+    step   6200/16479  lr=2.12e-04  train=1.3064  val=1.2895  test=1.3110 nats  t=2472s
+    step   6400/16479  lr=2.07e-04  train=1.2990  val=1.2849  test=1.3083 nats  t=2552s
+    step   6600/16479  lr=2.01e-04  train=1.2959  val=1.2786  test=1.3005 nats  t=2632s
+    step   6800/16479  lr=1.96e-04  train=1.2849  val=1.2752  test=1.2978 nats  t=2711s
+    step   7000/16479  lr=1.90e-04  train=1.2913  val=1.2714  test=1.2946 nats  t=2791s
+    step   7200/16479  lr=1.84e-04  train=1.2860  val=1.2654  test=1.2877 nats  t=2871s
+    step   7400/16479  lr=1.79e-04  train=1.2801  val=1.2614  test=1.2822 nats  t=2951s
+    step   7600/16479  lr=1.73e-04  train=1.2777  val=1.2582  test=1.2792 nats  t=3030s
+    step   7800/16479  lr=1.67e-04  train=1.2781  val=1.2538  test=1.2756 nats  t=3110s
+    step   8000/16479  lr=1.61e-04  train=1.2720  val=1.2495  test=1.2716 nats  t=3190s
+    step   8200/16479  lr=1.56e-04  train=1.2572  val=1.2459  test=1.2676 nats  t=3270s
+    step   8400/16479  lr=1.50e-04  train=1.2533  val=1.2446  test=1.2662 nats  t=3349s
+    step   8600/16479  lr=1.44e-04  train=1.2569  val=1.2388  test=1.2597 nats  t=3429s
+    step   8800/16479  lr=1.38e-04  train=1.2577  val=1.2377  test=1.2566 nats  t=3509s
+    step   9000/16479  lr=1.32e-04  train=1.2530  val=1.2340  test=1.2541 nats  t=3589s
+    step   9200/16479  lr=1.27e-04  train=1.2508  val=1.2303  test=1.2527 nats  t=3668s
+    step   9400/16479  lr=1.21e-04  train=1.2506  val=1.2312  test=1.2517 nats  t=3748s
+    step   9600/16479  lr=1.15e-04  train=1.2409  val=1.2246  test=1.2452 nats  t=3828s
+    step   9800/16479  lr=1.09e-04  train=1.2342  val=1.2205  test=1.2406 nats  t=3908s
+    step  10000/16479  lr=1.04e-04  train=1.2378  val=1.2204  test=1.2413 nats  t=3987s
+    step  10200/16479  lr=9.84e-05  train=1.2444  val=1.2164  test=1.2378 nats  t=4067s
+    step  10400/16479  lr=9.29e-05  train=1.2316  val=1.2130  test=1.2351 nats  t=4147s
+    step  10600/16479  lr=8.76e-05  train=1.2279  val=1.2104  test=1.2304 nats  t=4227s
+    step  10800/16479  lr=8.24e-05  train=1.2354  val=1.2097  test=1.2294 nats  t=4306s
+    step  11000/16479  lr=7.72e-05  train=1.2255  val=1.2052  test=1.2260 nats  t=4386s
+    step  11200/16479  lr=7.22e-05  train=1.2219  val=1.2051  test=1.2254 nats  t=4466s
+    step  11400/16479  lr=6.72e-05  train=1.2138  val=1.2031  test=1.2236 nats  t=4546s
+    step  11600/16479  lr=6.25e-05  train=1.2211  val=1.2014  test=1.2217 nats  t=4625s
+    step  11800/16479  lr=5.78e-05  train=1.2180  val=1.1987  test=1.2189 nats  t=4705s
+    step  12000/16479  lr=5.33e-05  train=1.2168  val=1.1981  test=1.2188 nats  t=4785s
+    step  12200/16479  lr=4.89e-05  train=1.2071  val=1.1954  test=1.2150 nats  t=4865s
+    step  12400/16479  lr=4.47e-05  train=1.2151  val=1.1943  test=1.2141 nats  t=4944s
+    step  12600/16479  lr=4.06e-05  train=1.2138  val=1.1920  test=1.2114 nats  t=5024s
+    step  12800/16479  lr=3.67e-05  train=1.2094  val=1.1910  test=1.2096 nats  t=5104s
+    step  13000/16479  lr=3.30e-05  train=1.2049  val=1.1889  test=1.2083 nats  t=5184s
+    step  13200/16479  lr=2.94e-05  train=1.2010  val=1.1871  test=1.2069 nats  t=5263s
+    step  13400/16479  lr=2.60e-05  train=1.2021  val=1.1860  test=1.2052 nats  t=5343s
+    step  13600/16479  lr=2.29e-05  train=1.2037  val=1.1841  test=1.2042 nats  t=5423s
+    step  13800/16479  lr=1.99e-05  train=1.1887  val=1.1831  test=1.2030 nats  t=5503s
+    step  14000/16479  lr=1.71e-05  train=1.1950  val=1.1822  test=1.2021 nats  t=5583s
+    step  14200/16479  lr=1.45e-05  train=1.1993  val=1.1815  test=1.2018 nats  t=5662s
+    step  14400/16479  lr=1.21e-05  train=1.1954  val=1.1804  test=1.2002 nats  t=5742s
+    step  14600/16479  lr=9.88e-06  train=1.1924  val=1.1804  test=1.2002 nats  t=5822s
+    step  14800/16479  lr=7.91e-06  train=1.1927  val=1.1791  test=1.1990 nats  t=5902s
+    step  15000/16479  lr=6.15e-06  train=1.1967  val=1.1784  test=1.1987 nats  t=5981s
+    step  15200/16479  lr=4.61e-06  train=1.1923  val=1.1780  test=1.1981 nats  t=6061s
+    step  15400/16479  lr=3.29e-06  train=1.1883  val=1.1776  test=1.1977 nats  t=6141s
+    step  15600/16479  lr=2.18e-06  train=1.1936  val=1.1773  test=1.1972 nats  t=6221s
+    step  15800/16479  lr=1.31e-06  train=1.1930  val=1.1768  test=1.1969 nats  t=6300s
+    step  16000/16479  lr=6.51e-07  train=1.1978  val=1.1767  test=1.1968 nats  t=6380s
+    step  16200/16479  lr=2.22e-07  train=1.1931  val=1.1767  test=1.1968 nats  t=6460s
+    step  16400/16479  lr=1.81e-08  train=1.1983  val=1.1767  test=1.1968 nats  t=6540s
+    step  16479/16479  lr=2.83e-12  train=1.1992  val=1.1767  test=1.1968 nats  t=6582s
+  → test_ce=1.1968 nats  AOFE_ratio=0.9368  α=0.2400  t=7827s
+
+================================================================================
+COMPLETE RESULTS: Transformer NTP × Shape Sweep
+Task: Byte-level next-token prediction  (WikiText-103)
+================================================================================
+
+       N   depth   d_model         α     test_ce    AGOP_ratio   WtW_ratio
+------------------------------------------------------------------------------
+    0.3M       1       128    0.0078     2.21865        0.9495      0.6311 ←
+    0.3M       2        96    0.0208     2.23529        0.9415      0.6298
+    0.3M       3        80    0.0375     2.24720        0.9417      0.6488
+    0.3M       4        68    0.0588     2.27294        0.9394      0.5993
+    0.3M       5        64    0.0781     2.25659        0.9418      0.6048
+    0.3M       6        56    0.1071     2.28506        0.9405      0.5717
+    0.3M       8        48    0.1667     2.34896        0.9425      0.5625
+    0.3M      10        44    0.2273     2.32453        0.9368      0.5299
+    0.3M      12        40    0.3000     2.39786        0.9371      0.5317
+    0.3M      16        36    0.4444     2.40347        0.9408      0.5539
+    0.3M      20        32    0.6250     2.43829        0.9407      0.5456
+    0.3M      24        28    0.8571     2.48302        0.9395      0.4554
+        AGOP_ratio — Pearson=-0.4823  Spearman=-0.4895
+        WtW_ratio  — Pearson=-0.8976  Spearman=-0.8881
+        Optimal: depth*=1  d_model*=128  α*=0.0078
+
+    1.0M       1       256    0.0039     1.56800        0.9294      0.7680
+    1.0M       2       188    0.0106     1.54797        0.9251      0.7738
+    1.0M       3       156    0.0192     1.45139        0.9251      0.7658
+    1.0M       4       136    0.0294     1.44588        0.9234      0.7786
+    1.0M       5       120    0.0417     1.44587        0.9230      0.7649 ←
+    1.0M       6       112    0.0536     1.46160        0.9219      0.7803
+    1.0M       8        96    0.0833     1.46353        0.9275      0.7419
+    1.0M      10        84    0.1190     1.50055        0.9225      0.7233
+    1.0M      12        80    0.1500     1.48904        0.9248      0.7097
+    1.0M      16        68    0.2353     1.54582        0.9211      0.6960
+    1.0M      20        60    0.3333     1.60807        0.9261      0.6681
+    1.0M      24        56    0.4286     1.62415        0.9248      0.6396
+        AGOP_ratio — Pearson=0.2985  Spearman=0.3357
+        WtW_ratio  — Pearson=-0.7178  Spearman=-0.5524
+        Optimal: depth*=5  d_model*=120  α*=0.0417
+
+    3.0M       1       468    0.0021     1.30202        0.9086      0.8736
+    3.0M       2       336    0.0060     1.28173        0.9312      0.9003
+    3.0M       3       276    0.0109     1.18854        0.9356      0.8916
+    3.0M       4       240    0.0167     1.17426        0.9348      0.8900
+    3.0M       5       216    0.0231     1.15981        0.9388      0.8947 ←
+    3.0M       6       196    0.0306     1.16751        0.9367      0.8846
+    3.0M       8       172    0.0465     1.16601        0.9397      0.8786
+    3.0M      10       152    0.0658     1.16613        0.9367      0.8721
+    3.0M      12       140    0.0857     1.17273        0.9396      0.8613
+    3.0M      16       120    0.1333     1.18234        0.9337      0.8407
+    3.0M      20       108    0.1852     1.19478        0.9375      0.8356
+    3.0M      24       100    0.2400     1.19675        0.9368      0.8246
+        AGOP_ratio — Pearson=-0.8362  Spearman=-0.6434
+        WtW_ratio  — Pearson=0.1065  Spearman=-0.1958
+        Optimal: depth*=5  d_model*=216  α*=0.0231
+
+
+All results saved to: /workspace/AOFE_Law/superposition-law-agop/results/transformer_ntp_shape_sweep
+CSV: /workspace/AOFE_Law/superposition-law-agop/results/transformer_ntp_shape_sweep/results_ntp_shape_sweep.csv

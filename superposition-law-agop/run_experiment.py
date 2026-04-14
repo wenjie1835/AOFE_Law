@@ -34,6 +34,25 @@ EXPERIMENTS = {
         "default_out_dir": RESULTS_DIR / "transformer_shape_sweep",
         "default_args": [],
     },
+    "transformer_scaling": {
+        "script": EXPERIMENTS_DIR / "transformer_scaling_shape_sweep.py",
+        "default_out_dir": RESULTS_DIR / "transformer_scaling_shape_sweep",
+        "default_args": [
+            "--param_groups", "300000,1000000,3000000",
+            "--depth_list",   "1,2,3,4,5,6,8,10,12,16,20,24",
+            "--teacher_type", "gpt",
+        ],
+    },
+    "transformer_ntp": {
+        "script": EXPERIMENTS_DIR / "transformer_ntp_shape_sweep.py",
+        "default_out_dir": RESULTS_DIR / "transformer_ntp_shape_sweep",
+        "default_args": [
+            "--data_dir",     str(DATA_DIR),
+            "--param_groups", "300000,1000000,3000000",
+            "--depth_list",   "1,2,3,4,5,6,8,10,12,16,20,24",
+            "--data_ratio",   "60.0",
+        ],
+    },
 }
 
 

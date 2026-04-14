@@ -1,0 +1,685 @@
+
+======================================================================
+  Transformer Scaling × Shape Sweep
+  Hypothesis: ∃ optimal α* = depth/d_model that minimises MSE + AOFE_ratio
+======================================================================
+  param_groups : ['300K', '1.0M', '3.0M']
+  depths       : [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24]
+  teacher_type : gpt
+  data_ratio   : 20  (D = 20N)
+  batch_size   : 256
+  head_dim     : 4
+  d_model_min  : 24  d_model_max: 1024
+  max_train_factor: 1.5  fit_patience: 8
+  agop_proj_samples: 64  agop_batch: 256
+  device       : cuda
+  out_dir      : ./results_scaling_shape_sweep
+======================================================================
+  Teacher (gpt) params (frozen): 305,984
+
+======================================================================
+  N = 300,000  |  D = 6,000,000 (ratio=20N)  |  train_size=93,750  |  base_steps=367
+======================================================================
+  Datasets ready in 2.8s  (y_scale=0.5822)
+
+  ── depth=  1  d_model= 148  n_heads=37  d_ff=  592  active=285,408  pad=14,592  α=depth/d_model=0.0068
+    step    200/551  lr=2.00e-04  train=0.00251  val=0.00229  test=0.00253  t=3s
+    step    400/551  lr=1.99e-04  train=0.00058  val=0.00054  test=0.00058  t=6s
+    step    551/551  lr=1.17e-08  train=0.00048  val=0.00045  test=0.00048  t=8s
+  → test_mse=0.00048  AOFE=0.5291  AOFE_ratio=0.3402
+
+  ── depth=  2  d_model= 108  n_heads=27  d_ff=  432  active=296,848  pad=3,152  α=depth/d_model=0.0185
+    step    200/551  lr=2.00e-04  train=0.00248  val=0.00230  test=0.00253  t=4s
+    step    400/551  lr=1.99e-04  train=0.00073  val=0.00070  test=0.00074  t=8s
+    step    551/551  lr=1.17e-08  train=0.00065  val=0.00058  test=0.00062  t=11s
+  → test_mse=0.00062  AOFE=0.8215  AOFE_ratio=0.4125
+
+  ── depth=  3  d_model=  88  n_heads=22  d_ff=  352  active=292,928  pad=7,072  α=depth/d_model=0.0341
+    step    200/551  lr=2.00e-04  train=0.00291  val=0.00274  test=0.00306  t=5s
+    step    400/551  lr=1.99e-04  train=0.00082  val=0.00076  test=0.00081  t=9s
+    step    551/551  lr=1.17e-08  train=0.00068  val=0.00065  test=0.00069  t=13s
+  → test_mse=0.00069  AOFE=1.2663  AOFE_ratio=0.4659
+
+  ── depth=  4  d_model=  76  n_heads=19  d_ff=  304  active=289,776  pad=10,224  α=depth/d_model=0.0526
+    step    200/551  lr=2.00e-04  train=0.00532  val=0.00496  test=0.00534  t=6s
+    step    400/551  lr=1.99e-04  train=0.00091  val=0.00091  test=0.00093  t=11s
+    step    551/551  lr=1.17e-08  train=0.00084  val=0.00080  test=0.00082  t=15s
+  → test_mse=0.00082  AOFE=1.9593  AOFE_ratio=0.5292
+
+  ── depth=  5  d_model=  68  n_heads=17  d_ff=  272  active=288,928  pad=11,072  α=depth/d_model=0.0735
+    step    200/551  lr=2.00e-04  train=0.00786  val=0.00721  test=0.00784  t=6s
+    step    400/551  lr=1.99e-04  train=0.00104  val=0.00096  test=0.00104  t=13s
+    step    551/551  lr=1.17e-08  train=0.00081  val=0.00078  test=0.00085  t=18s
+  → test_mse=0.00085  AOFE=1.9309  AOFE_ratio=0.5532
+
+  ── depth=  6  d_model=  60  n_heads=15  d_ff=  240  active=269,584  pad=30,416  α=depth/d_model=0.1000
+    step    200/551  lr=2.00e-04  train=0.01323  val=0.01258  test=0.01324  t=7s
+    step    400/551  lr=1.99e-04  train=0.00129  val=0.00127  test=0.00134  t=13s
+    step    551/551  lr=1.17e-08  train=0.00116  val=0.00111  test=0.00116  t=18s
+  → test_mse=0.00116  AOFE=2.6196  AOFE_ratio=0.6113
+
+  ── depth=  8  d_model=  52  n_heads=13  d_ff=  208  active=269,008  pad=30,992  α=depth/d_model=0.1538
+    step    200/551  lr=2.00e-04  train=0.03639  val=0.03504  test=0.03609  t=8s
+    step    400/551  lr=1.99e-04  train=0.00178  val=0.00173  test=0.00185  t=15s
+    step    551/551  lr=1.17e-08  train=0.00158  val=0.00148  test=0.00158  t=21s
+  → test_mse=0.00158  AOFE=4.8981  AOFE_ratio=0.6680
+
+  ── depth= 10  d_model=  48  n_heads=12  d_ff=  192  active=285,568  pad=14,432  α=depth/d_model=0.2083
+    step    200/551  lr=2.00e-04  train=0.05625  val=0.05524  test=0.05630  t=9s
+    step    400/551  lr=1.99e-04  train=0.00174  val=0.00162  test=0.00175  t=17s
+    step    551/551  lr=1.17e-08  train=0.00147  val=0.00135  test=0.00146  t=24s
+  → test_mse=0.00146  AOFE=4.1723  AOFE_ratio=0.6678
+
+  ── depth= 12  d_model=  44  n_heads=11  d_ff=  176  active=287,472  pad=12,528  α=depth/d_model=0.2727
+    step    200/551  lr=2.00e-04  train=0.05341  val=0.05275  test=0.05371  t=10s
+    step    400/551  lr=1.99e-04  train=0.00193  val=0.00180  test=0.00193  t=20s
+    step    551/551  lr=1.17e-08  train=0.00161  val=0.00153  test=0.00164  t=28s
+  → test_mse=0.00164  AOFE=6.3376  AOFE_ratio=0.7086
+
+  ── depth= 16  d_model=  36  n_heads= 9  d_ff=  144  active=256,528  pad=43,472  α=depth/d_model=0.4444
+    step    200/551  lr=2.00e-04  train=0.09296  val=0.09166  test=0.09272  t=12s
+    step    400/551  lr=1.99e-04  train=0.00392  val=0.00368  test=0.00393  t=24s
+    step    551/551  lr=1.17e-08  train=0.00276  val=0.00268  test=0.00287  t=33s
+  → test_mse=0.00287  AOFE=3.6573  AOFE_ratio=0.7644
+
+  ── depth= 20  d_model=  32  n_heads= 8  d_ff=  128  active=253,120  pad=46,880  α=depth/d_model=0.6250
+    step    200/551  lr=2.00e-04  train=0.13566  val=0.13374  test=0.13573  t=11s
+    step    400/551  lr=1.99e-04  train=0.00762  val=0.00723  test=0.00770  t=22s
+    step    551/551  lr=1.17e-08  train=0.00494  val=0.00465  test=0.00499  t=31s
+  → test_mse=0.00499  AOFE=5.0685  AOFE_ratio=0.7932
+  [SKIP] depth=24: padding_ratio=0.224 > max=0.200
+
+  N=300,000: Pearson(AOFE_ratio, test_mse)=0.796  Spearman=1.000
+
+======================================================================
+  N = 1,000,000  |  D = 20,000,000 (ratio=20N)  |  train_size=312,500  |  base_steps=1,221
+======================================================================
+  Datasets ready in 7.2s  (y_scale=0.5820)
+
+  ── depth=  1  d_model= 280  n_heads=70  d_ff= 1120  active=983,424  pad=16,576  α=depth/d_model=0.0036
+    step    200/1832  lr=2.00e-04  train=0.00119  val=0.00113  test=0.00122  t=5s
+    step    400/1832  lr=2.97e-04  train=0.00030  val=0.00027  test=0.00029  t=11s
+    step    600/1832  lr=2.73e-04  train=0.00018  val=0.00018  test=0.00019  t=16s
+    step    800/1832  lr=2.28e-04  train=0.00014  val=0.00014  test=0.00015  t=21s
+    step   1000/1832  lr=1.71e-04  train=0.00013  val=0.00013  test=0.00013  t=27s
+    step   1200/1832  lr=1.10e-04  train=0.00012  val=0.00011  test=0.00012  t=32s
+    step   1400/1832  lr=5.53e-05  train=0.00011  val=0.00011  test=0.00011  t=38s
+    step   1600/1832  lr=1.68e-05  train=0.00011  val=0.00011  test=0.00011  t=43s
+    step   1800/1832  lr=3.43e-07  train=0.00011  val=0.00011  test=0.00011  t=48s
+    step   1832/1832  lr=3.15e-10  train=0.00011  val=0.00011  test=0.00011  t=49s
+  → test_mse=0.00011  AOFE=0.1864  AOFE_ratio=0.1998
+
+  ── depth=  2  d_model= 200  n_heads=50  d_ff=  800  active=991,264  pad=8,736  α=depth/d_model=0.0100
+    step    200/1832  lr=2.00e-04  train=0.00111  val=0.00102  test=0.00110  t=7s
+    step    400/1832  lr=2.97e-04  train=0.00026  val=0.00024  test=0.00026  t=14s
+    step    600/1832  lr=2.73e-04  train=0.00018  val=0.00017  test=0.00018  t=21s
+    step    800/1832  lr=2.28e-04  train=0.00015  val=0.00015  test=0.00015  t=28s
+    step   1000/1832  lr=1.71e-04  train=0.00014  val=0.00013  test=0.00014  t=35s
+    step   1200/1832  lr=1.10e-04  train=0.00013  val=0.00013  test=0.00013  t=42s
+    step   1400/1832  lr=5.53e-05  train=0.00013  val=0.00012  test=0.00012  t=50s
+    step   1600/1832  lr=1.68e-05  train=0.00012  val=0.00012  test=0.00012  t=57s
+    step   1800/1832  lr=3.43e-07  train=0.00012  val=0.00012  test=0.00012  t=64s
+    step   1832/1832  lr=3.15e-10  train=0.00012  val=0.00012  test=0.00012  t=65s
+  → test_mse=0.00012  AOFE=0.3186  AOFE_ratio=0.2734
+
+  ── depth=  3  d_model= 164  n_heads=41  d_ff=  656  active=994,560  pad=5,440  α=depth/d_model=0.0183
+    step    200/1832  lr=2.00e-04  train=0.00100  val=0.00094  test=0.00100  t=9s
+    step    400/1832  lr=2.97e-04  train=0.00026  val=0.00024  test=0.00026  t=17s
+    step    600/1832  lr=2.73e-04  train=0.00018  val=0.00018  test=0.00018  t=26s
+    step    800/1832  lr=2.28e-04  train=0.00016  val=0.00015  test=0.00016  t=35s
+    step   1000/1832  lr=1.71e-04  train=0.00015  val=0.00014  test=0.00014  t=43s
+    step   1200/1832  lr=1.10e-04  train=0.00014  val=0.00013  test=0.00013  t=52s
+    step   1400/1832  lr=5.53e-05  train=0.00013  val=0.00013  test=0.00013  t=61s
+    step   1600/1832  lr=1.68e-05  train=0.00013  val=0.00012  test=0.00013  t=69s
+    step   1800/1832  lr=3.43e-07  train=0.00013  val=0.00012  test=0.00013  t=78s
+    step   1832/1832  lr=3.15e-10  train=0.00013  val=0.00012  test=0.00013  t=80s
+  → test_mse=0.00013  AOFE=0.6427  AOFE_ratio=0.3205
+
+  ── depth=  4  d_model= 140  n_heads=35  d_ff=  560  active=963,824  pad=36,176  α=depth/d_model=0.0286
+    step    200/1832  lr=2.00e-04  train=0.00124  val=0.00113  test=0.00123  t=10s
+    step    400/1832  lr=2.97e-04  train=0.00030  val=0.00028  test=0.00030  t=20s
+    step    600/1832  lr=2.73e-04  train=0.00020  val=0.00019  test=0.00020  t=30s
+    step    800/1832  lr=2.28e-04  train=0.00017  val=0.00016  test=0.00017  t=40s
+    step   1000/1832  lr=1.71e-04  train=0.00015  val=0.00015  test=0.00015  t=50s
+    step   1200/1832  lr=1.10e-04  train=0.00015  val=0.00014  test=0.00014  t=59s
+    step   1400/1832  lr=5.53e-05  train=0.00014  val=0.00014  test=0.00014  t=69s
+    step   1600/1832  lr=1.68e-05  train=0.00014  val=0.00013  test=0.00014  t=79s
+    step   1800/1832  lr=3.43e-07  train=0.00014  val=0.00013  test=0.00014  t=89s
+    step   1832/1832  lr=3.15e-10  train=0.00014  val=0.00013  test=0.00014  t=91s
+  → test_mse=0.00014  AOFE=0.4943  AOFE_ratio=0.3548
+
+  ── depth=  5  d_model= 124  n_heads=31  d_ff=  496  active=943,456  pad=56,544  α=depth/d_model=0.0403
+    step    200/1832  lr=2.00e-04  train=0.00129  val=0.00117  test=0.00128  t=10s
+    step    400/1832  lr=2.97e-04  train=0.00034  val=0.00031  test=0.00034  t=20s
+    step    600/1832  lr=2.73e-04  train=0.00020  val=0.00019  test=0.00020  t=30s
+    step    800/1832  lr=2.28e-04  train=0.00017  val=0.00016  test=0.00017  t=40s
+    step   1000/1832  lr=1.71e-04  train=0.00015  val=0.00015  test=0.00015  t=51s
+    step   1200/1832  lr=1.10e-04  train=0.00015  val=0.00014  test=0.00014  t=61s
+    step   1400/1832  lr=5.53e-05  train=0.00014  val=0.00014  test=0.00014  t=71s
+    step   1600/1832  lr=1.68e-05  train=0.00014  val=0.00013  test=0.00014  t=81s
+    step   1800/1832  lr=3.43e-07  train=0.00014  val=0.00013  test=0.00014  t=91s
+    step   1832/1832  lr=3.15e-10  train=0.00014  val=0.00013  test=0.00014  t=93s
+  → test_mse=0.00014  AOFE=0.7224  AOFE_ratio=0.3943
+
+  ── depth=  6  d_model= 116  n_heads=29  d_ff=  464  active=988,848  pad=11,152  α=depth/d_model=0.0517
+    step    200/1832  lr=2.00e-04  train=0.00113  val=0.00108  test=0.00117  t=11s
+    step    400/1832  lr=2.97e-04  train=0.00027  val=0.00026  test=0.00028  t=23s
+    step    600/1832  lr=2.73e-04  train=0.00019  val=0.00018  test=0.00019  t=34s
+    step    800/1832  lr=2.28e-04  train=0.00017  val=0.00016  test=0.00016  t=46s
+    step   1000/1832  lr=1.71e-04  train=0.00015  val=0.00015  test=0.00015  t=57s
+    step   1200/1832  lr=1.10e-04  train=0.00015  val=0.00014  test=0.00014  t=69s
+    step   1400/1832  lr=5.53e-05  train=0.00014  val=0.00013  test=0.00014  t=80s
+    step   1600/1832  lr=1.68e-05  train=0.00014  val=0.00013  test=0.00013  t=92s
+    step   1800/1832  lr=3.43e-07  train=0.00014  val=0.00013  test=0.00013  t=103s
+    step   1832/1832  lr=3.15e-10  train=0.00013  val=0.00013  test=0.00013  t=105s
+  → test_mse=0.00013  AOFE=0.9572  AOFE_ratio=0.4199
+
+  ── depth=  8  d_model= 100  n_heads=25  d_ff=  400  active=978,064  pad=21,936  α=depth/d_model=0.0800
+    step    200/1832  lr=2.00e-04  train=0.00163  val=0.00146  test=0.00158  t=14s
+    step    400/1832  lr=2.97e-04  train=0.00033  val=0.00031  test=0.00033  t=27s
+    step    600/1832  lr=2.73e-04  train=0.00022  val=0.00021  test=0.00022  t=41s
+    step    800/1832  lr=2.28e-04  train=0.00018  val=0.00017  test=0.00018  t=54s
+    step   1000/1832  lr=1.71e-04  train=0.00016  val=0.00016  test=0.00016  t=68s
+    step   1200/1832  lr=1.10e-04  train=0.00015  val=0.00015  test=0.00015  t=82s
+    step   1400/1832  lr=5.53e-05  train=0.00015  val=0.00014  test=0.00015  t=95s
+    step   1600/1832  lr=1.68e-05  train=0.00015  val=0.00014  test=0.00014  t=109s
+    step   1800/1832  lr=3.43e-07  train=0.00014  val=0.00014  test=0.00014  t=122s
+    step   1832/1832  lr=3.15e-10  train=0.00014  val=0.00014  test=0.00014  t=125s
+  → test_mse=0.00014  AOFE=1.1714  AOFE_ratio=0.4770
+
+  ── depth= 10  d_model=  88  n_heads=22  d_ff=  352  active=945,888  pad=54,112  α=depth/d_model=0.1136
+    step    200/1832  lr=2.00e-04  train=0.00189  val=0.00174  test=0.00189  t=15s
+    step    400/1832  lr=2.97e-04  train=0.00038  val=0.00035  test=0.00037  t=30s
+    step    600/1832  lr=2.73e-04  train=0.00024  val=0.00022  test=0.00023  t=45s
+    step    800/1832  lr=2.28e-04  train=0.00019  val=0.00018  test=0.00019  t=60s
+    step   1000/1832  lr=1.71e-04  train=0.00017  val=0.00016  test=0.00017  t=75s
+    step   1200/1832  lr=1.10e-04  train=0.00016  val=0.00015  test=0.00016  t=90s
+    step   1400/1832  lr=5.53e-05  train=0.00015  val=0.00015  test=0.00015  t=105s
+    step   1600/1832  lr=1.68e-05  train=0.00015  val=0.00014  test=0.00015  t=119s
+    step   1800/1832  lr=3.43e-07  train=0.00015  val=0.00014  test=0.00015  t=134s
+    step   1832/1832  lr=3.15e-10  train=0.00015  val=0.00014  test=0.00015  t=138s
+  → test_mse=0.00015  AOFE=1.0640  AOFE_ratio=0.5140
+
+  ── depth= 12  d_model=  80  n_heads=20  d_ff=  320  active=937,344  pad=62,656  α=depth/d_model=0.1500
+    step    200/1832  lr=2.00e-04  train=0.00275  val=0.00263  test=0.00281  t=16s
+    step    400/1832  lr=2.97e-04  train=0.00051  val=0.00047  test=0.00050  t=33s
+    step    600/1832  lr=2.73e-04  train=0.00029  val=0.00028  test=0.00029  t=49s
+    step    800/1832  lr=2.28e-04  train=0.00022  val=0.00021  test=0.00022  t=66s
+    step   1000/1832  lr=1.71e-04  train=0.00019  val=0.00019  test=0.00019  t=82s
+    step   1200/1832  lr=1.10e-04  train=0.00017  val=0.00017  test=0.00017  t=99s
+    step   1400/1832  lr=5.53e-05  train=0.00017  val=0.00016  test=0.00016  t=115s
+    step   1600/1832  lr=1.68e-05  train=0.00016  val=0.00016  test=0.00016  t=131s
+    step   1800/1832  lr=3.43e-07  train=0.00016  val=0.00016  test=0.00016  t=148s
+    step   1832/1832  lr=3.15e-10  train=0.00016  val=0.00016  test=0.00016  t=151s
+  → test_mse=0.00016  AOFE=1.4235  AOFE_ratio=0.5459
+
+  ── depth= 16  d_model=  68  n_heads=17  d_ff=  272  active=902,288  pad=97,712  α=depth/d_model=0.2353
+    step    200/1832  lr=2.00e-04  train=0.00861  val=0.00822  test=0.00871  t=20s
+    step    400/1832  lr=2.97e-04  train=0.00059  val=0.00054  test=0.00059  t=39s
+    step    600/1832  lr=2.73e-04  train=0.00034  val=0.00032  test=0.00034  t=59s
+    step    800/1832  lr=2.28e-04  train=0.00025  val=0.00024  test=0.00025  t=79s
+    step   1000/1832  lr=1.71e-04  train=0.00021  val=0.00020  test=0.00021  t=98s
+    step   1200/1832  lr=1.10e-04  train=0.00019  val=0.00019  test=0.00019  t=118s
+    step   1400/1832  lr=5.53e-05  train=0.00019  val=0.00018  test=0.00018  t=137s
+    step   1600/1832  lr=1.68e-05  train=0.00018  val=0.00018  test=0.00018  t=157s
+    step   1800/1832  lr=3.43e-07  train=0.00018  val=0.00017  test=0.00018  t=177s
+    step   1832/1832  lr=3.15e-10  train=0.00018  val=0.00017  test=0.00018  t=181s
+  → test_mse=0.00018  AOFE=1.8527  AOFE_ratio=0.6302
+
+  ── depth= 20  d_model=  64  n_heads=16  d_ff=  256  active=997,696  pad=2,304  α=depth/d_model=0.3125
+    step    200/1832  lr=2.00e-04  train=0.01044  val=0.01017  test=0.01063  t=19s
+    step    400/1832  lr=2.97e-04  train=0.00086  val=0.00079  test=0.00084  t=38s
+    step    600/1832  lr=2.73e-04  train=0.00047  val=0.00045  test=0.00048  t=58s
+    step    800/1832  lr=2.28e-04  train=0.00034  val=0.00032  test=0.00034  t=77s
+    step   1000/1832  lr=1.71e-04  train=0.00028  val=0.00027  test=0.00028  t=96s
+    step   1200/1832  lr=1.10e-04  train=0.00024  val=0.00023  test=0.00024  t=115s
+    step   1400/1832  lr=5.53e-05  train=0.00022  val=0.00022  test=0.00023  t=134s
+    step   1600/1832  lr=1.68e-05  train=0.00022  val=0.00021  test=0.00022  t=153s
+    step   1800/1832  lr=3.43e-07  train=0.00022  val=0.00021  test=0.00022  t=173s
+    step   1832/1832  lr=3.15e-10  train=0.00022  val=0.00021  test=0.00022  t=177s
+  → test_mse=0.00022  AOFE=0.9274  AOFE_ratio=0.6454
+
+  ── depth= 24  d_model=  56  n_heads=14  d_ff=  224  active=916,896  pad=83,104  α=depth/d_model=0.4286
+    step    200/1832  lr=2.00e-04  train=0.02833  val=0.02751  test=0.02808  t=23s
+    step    400/1832  lr=2.97e-04  train=0.00074  val=0.00070  test=0.00073  t=45s
+    step    600/1832  lr=2.73e-04  train=0.00047  val=0.00045  test=0.00047  t=68s
+    step    800/1832  lr=2.28e-04  train=0.00034  val=0.00034  test=0.00035  t=91s
+    step   1000/1832  lr=1.71e-04  train=0.00029  val=0.00027  test=0.00028  t=114s
+    step   1200/1832  lr=1.10e-04  train=0.00024  val=0.00024  test=0.00025  t=136s
+    step   1400/1832  lr=5.53e-05  train=0.00023  val=0.00022  test=0.00023  t=159s
+    step   1600/1832  lr=1.68e-05  train=0.00022  val=0.00021  test=0.00022  t=182s
+    step   1800/1832  lr=3.43e-07  train=0.00022  val=0.00021  test=0.00022  t=204s
+    step   1832/1832  lr=3.15e-10  train=0.00022  val=0.00021  test=0.00022  t=209s
+  → test_mse=0.00022  AOFE=1.4307  AOFE_ratio=0.7202
+
+  N=1,000,000: Pearson(AOFE_ratio, test_mse)=0.934  Spearman=0.979
+
+======================================================================
+  N = 3,000,000  |  D = 60,000,000 (ratio=20N)  |  train_size=937,500  |  base_steps=3,663
+======================================================================
+  Datasets ready in 21.5s  (y_scale=0.5819)
+
+  ── depth=  1  d_model= 492  n_heads=123  d_ff= 1968  active=2,979,616  pad=20,384  α=depth/d_model=0.0020
+    step    200/5495  lr=2.00e-04  train=0.00044  val=0.00041  test=0.00044  t=10s
+    step    400/5495  lr=3.00e-04  train=0.00017  val=0.00016  test=0.00017  t=20s
+    step    600/5495  lr=2.98e-04  train=0.00013  val=0.00012  test=0.00013  t=30s
+    step    800/5495  lr=2.93e-04  train=0.00011  val=0.00011  test=0.00011  t=40s
+    step   1000/5495  lr=2.87e-04  train=0.00009  val=0.00009  test=0.00009  t=50s
+    step   1200/5495  lr=2.78e-04  train=0.00009  val=0.00009  test=0.00009  t=60s
+    step   1400/5495  lr=2.68e-04  train=0.00007  val=0.00007  test=0.00007  t=71s
+    step   1600/5495  lr=2.56e-04  train=0.00009  val=0.00009  test=0.00009  t=81s
+    step   1800/5495  lr=2.42e-04  train=0.00006  val=0.00006  test=0.00006  t=91s
+    step   2000/5495  lr=2.28e-04  train=0.00004  val=0.00004  test=0.00004  t=101s
+    step   2200/5495  lr=2.11e-04  train=0.00005  val=0.00005  test=0.00005  t=111s
+    step   2400/5495  lr=1.95e-04  train=0.00004  val=0.00004  test=0.00004  t=121s
+    step   2600/5495  lr=1.77e-04  train=0.00003  val=0.00003  test=0.00003  t=131s
+    step   2800/5495  lr=1.59e-04  train=0.00003  val=0.00003  test=0.00003  t=141s
+    step   3000/5495  lr=1.41e-04  train=0.00003  val=0.00003  test=0.00003  t=151s
+    step   3200/5495  lr=1.23e-04  train=0.00002  val=0.00002  test=0.00002  t=161s
+    step   3400/5495  lr=1.05e-04  train=0.00002  val=0.00002  test=0.00002  t=171s
+    step   3600/5495  lr=8.83e-05  train=0.00002  val=0.00002  test=0.00002  t=181s
+    step   3800/5495  lr=7.22e-05  train=0.00002  val=0.00002  test=0.00002  t=191s
+    step   4000/5495  lr=5.73e-05  train=0.00002  val=0.00002  test=0.00002  t=201s
+    step   4200/5495  lr=4.38e-05  train=0.00002  val=0.00002  test=0.00002  t=211s
+    step   4400/5495  lr=3.18e-05  train=0.00002  val=0.00002  test=0.00002  t=221s
+    step   4600/5495  lr=2.15e-05  train=0.00002  val=0.00002  test=0.00002  t=231s
+    step   4800/5495  lr=1.31e-05  train=0.00001  val=0.00001  test=0.00002  t=241s
+    step   5000/5495  lr=6.70e-06  train=0.00002  val=0.00001  test=0.00001  t=251s
+    step   5200/5495  lr=2.40e-06  train=0.00001  val=0.00001  test=0.00001  t=261s
+    step   5400/5495  lr=2.53e-07  train=0.00001  val=0.00001  test=0.00001  t=271s
+    step   5495/5495  lr=2.74e-11  train=0.00001  val=0.00001  test=0.00001  t=277s
+  → test_mse=0.00001  AOFE=0.0832  AOFE_ratio=0.1193
+
+  ── depth=  2  d_model= 348  n_heads=87  d_ff= 1392  active=2,960,848  pad=39,152  α=depth/d_model=0.0057
+    step    200/5495  lr=2.00e-04  train=0.00059  val=0.00051  test=0.00056  t=13s
+    step    400/5495  lr=3.00e-04  train=0.00019  val=0.00018  test=0.00019  t=26s
+    step    600/5495  lr=2.98e-04  train=0.00014  val=0.00013  test=0.00013  t=39s
+    step    800/5495  lr=2.93e-04  train=0.00012  val=0.00012  test=0.00012  t=52s
+    step   1000/5495  lr=2.87e-04  train=0.00012  val=0.00011  test=0.00011  t=65s
+    step   1200/5495  lr=2.78e-04  train=0.00009  val=0.00009  test=0.00009  t=78s
+    step   1400/5495  lr=2.68e-04  train=0.00008  val=0.00008  test=0.00008  t=91s
+    step   1600/5495  lr=2.56e-04  train=0.00009  val=0.00009  test=0.00009  t=104s
+    step   1800/5495  lr=2.42e-04  train=0.00007  val=0.00007  test=0.00007  t=117s
+    step   2000/5495  lr=2.28e-04  train=0.00005  val=0.00005  test=0.00005  t=130s
+    step   2200/5495  lr=2.11e-04  train=0.00005  val=0.00005  test=0.00005  t=143s
+    step   2400/5495  lr=1.95e-04  train=0.00004  val=0.00004  test=0.00004  t=156s
+    step   2600/5495  lr=1.77e-04  train=0.00004  val=0.00004  test=0.00004  t=169s
+    step   2800/5495  lr=1.59e-04  train=0.00004  val=0.00003  test=0.00004  t=182s
+    step   3000/5495  lr=1.41e-04  train=0.00003  val=0.00003  test=0.00003  t=195s
+    step   3200/5495  lr=1.23e-04  train=0.00003  val=0.00003  test=0.00003  t=208s
+    step   3400/5495  lr=1.05e-04  train=0.00002  val=0.00002  test=0.00002  t=221s
+    step   3600/5495  lr=8.83e-05  train=0.00002  val=0.00002  test=0.00002  t=234s
+    step   3800/5495  lr=7.22e-05  train=0.00002  val=0.00002  test=0.00002  t=247s
+    step   4000/5495  lr=5.73e-05  train=0.00002  val=0.00002  test=0.00002  t=260s
+    step   4200/5495  lr=4.38e-05  train=0.00002  val=0.00002  test=0.00002  t=273s
+    step   4400/5495  lr=3.18e-05  train=0.00002  val=0.00002  test=0.00002  t=286s
+    step   4600/5495  lr=2.15e-05  train=0.00002  val=0.00002  test=0.00002  t=299s
+    step   4800/5495  lr=1.31e-05  train=0.00002  val=0.00002  test=0.00002  t=312s
+    step   5000/5495  lr=6.70e-06  train=0.00002  val=0.00002  test=0.00002  t=325s
+    step   5200/5495  lr=2.40e-06  train=0.00002  val=0.00002  test=0.00002  t=338s
+    step   5400/5495  lr=2.53e-07  train=0.00002  val=0.00002  test=0.00002  t=351s
+    step   5495/5495  lr=2.74e-11  train=0.00002  val=0.00002  test=0.00002  t=357s
+  → test_mse=0.00002  AOFE=0.1031  AOFE_ratio=0.1584
+
+  ── depth=  3  d_model= 284  n_heads=71  d_ff= 1136  active=2,949,120  pad=50,880  α=depth/d_model=0.0106
+    step    200/5495  lr=2.00e-04  train=0.00048  val=0.00045  test=0.00050  t=16s
+    step    400/5495  lr=3.00e-04  train=0.00019  val=0.00017  test=0.00018  t=31s
+    step    600/5495  lr=2.98e-04  train=0.00014  val=0.00014  test=0.00014  t=47s
+    step    800/5495  lr=2.93e-04  train=0.00013  val=0.00013  test=0.00013  t=62s
+    step   1000/5495  lr=2.87e-04  train=0.00012  val=0.00012  test=0.00012  t=78s
+    step   1200/5495  lr=2.78e-04  train=0.00010  val=0.00010  test=0.00010  t=93s
+    step   1400/5495  lr=2.68e-04  train=0.00009  val=0.00009  test=0.00009  t=109s
+    step   1600/5495  lr=2.56e-04  train=0.00009  val=0.00009  test=0.00009  t=125s
+    step   1800/5495  lr=2.42e-04  train=0.00007  val=0.00007  test=0.00007  t=140s
+    step   2000/5495  lr=2.28e-04  train=0.00006  val=0.00006  test=0.00006  t=156s
+    step   2200/5495  lr=2.11e-04  train=0.00005  val=0.00005  test=0.00005  t=171s
+    step   2400/5495  lr=1.95e-04  train=0.00005  val=0.00005  test=0.00005  t=187s
+    step   2600/5495  lr=1.77e-04  train=0.00004  val=0.00004  test=0.00004  t=202s
+    step   2800/5495  lr=1.59e-04  train=0.00003  val=0.00003  test=0.00003  t=218s
+    step   3000/5495  lr=1.41e-04  train=0.00003  val=0.00003  test=0.00003  t=233s
+    step   3200/5495  lr=1.23e-04  train=0.00003  val=0.00003  test=0.00003  t=249s
+    step   3400/5495  lr=1.05e-04  train=0.00003  val=0.00003  test=0.00003  t=264s
+    step   3600/5495  lr=8.83e-05  train=0.00002  val=0.00002  test=0.00002  t=280s
+    step   3800/5495  lr=7.22e-05  train=0.00002  val=0.00002  test=0.00002  t=295s
+    step   4000/5495  lr=5.73e-05  train=0.00002  val=0.00002  test=0.00002  t=311s
+    step   4200/5495  lr=4.38e-05  train=0.00002  val=0.00002  test=0.00002  t=326s
+    step   4400/5495  lr=3.18e-05  train=0.00002  val=0.00002  test=0.00002  t=342s
+    step   4600/5495  lr=2.15e-05  train=0.00002  val=0.00002  test=0.00002  t=358s
+    step   4800/5495  lr=1.31e-05  train=0.00002  val=0.00002  test=0.00002  t=373s
+    step   5000/5495  lr=6.70e-06  train=0.00002  val=0.00002  test=0.00002  t=389s
+    step   5200/5495  lr=2.40e-06  train=0.00002  val=0.00002  test=0.00002  t=404s
+    step   5400/5495  lr=2.53e-07  train=0.00002  val=0.00002  test=0.00002  t=420s
+    step   5495/5495  lr=2.74e-11  train=0.00002  val=0.00002  test=0.00002  t=428s
+  → test_mse=0.00002  AOFE=0.0981  AOFE_ratio=0.1878
+
+  ── depth=  4  d_model= 248  n_heads=62  d_ff=  992  active=2,992,928  pad=7,072  α=depth/d_model=0.0161
+    step    200/5495  lr=2.00e-04  train=0.00043  val=0.00037  test=0.00042  t=17s
+    step    400/5495  lr=3.00e-04  train=0.00018  val=0.00017  test=0.00019  t=33s
+    step    600/5495  lr=2.98e-04  train=0.00015  val=0.00014  test=0.00015  t=50s
+    step    800/5495  lr=2.93e-04  train=0.00016  val=0.00016  test=0.00016  t=67s
+    step   1000/5495  lr=2.87e-04  train=0.00012  val=0.00012  test=0.00012  t=83s
+    step   1200/5495  lr=2.78e-04  train=0.00012  val=0.00012  test=0.00012  t=100s
+    step   1400/5495  lr=2.68e-04  train=0.00011  val=0.00011  test=0.00011  t=116s
+    step   1600/5495  lr=2.56e-04  train=0.00008  val=0.00008  test=0.00008  t=133s
+    step   1800/5495  lr=2.42e-04  train=0.00007  val=0.00007  test=0.00007  t=150s
+    step   2000/5495  lr=2.28e-04  train=0.00007  val=0.00007  test=0.00007  t=166s
+    step   2200/5495  lr=2.11e-04  train=0.00006  val=0.00006  test=0.00006  t=183s
+    step   2400/5495  lr=1.95e-04  train=0.00005  val=0.00005  test=0.00005  t=199s
+    step   2600/5495  lr=1.77e-04  train=0.00004  val=0.00004  test=0.00004  t=216s
+    step   2800/5495  lr=1.59e-04  train=0.00004  val=0.00004  test=0.00004  t=232s
+    step   3000/5495  lr=1.41e-04  train=0.00003  val=0.00003  test=0.00003  t=249s
+    step   3200/5495  lr=1.23e-04  train=0.00003  val=0.00003  test=0.00003  t=266s
+    step   3400/5495  lr=1.05e-04  train=0.00003  val=0.00003  test=0.00003  t=282s
+    step   3600/5495  lr=8.83e-05  train=0.00003  val=0.00003  test=0.00003  t=299s
+    step   3800/5495  lr=7.22e-05  train=0.00002  val=0.00002  test=0.00002  t=315s
+    step   4000/5495  lr=5.73e-05  train=0.00002  val=0.00002  test=0.00002  t=332s
+    step   4200/5495  lr=4.38e-05  train=0.00002  val=0.00002  test=0.00002  t=348s
+    step   4400/5495  lr=3.18e-05  train=0.00002  val=0.00002  test=0.00002  t=365s
+    step   4600/5495  lr=2.15e-05  train=0.00002  val=0.00002  test=0.00002  t=382s
+    step   4800/5495  lr=1.31e-05  train=0.00002  val=0.00002  test=0.00002  t=398s
+    step   5000/5495  lr=6.70e-06  train=0.00002  val=0.00002  test=0.00002  t=415s
+    step   5200/5495  lr=2.40e-06  train=0.00002  val=0.00002  test=0.00002  t=431s
+    step   5400/5495  lr=2.53e-07  train=0.00002  val=0.00002  test=0.00002  t=448s
+    step   5495/5495  lr=2.74e-11  train=0.00002  val=0.00002  test=0.00002  t=456s
+  → test_mse=0.00002  AOFE=0.1170  AOFE_ratio=0.2065
+
+  ── depth=  5  d_model= 220  n_heads=55  d_ff=  880  active=2,941,024  pad=58,976  α=depth/d_model=0.0227
+    step    200/5495  lr=2.00e-04  train=0.00055  val=0.00050  test=0.00055  t=19s
+    step    400/5495  lr=3.00e-04  train=0.00020  val=0.00018  test=0.00019  t=37s
+    step    600/5495  lr=2.98e-04  train=0.00017  val=0.00016  test=0.00017  t=55s
+    step    800/5495  lr=2.93e-04  train=0.00013  val=0.00013  test=0.00014  t=74s
+    step   1000/5495  lr=2.87e-04  train=0.00013  val=0.00013  test=0.00013  t=92s
+    step   1200/5495  lr=2.78e-04  train=0.00011  val=0.00011  test=0.00011  t=111s
+    step   1400/5495  lr=2.68e-04  train=0.00011  val=0.00011  test=0.00011  t=129s
+    step   1600/5495  lr=2.56e-04  train=0.00010  val=0.00010  test=0.00010  t=148s
+    step   1800/5495  lr=2.42e-04  train=0.00008  val=0.00008  test=0.00008  t=166s
+    step   2000/5495  lr=2.28e-04  train=0.00007  val=0.00007  test=0.00007  t=184s
+    step   2200/5495  lr=2.11e-04  train=0.00006  val=0.00006  test=0.00006  t=203s
+    step   2400/5495  lr=1.95e-04  train=0.00006  val=0.00005  test=0.00005  t=221s
+    step   2600/5495  lr=1.77e-04  train=0.00005  val=0.00005  test=0.00005  t=240s
+    step   2800/5495  lr=1.59e-04  train=0.00005  val=0.00005  test=0.00005  t=258s
+    step   3000/5495  lr=1.41e-04  train=0.00004  val=0.00004  test=0.00004  t=277s
+    step   3200/5495  lr=1.23e-04  train=0.00003  val=0.00003  test=0.00003  t=295s
+    step   3400/5495  lr=1.05e-04  train=0.00003  val=0.00003  test=0.00003  t=314s
+    step   3600/5495  lr=8.83e-05  train=0.00003  val=0.00003  test=0.00003  t=332s
+    step   3800/5495  lr=7.22e-05  train=0.00003  val=0.00003  test=0.00003  t=350s
+    step   4000/5495  lr=5.73e-05  train=0.00003  val=0.00002  test=0.00003  t=369s
+    step   4200/5495  lr=4.38e-05  train=0.00002  val=0.00002  test=0.00002  t=387s
+    step   4400/5495  lr=3.18e-05  train=0.00002  val=0.00002  test=0.00002  t=406s
+    step   4600/5495  lr=2.15e-05  train=0.00002  val=0.00002  test=0.00002  t=424s
+    step   4800/5495  lr=1.31e-05  train=0.00002  val=0.00002  test=0.00002  t=443s
+    step   5000/5495  lr=6.70e-06  train=0.00002  val=0.00002  test=0.00002  t=461s
+    step   5200/5495  lr=2.40e-06  train=0.00002  val=0.00002  test=0.00002  t=479s
+    step   5400/5495  lr=2.53e-07  train=0.00002  val=0.00002  test=0.00002  t=498s
+    step   5495/5495  lr=2.74e-11  train=0.00002  val=0.00002  test=0.00002  t=507s
+  → test_mse=0.00002  AOFE=0.1314  AOFE_ratio=0.2458
+
+  ── depth=  6  d_model= 200  n_heads=50  d_ff=  800  active=2,914,464  pad=85,536  α=depth/d_model=0.0300
+    step    200/5495  lr=2.00e-04  train=0.00047  val=0.00042  test=0.00047  t=20s
+    step    400/5495  lr=3.00e-04  train=0.00021  val=0.00020  test=0.00021  t=41s
+    step    600/5495  lr=2.98e-04  train=0.00018  val=0.00018  test=0.00018  t=61s
+    step    800/5495  lr=2.93e-04  train=0.00016  val=0.00015  test=0.00016  t=81s
+    step   1000/5495  lr=2.87e-04  train=0.00013  val=0.00013  test=0.00013  t=102s
+    step   1200/5495  lr=2.78e-04  train=0.00011  val=0.00011  test=0.00011  t=122s
+    step   1400/5495  lr=2.68e-04  train=0.00013  val=0.00012  test=0.00012  t=142s
+    step   1600/5495  lr=2.56e-04  train=0.00009  val=0.00009  test=0.00009  t=162s
+    step   1800/5495  lr=2.42e-04  train=0.00009  val=0.00008  test=0.00008  t=183s
+    step   2000/5495  lr=2.28e-04  train=0.00007  val=0.00007  test=0.00007  t=203s
+    step   2200/5495  lr=2.11e-04  train=0.00006  val=0.00006  test=0.00006  t=223s
+    step   2400/5495  lr=1.95e-04  train=0.00006  val=0.00006  test=0.00006  t=244s
+    step   2600/5495  lr=1.77e-04  train=0.00005  val=0.00005  test=0.00005  t=264s
+    step   2800/5495  lr=1.59e-04  train=0.00005  val=0.00005  test=0.00005  t=284s
+    step   3000/5495  lr=1.41e-04  train=0.00004  val=0.00004  test=0.00004  t=305s
+    step   3200/5495  lr=1.23e-04  train=0.00004  val=0.00004  test=0.00004  t=325s
+    step   3400/5495  lr=1.05e-04  train=0.00003  val=0.00003  test=0.00003  t=345s
+    step   3600/5495  lr=8.83e-05  train=0.00003  val=0.00003  test=0.00003  t=365s
+    step   3800/5495  lr=7.22e-05  train=0.00003  val=0.00003  test=0.00003  t=386s
+    step   4000/5495  lr=5.73e-05  train=0.00003  val=0.00003  test=0.00003  t=406s
+    step   4200/5495  lr=4.38e-05  train=0.00003  val=0.00003  test=0.00003  t=426s
+    step   4400/5495  lr=3.18e-05  train=0.00003  val=0.00003  test=0.00003  t=447s
+    step   4600/5495  lr=2.15e-05  train=0.00002  val=0.00002  test=0.00002  t=467s
+    step   4800/5495  lr=1.31e-05  train=0.00002  val=0.00002  test=0.00002  t=487s
+    step   5000/5495  lr=6.70e-06  train=0.00002  val=0.00002  test=0.00002  t=508s
+    step   5200/5495  lr=2.40e-06  train=0.00002  val=0.00002  test=0.00002  t=528s
+    step   5400/5495  lr=2.53e-07  train=0.00002  val=0.00002  test=0.00002  t=548s
+    step   5495/5495  lr=2.74e-11  train=0.00002  val=0.00002  test=0.00002  t=559s
+  → test_mse=0.00002  AOFE=0.1620  AOFE_ratio=0.2644
+
+  ── depth=  8  d_model= 172  n_heads=43  d_ff=  688  active=2,871,088  pad=128,912  α=depth/d_model=0.0465
+    step    200/5495  lr=2.00e-04  train=0.00044  val=0.00041  test=0.00045  t=24s
+    step    400/5495  lr=3.00e-04  train=0.00020  val=0.00019  test=0.00020  t=47s
+    step    600/5495  lr=2.98e-04  train=0.00016  val=0.00016  test=0.00016  t=70s
+    step    800/5495  lr=2.93e-04  train=0.00014  val=0.00013  test=0.00014  t=94s
+    step   1000/5495  lr=2.87e-04  train=0.00013  val=0.00013  test=0.00014  t=117s
+    step   1200/5495  lr=2.78e-04  train=0.00012  val=0.00011  test=0.00012  t=140s
+    step   1400/5495  lr=2.68e-04  train=0.00011  val=0.00011  test=0.00011  t=164s
+    step   1600/5495  lr=2.56e-04  train=0.00010  val=0.00010  test=0.00010  t=187s
+    step   1800/5495  lr=2.42e-04  train=0.00009  val=0.00009  test=0.00009  t=210s
+    step   2000/5495  lr=2.28e-04  train=0.00007  val=0.00007  test=0.00007  t=234s
+    step   2200/5495  lr=2.11e-04  train=0.00007  val=0.00007  test=0.00007  t=257s
+    step   2400/5495  lr=1.95e-04  train=0.00006  val=0.00006  test=0.00006  t=280s
+    step   2600/5495  lr=1.77e-04  train=0.00005  val=0.00005  test=0.00005  t=304s
+    step   2800/5495  lr=1.59e-04  train=0.00005  val=0.00005  test=0.00005  t=327s
+    step   3000/5495  lr=1.41e-04  train=0.00004  val=0.00004  test=0.00004  t=350s
+    step   3200/5495  lr=1.23e-04  train=0.00004  val=0.00004  test=0.00004  t=374s
+    step   3400/5495  lr=1.05e-04  train=0.00004  val=0.00004  test=0.00004  t=397s
+    step   3600/5495  lr=8.83e-05  train=0.00003  val=0.00003  test=0.00003  t=420s
+    step   3800/5495  lr=7.22e-05  train=0.00003  val=0.00003  test=0.00003  t=444s
+    step   4000/5495  lr=5.73e-05  train=0.00003  val=0.00003  test=0.00003  t=467s
+    step   4200/5495  lr=4.38e-05  train=0.00003  val=0.00003  test=0.00003  t=490s
+    step   4400/5495  lr=3.18e-05  train=0.00003  val=0.00003  test=0.00003  t=514s
+    step   4600/5495  lr=2.15e-05  train=0.00003  val=0.00003  test=0.00003  t=537s
+    step   4800/5495  lr=1.31e-05  train=0.00003  val=0.00003  test=0.00003  t=560s
+    step   5000/5495  lr=6.70e-06  train=0.00003  val=0.00003  test=0.00003  t=584s
+    step   5200/5495  lr=2.40e-06  train=0.00003  val=0.00003  test=0.00003  t=607s
+    step   5400/5495  lr=2.53e-07  train=0.00003  val=0.00003  test=0.00003  t=630s
+    step   5495/5495  lr=2.74e-11  train=0.00003  val=0.00003  test=0.00003  t=642s
+  → test_mse=0.00003  AOFE=0.1750  AOFE_ratio=0.3076
+
+  ── depth= 10  d_model= 156  n_heads=39  d_ff=  624  active=2,949,712  pad=50,288  α=depth/d_model=0.0641
+    step    200/5495  lr=2.00e-04  train=0.00049  val=0.00046  test=0.00050  t=27s
+    step    400/5495  lr=3.00e-04  train=0.00021  val=0.00019  test=0.00021  t=53s
+    step    600/5495  lr=2.98e-04  train=0.00016  val=0.00015  test=0.00016  t=80s
+    step    800/5495  lr=2.93e-04  train=0.00014  val=0.00014  test=0.00014  t=107s
+    step   1000/5495  lr=2.87e-04  train=0.00013  val=0.00012  test=0.00013  t=134s
+    step   1200/5495  lr=2.78e-04  train=0.00011  val=0.00011  test=0.00011  t=160s
+    step   1400/5495  lr=2.68e-04  train=0.00010  val=0.00010  test=0.00010  t=187s
+    step   1600/5495  lr=2.56e-04  train=0.00009  val=0.00009  test=0.00009  t=214s
+    step   1800/5495  lr=2.42e-04  train=0.00011  val=0.00010  test=0.00011  t=240s
+    step   2000/5495  lr=2.28e-04  train=0.00008  val=0.00008  test=0.00008  t=267s
+    step   2200/5495  lr=2.11e-04  train=0.00007  val=0.00007  test=0.00007  t=294s
+    step   2400/5495  lr=1.95e-04  train=0.00007  val=0.00007  test=0.00007  t=320s
+    step   2600/5495  lr=1.77e-04  train=0.00006  val=0.00006  test=0.00006  t=347s
+    step   2800/5495  lr=1.59e-04  train=0.00005  val=0.00005  test=0.00005  t=374s
+    step   3000/5495  lr=1.41e-04  train=0.00005  val=0.00005  test=0.00005  t=400s
+    step   3200/5495  lr=1.23e-04  train=0.00005  val=0.00005  test=0.00005  t=427s
+    step   3400/5495  lr=1.05e-04  train=0.00004  val=0.00004  test=0.00004  t=454s
+    step   3600/5495  lr=8.83e-05  train=0.00004  val=0.00004  test=0.00004  t=480s
+    step   3800/5495  lr=7.22e-05  train=0.00004  val=0.00003  test=0.00004  t=507s
+    step   4000/5495  lr=5.73e-05  train=0.00003  val=0.00003  test=0.00003  t=534s
+    step   4200/5495  lr=4.38e-05  train=0.00003  val=0.00003  test=0.00003  t=560s
+    step   4400/5495  lr=3.18e-05  train=0.00003  val=0.00003  test=0.00003  t=587s
+    step   4600/5495  lr=2.15e-05  train=0.00003  val=0.00003  test=0.00003  t=614s
+    step   4800/5495  lr=1.31e-05  train=0.00003  val=0.00003  test=0.00003  t=640s
+    step   5000/5495  lr=6.70e-06  train=0.00003  val=0.00003  test=0.00003  t=667s
+    step   5200/5495  lr=2.40e-06  train=0.00003  val=0.00003  test=0.00003  t=694s
+    step   5400/5495  lr=2.53e-07  train=0.00003  val=0.00003  test=0.00003  t=720s
+    step   5495/5495  lr=2.74e-11  train=0.00003  val=0.00003  test=0.00003  t=734s
+  → test_mse=0.00003  AOFE=0.1775  AOFE_ratio=0.3496
+
+  ── depth= 12  d_model= 140  n_heads=35  d_ff=  560  active=2,849,904  pad=150,096  α=depth/d_model=0.0857
+    step    200/5495  lr=2.00e-04  train=0.00062  val=0.00057  test=0.00061  t=29s
+    step    400/5495  lr=3.00e-04  train=0.00021  val=0.00020  test=0.00021  t=58s
+    step    600/5495  lr=2.98e-04  train=0.00017  val=0.00017  test=0.00017  t=87s
+    step    800/5495  lr=2.93e-04  train=0.00014  val=0.00014  test=0.00014  t=116s
+    step   1000/5495  lr=2.87e-04  train=0.00015  val=0.00015  test=0.00015  t=145s
+    step   1200/5495  lr=2.78e-04  train=0.00012  val=0.00012  test=0.00012  t=173s
+    step   1400/5495  lr=2.68e-04  train=0.00010  val=0.00010  test=0.00010  t=202s
+    step   1600/5495  lr=2.56e-04  train=0.00018  val=0.00018  test=0.00019  t=231s
+    step   1800/5495  lr=2.42e-04  train=0.00010  val=0.00010  test=0.00010  t=260s
+    step   2000/5495  lr=2.28e-04  train=0.00008  val=0.00008  test=0.00008  t=289s
+    step   2200/5495  lr=2.11e-04  train=0.00008  val=0.00008  test=0.00008  t=318s
+    step   2400/5495  lr=1.95e-04  train=0.00007  val=0.00007  test=0.00007  t=347s
+    step   2600/5495  lr=1.77e-04  train=0.00006  val=0.00006  test=0.00006  t=376s
+    step   2800/5495  lr=1.59e-04  train=0.00006  val=0.00006  test=0.00006  t=404s
+    step   3000/5495  lr=1.41e-04  train=0.00005  val=0.00005  test=0.00005  t=433s
+    step   3200/5495  lr=1.23e-04  train=0.00005  val=0.00005  test=0.00005  t=462s
+    step   3400/5495  lr=1.05e-04  train=0.00004  val=0.00004  test=0.00004  t=491s
+    step   3600/5495  lr=8.83e-05  train=0.00004  val=0.00004  test=0.00004  t=520s
+    step   3800/5495  lr=7.22e-05  train=0.00004  val=0.00004  test=0.00004  t=549s
+    step   4000/5495  lr=5.73e-05  train=0.00004  val=0.00004  test=0.00004  t=578s
+    step   4200/5495  lr=4.38e-05  train=0.00004  val=0.00004  test=0.00004  t=607s
+    step   4400/5495  lr=3.18e-05  train=0.00003  val=0.00003  test=0.00003  t=636s
+    step   4600/5495  lr=2.15e-05  train=0.00003  val=0.00003  test=0.00003  t=665s
+    step   4800/5495  lr=1.31e-05  train=0.00003  val=0.00003  test=0.00003  t=694s
+    step   5000/5495  lr=6.70e-06  train=0.00003  val=0.00003  test=0.00003  t=723s
+    step   5200/5495  lr=2.40e-06  train=0.00003  val=0.00003  test=0.00003  t=751s
+    step   5400/5495  lr=2.53e-07  train=0.00003  val=0.00003  test=0.00003  t=780s
+    step   5495/5495  lr=2.74e-11  train=0.00003  val=0.00003  test=0.00003  t=795s
+  → test_mse=0.00003  AOFE=0.2035  AOFE_ratio=0.3980
+
+  ── depth= 16  d_model= 124  n_heads=31  d_ff=  496  active=2,978,544  pad=21,456  α=depth/d_model=0.1290
+    step    200/5495  lr=2.00e-04  train=0.00062  val=0.00056  test=0.00062  t=32s
+    step    400/5495  lr=3.00e-04  train=0.00022  val=0.00021  test=0.00022  t=63s
+    step    600/5495  lr=2.98e-04  train=0.00018  val=0.00017  test=0.00018  t=95s
+    step    800/5495  lr=2.93e-04  train=0.00015  val=0.00014  test=0.00015  t=126s
+    step   1000/5495  lr=2.87e-04  train=0.00015  val=0.00015  test=0.00015  t=158s
+    step   1200/5495  lr=2.78e-04  train=0.00014  val=0.00014  test=0.00014  t=189s
+    step   1400/5495  lr=2.68e-04  train=0.00011  val=0.00011  test=0.00011  t=221s
+    step   1600/5495  lr=2.56e-04  train=0.00010  val=0.00010  test=0.00010  t=253s
+    step   1800/5495  lr=2.42e-04  train=0.00010  val=0.00009  test=0.00010  t=284s
+    step   2000/5495  lr=2.28e-04  train=0.00008  val=0.00008  test=0.00008  t=316s
+    step   2200/5495  lr=2.11e-04  train=0.00008  val=0.00008  test=0.00008  t=347s
+    step   2400/5495  lr=1.95e-04  train=0.00008  val=0.00007  test=0.00008  t=379s
+    step   2600/5495  lr=1.77e-04  train=0.00006  val=0.00006  test=0.00007  t=411s
+    step   2800/5495  lr=1.59e-04  train=0.00007  val=0.00007  test=0.00007  t=442s
+    step   3000/5495  lr=1.41e-04  train=0.00006  val=0.00006  test=0.00006  t=474s
+    step   3200/5495  lr=1.23e-04  train=0.00005  val=0.00005  test=0.00005  t=505s
+    step   3400/5495  lr=1.05e-04  train=0.00005  val=0.00005  test=0.00005  t=537s
+    step   3600/5495  lr=8.83e-05  train=0.00005  val=0.00004  test=0.00005  t=568s
+    step   3800/5495  lr=7.22e-05  train=0.00004  val=0.00004  test=0.00004  t=600s
+    step   4000/5495  lr=5.73e-05  train=0.00004  val=0.00004  test=0.00004  t=631s
+    step   4200/5495  lr=4.38e-05  train=0.00004  val=0.00004  test=0.00004  t=663s
+    step   4400/5495  lr=3.18e-05  train=0.00004  val=0.00004  test=0.00004  t=694s
+    step   4600/5495  lr=2.15e-05  train=0.00004  val=0.00004  test=0.00004  t=726s
+    step   4800/5495  lr=1.31e-05  train=0.00004  val=0.00004  test=0.00004  t=757s
+    step   5000/5495  lr=6.70e-06  train=0.00004  val=0.00004  test=0.00004  t=789s
+    step   5200/5495  lr=2.40e-06  train=0.00004  val=0.00004  test=0.00004  t=821s
+    step   5400/5495  lr=2.53e-07  train=0.00004  val=0.00004  test=0.00004  t=852s
+    step   5495/5495  lr=2.74e-11  train=0.00004  val=0.00004  test=0.00004  t=868s
+  → test_mse=0.00004  AOFE=0.1633  AOFE_ratio=0.4436
+
+  ── depth= 20  d_model= 108  n_heads=27  d_ff=  432  active=2,824,048  pad=175,952  α=depth/d_model=0.1852
+    step    200/5495  lr=2.00e-04  train=0.00073  val=0.00068  test=0.00074  t=35s
+    step    400/5495  lr=3.00e-04  train=0.00024  val=0.00023  test=0.00025  t=70s
+    step    600/5495  lr=2.98e-04  train=0.00019  val=0.00018  test=0.00019  t=106s
+    step    800/5495  lr=2.93e-04  train=0.00019  val=0.00018  test=0.00018  t=141s
+    step   1000/5495  lr=2.87e-04  train=0.00016  val=0.00015  test=0.00015  t=176s
+    step   1200/5495  lr=2.78e-04  train=0.00013  val=0.00013  test=0.00013  t=211s
+    step   1400/5495  lr=2.68e-04  train=0.00013  val=0.00013  test=0.00013  t=247s
+    step   1600/5495  lr=2.56e-04  train=0.00010  val=0.00010  test=0.00010  t=282s
+    step   1800/5495  lr=2.42e-04  train=0.00011  val=0.00011  test=0.00011  t=317s
+    step   2000/5495  lr=2.28e-04  train=0.00010  val=0.00010  test=0.00010  t=352s
+    step   2200/5495  lr=2.11e-04  train=0.00009  val=0.00008  test=0.00009  t=387s
+    step   2400/5495  lr=1.95e-04  train=0.00009  val=0.00009  test=0.00009  t=423s
+    step   2600/5495  lr=1.77e-04  train=0.00007  val=0.00007  test=0.00007  t=458s
+    step   2800/5495  lr=1.59e-04  train=0.00007  val=0.00007  test=0.00007  t=493s
+    step   3000/5495  lr=1.41e-04  train=0.00007  val=0.00007  test=0.00007  t=528s
+    step   3200/5495  lr=1.23e-04  train=0.00006  val=0.00006  test=0.00006  t=564s
+    step   3400/5495  lr=1.05e-04  train=0.00006  val=0.00006  test=0.00006  t=599s
+    step   3600/5495  lr=8.83e-05  train=0.00005  val=0.00005  test=0.00005  t=634s
+    step   3800/5495  lr=7.22e-05  train=0.00005  val=0.00005  test=0.00005  t=669s
+    step   4000/5495  lr=5.73e-05  train=0.00005  val=0.00005  test=0.00005  t=704s
+    step   4200/5495  lr=4.38e-05  train=0.00005  val=0.00005  test=0.00005  t=740s
+    step   4400/5495  lr=3.18e-05  train=0.00005  val=0.00005  test=0.00005  t=775s
+    step   4600/5495  lr=2.15e-05  train=0.00005  val=0.00005  test=0.00005  t=810s
+    step   4800/5495  lr=1.31e-05  train=0.00005  val=0.00004  test=0.00004  t=845s
+    step   5000/5495  lr=6.70e-06  train=0.00004  val=0.00004  test=0.00004  t=880s
+    step   5200/5495  lr=2.40e-06  train=0.00004  val=0.00004  test=0.00004  t=916s
+    step   5400/5495  lr=2.53e-07  train=0.00004  val=0.00004  test=0.00004  t=951s
+    step   5495/5495  lr=2.74e-11  train=0.00004  val=0.00004  test=0.00004  t=969s
+  → test_mse=0.00004  AOFE=0.2673  AOFE_ratio=0.5568
+
+  ── depth= 24  d_model= 100  n_heads=25  d_ff=  400  active=2,904,464  pad=95,536  α=depth/d_model=0.2400
+    step    200/5495  lr=2.00e-04  train=0.00096  val=0.00091  test=0.00098  t=40s
+    step    400/5495  lr=3.00e-04  train=0.00030  val=0.00029  test=0.00030  t=80s
+    step    600/5495  lr=2.98e-04  train=0.00024  val=0.00024  test=0.00024  t=120s
+    step    800/5495  lr=2.93e-04  train=0.00015  val=0.00015  test=0.00015  t=160s
+    step   1000/5495  lr=2.87e-04  train=0.00015  val=0.00015  test=0.00015  t=200s
+    step   1200/5495  lr=2.78e-04  train=0.00013  val=0.00013  test=0.00013  t=240s
+    step   1400/5495  lr=2.68e-04  train=0.00013  val=0.00013  test=0.00013  t=279s
+    step   1600/5495  lr=2.56e-04  train=0.00011  val=0.00011  test=0.00011  t=319s
+    step   1800/5495  lr=2.42e-04  train=0.00011  val=0.00011  test=0.00011  t=359s
+    step   2000/5495  lr=2.28e-04  train=0.00011  val=0.00010  test=0.00011  t=399s
+    step   2200/5495  lr=2.11e-04  train=0.00009  val=0.00009  test=0.00009  t=439s
+    step   2400/5495  lr=1.95e-04  train=0.00008  val=0.00008  test=0.00008  t=479s
+    step   2600/5495  lr=1.77e-04  train=0.00008  val=0.00008  test=0.00008  t=519s
+    step   2800/5495  lr=1.59e-04  train=0.00007  val=0.00007  test=0.00007  t=559s
+    step   3000/5495  lr=1.41e-04  train=0.00008  val=0.00008  test=0.00008  t=599s
+    step   3200/5495  lr=1.23e-04  train=0.00006  val=0.00006  test=0.00006  t=639s
+    step   3400/5495  lr=1.05e-04  train=0.00006  val=0.00006  test=0.00006  t=678s
+    step   3600/5495  lr=8.83e-05  train=0.00006  val=0.00006  test=0.00006  t=718s
+    step   3800/5495  lr=7.22e-05  train=0.00006  val=0.00006  test=0.00006  t=758s
+    step   4000/5495  lr=5.73e-05  train=0.00005  val=0.00005  test=0.00005  t=798s
+    step   4200/5495  lr=4.38e-05  train=0.00005  val=0.00005  test=0.00005  t=838s
+    step   4400/5495  lr=3.18e-05  train=0.00005  val=0.00005  test=0.00005  t=878s
+    step   4600/5495  lr=2.15e-05  train=0.00005  val=0.00005  test=0.00005  t=918s
+    step   4800/5495  lr=1.31e-05  train=0.00005  val=0.00005  test=0.00005  t=958s
+    step   5000/5495  lr=6.70e-06  train=0.00005  val=0.00005  test=0.00005  t=998s
+    step   5200/5495  lr=2.40e-06  train=0.00005  val=0.00005  test=0.00005  t=1038s
+    step   5400/5495  lr=2.53e-07  train=0.00005  val=0.00005  test=0.00005  t=1077s
+    step   5495/5495  lr=2.74e-11  train=0.00005  val=0.00005  test=0.00005  t=1098s
+  → test_mse=0.00005  AOFE=0.2418  AOFE_ratio=0.5933
+
+  N=3,000,000: Pearson(AOFE_ratio, test_mse)=0.998  Spearman=1.000
+
+Total sweep time: 194.7 min
+
+Global (all N, all shapes):
+  Pearson (AOFE_ratio, test_mse)  = 0.6283
+  Spearman(AOFE_ratio, test_mse)  = 0.8204
+
+Results saved to: ./results_scaling_shape_sweep
+
+==========================================================================================
+         N   depth   d_model     α=d/dm    test_mse    AOFE_ratio    optimal?
+------------------------------------------------------------------------------------------
+      300K       1       148     0.0068     0.00048        0.3402   ← best
+      300K       2       108     0.0185     0.00062        0.4125  
+      300K       3        88     0.0341     0.00069        0.4659  
+      300K       4        76     0.0526     0.00082        0.5292  
+      300K       5        68     0.0735     0.00085        0.5532  
+      300K       6        60     0.1000     0.00116        0.6113  
+      300K       8        52     0.1538     0.00158        0.6680  
+      300K      10        48     0.2083     0.00146        0.6678  
+      300K      12        44     0.2727     0.00164        0.7086  
+      300K      16        36     0.4444     0.00287        0.7644  
+      300K      20        32     0.6250     0.00499        0.7932  
+
+      1.0M       1       280     0.0036     0.00011        0.1998   ← best
+      1.0M       2       200     0.0100     0.00012        0.2734  
+      1.0M       3       164     0.0183     0.00013        0.3205  
+      1.0M       4       140     0.0286     0.00014        0.3548  
+      1.0M       5       124     0.0403     0.00014        0.3943  
+      1.0M       6       116     0.0517     0.00013        0.4199  
+      1.0M       8       100     0.0800     0.00014        0.4770  
+      1.0M      10        88     0.1136     0.00015        0.5140  
+      1.0M      12        80     0.1500     0.00016        0.5459  
+      1.0M      16        68     0.2353     0.00018        0.6302  
+      1.0M      20        64     0.3125     0.00022        0.6454  
+      1.0M      24        56     0.4286     0.00022        0.7202  
+
+      3.0M       1       492     0.0020     0.00001        0.1193   ← best
+      3.0M       2       348     0.0057     0.00002        0.1584  
+      3.0M       3       284     0.0106     0.00002        0.1878  
+      3.0M       4       248     0.0161     0.00002        0.2065  
+      3.0M       5       220     0.0227     0.00002        0.2458  
+      3.0M       6       200     0.0300     0.00002        0.2644  
+      3.0M       8       172     0.0465     0.00003        0.3076  
+      3.0M      10       156     0.0641     0.00003        0.3496  
+      3.0M      12       140     0.0857     0.00003        0.3980  
+      3.0M      16       124     0.1290     0.00004        0.4436  
+      3.0M      20       108     0.1852     0.00004        0.5568  
+      3.0M      24       100     0.2400     0.00005        0.5933  
+
+==========================================================================================
