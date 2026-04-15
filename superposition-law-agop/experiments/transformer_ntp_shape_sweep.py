@@ -51,6 +51,10 @@ Usage
       --depth_list 1,2,3,4,5,6,8,10,12,16,20,24 \\
       --out_dir ./results_ntp_shape_sweep \\
       --device cuda
+
+  # Regenerate all plots from an existing CSV (after appending new N):
+  python experiments/transformer_ntp_shape_sweep.py \\
+      --plot_only --out_dir ./results/transformer_ntp_shape_sweep
 """
 
 from __future__ import annotations
@@ -934,7 +938,17 @@ def plot_multi_n_summary(
     param_groups: List[int],
     out_dir: str,
 ) -> None:
-    """Summary plot: AOFE_ratio vs test_ce for all (N, shape) pairs."""
+    """
+    Summary two-panel figure(s). Left: scatter of a coupling metric vs test CE; right: loss vs depth.
+
+    We emit two PNGs: ``multi_N_ntp_summary.png`` uses **WtW AOFE_ratio** on the scatter x-axis
+    (embedding Gram matrix; varies strongly with width / d_model). A companion file
+    ``multi_N_ntp_summary_aofe_ratio.png`` uses **aofe_ratio** from the projected AGOP — the Jacobian
+    coupling metric aligned with per-single-N plots. WtW is often preferred for this overview
+    because it spans a wider numeric range across shapes than AGOP AOFE_ratio (~0.92--0.94 here),
+    which makes the multi-N scatter easier to read; AGOP is kept as the primary metric elsewhere
+    (twin axes on each ``N*_ntp_depth_alpha.png``).
+    """
     if not all_results:
         return
 
@@ -944,54 +958,84 @@ def plot_multi_n_summary(
         cmap   = matplotlib.cm.get_cmap("tab10")   # matplotlib < 3.7 fallback
     colors = {n: cmap(i % 10) for i, n in enumerate(param_groups)}
 
+    def _loss_vs_depth(ax: plt.Axes) -> None:
+        for n in param_groups:
+            rows = sorted(
+                [r for r in all_results if r["target_n"] == n],
+                key=lambda r: r["depth"],
+            )
+            if not rows:
+                continue
+            depths   = [r["depth"]   for r in rows]
+            test_ces = [r["test_ce"] for r in rows]
+            ax.plot(depths, test_ces, "o-", color=colors[n], lw=2, ms=5,
+                    label=f"N={n/1e6:.1f}M")
+            bi = int(np.argmin(test_ces))
+            ax.plot(depths[bi], test_ces[bi], "*", color=colors[n], ms=14, zorder=5)
+        ax.set_xlabel("Depth", fontsize=11)
+        ax.set_ylabel("Test cross-entropy (nats/byte)", fontsize=11)
+        ax.set_title("Loss vs. Depth  (★ = optimal)", fontsize=11)
+        ax.legend(fontsize=10)
+        ax.grid(True, alpha=0.4)
+
+    def _scatter_vs_loss(
+        ax: plt.Axes,
+        xkey: str,
+        xlabel: str,
+        title: str,
+    ) -> None:
+        for n in param_groups:
+            rows = [r for r in all_results if r["target_n"] == n]
+            if not rows:
+                continue
+            xs = [r[xkey] for r in rows]
+            ys = [r["test_ce"] for r in rows]
+            ax.scatter(xs, ys, color=colors[n], s=60, alpha=0.8, zorder=3,
+                       label=f"N={n/1e6:.1f}M")
+            bi = int(np.argmin(ys))
+            ax.scatter(xs[bi], ys[bi], color=colors[n], s=200, marker="*", zorder=5)
+        ax.set_xlabel(xlabel, fontsize=11)
+        ax.set_ylabel("Test cross-entropy (nats/byte)", fontsize=11)
+        ax.set_title(title, fontsize=11)
+        ax.legend(fontsize=10)
+        ax.grid(True, alpha=0.4)
+
+    # --- WtW (default multi-N overview) ---
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     fig.suptitle(
         "NTP Shape Sweep — Byte-level LM (WikiText-103)",
         fontsize=13, fontweight="bold",
     )
-
-    # --- Panel 1: WtW_ratio vs test_ce (scatter) ---
-    ax = axes[0]
-    for n in param_groups:
-        rows = [r for r in all_results if r["target_n"] == n]
-        if not rows:
-            continue
-        xs = [r["wtw_aofe_ratio"] for r in rows]
-        ys = [r["test_ce"]        for r in rows]
-        ax.scatter(xs, ys, color=colors[n], s=60, alpha=0.8, zorder=3,
-                   label=f"N={n/1e6:.1f}M")
-        bi = int(np.argmin(ys))
-        ax.scatter(xs[bi], ys[bi], color=colors[n], s=200, marker="*", zorder=5)
-    ax.set_xlabel("WtW AOFE_ratio (embedding superposition)", fontsize=11)
-    ax.set_ylabel("Test cross-entropy (nats/byte)", fontsize=11)
-    ax.set_title("WtW AOFE_ratio vs. Loss  (every (N, shape) pair)", fontsize=11)
-    ax.legend(fontsize=10)
-    ax.grid(True, alpha=0.4)
-
-    # --- Panel 2: Loss vs depth, multi-N ---
-    ax = axes[1]
-    for n in param_groups:
-        rows = sorted(
-            [r for r in all_results if r["target_n"] == n],
-            key=lambda r: r["depth"],
-        )
-        if not rows:
-            continue
-        depths   = [r["depth"]   for r in rows]
-        test_ces = [r["test_ce"] for r in rows]
-        ax.plot(depths, test_ces, "o-", color=colors[n], lw=2, ms=5,
-                label=f"N={n/1e6:.1f}M")
-        bi = int(np.argmin(test_ces))
-        ax.plot(depths[bi], test_ces[bi], "*", color=colors[n], ms=14, zorder=5)
-    ax.set_xlabel("Depth", fontsize=11)
-    ax.set_ylabel("Test cross-entropy (nats/byte)", fontsize=11)
-    ax.set_title("Loss vs. Depth  (★ = optimal)", fontsize=11)
-    ax.legend(fontsize=10)
-    ax.grid(True, alpha=0.4)
-
+    _scatter_vs_loss(
+        axes[0],
+        xkey="wtw_aofe_ratio",
+        xlabel="WtW AOFE_ratio (embedding superposition)",
+        title="WtW AOFE_ratio vs. Loss  (every (N, shape) pair)",
+    )
+    _loss_vs_depth(axes[1])
     plt.tight_layout()
     fig.savefig(
         os.path.join(out_dir, "multi_N_ntp_summary.png"),
+        dpi=150, bbox_inches="tight",
+    )
+    plt.close(fig)
+
+    # --- Projected AGOP AOFE_ratio (same layout) ---
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.suptitle(
+        "NTP Shape Sweep — Byte-level LM (WikiText-103)",
+        fontsize=13, fontweight="bold",
+    )
+    _scatter_vs_loss(
+        axes[0],
+        xkey="aofe_ratio",
+        xlabel="AOFE_ratio (64×64 projected AGOP)",
+        title="AOFE_ratio (AGOP) vs. Loss  (every (N, shape) pair)",
+    )
+    _loss_vs_depth(axes[1])
+    plt.tight_layout()
+    fig.savefig(
+        os.path.join(out_dir, "multi_N_ntp_summary_aofe_ratio.png"),
         dpi=150, bbox_inches="tight",
     )
     plt.close(fig)
@@ -1072,9 +1116,50 @@ def print_summary_table(all_results: List[Dict], param_groups: List[int]) -> Non
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
 
+def load_results_csv(csv_path: str) -> List[Dict]:
+    """
+    Load results_ntp_shape_sweep.csv with numeric types.
+    If duplicate (target_n, depth) rows exist, keeps the last occurrence.
+    """
+    with open(csv_path, newline="") as f:
+        rows = list(csv.DictReader(f))
+    int_keys = {
+        "target_n", "depth", "d_model", "n_heads", "d_ff", "active_n", "steps_run",
+    }
+    float_keys = {
+        "pad_ratio", "alpha", "train_ce", "val_ce", "test_ce",
+        "aofe", "aofe_ratio", "wtw_aofe_ratio", "elapsed_s",
+    }
+    parsed: List[Dict] = []
+    for r in rows:
+        d = dict(r)
+        for k in int_keys:
+            if k in d and d[k] != "":
+                d[k] = int(float(d[k]))
+        for k in float_keys:
+            if k in d and d[k] != "":
+                d[k] = float(d[k])
+        parsed.append(d)
+    # Dedupe (target_n, depth): last row wins
+    by_key: Dict[Tuple[int, int], Dict] = {}
+    for r in parsed:
+        key = (int(r["target_n"]), int(r["depth"]))
+        by_key[key] = r
+    return sorted(by_key.values(), key=lambda x: (x["target_n"], x["depth"]))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="NTP shape sweep: next-token prediction on WikiText-103 (byte-level)."
+        description="NTP shape sweep: next-token prediction on WikiText-103 (byte-level).",
+    )
+    parser.add_argument(
+        "--plot_only",
+        action="store_true",
+        help=(
+            "Skip training and corpus load; read results_ntp_shape_sweep.csv under "
+            "--out_dir, then regenerate per-N plots, multi-N summaries, and the stdout table. "
+            "Use after adding new runs so figures include all N in the CSV."
+        ),
     )
     parser.add_argument(
         "--data_dir", type=str, default="./data",
@@ -1113,6 +1198,28 @@ def main() -> None:
     parser.add_argument("--d_model_max",   type=int,   default=1024)
     parser.add_argument("--seed",          type=int,   default=0)
     args = parser.parse_args()
+
+    if args.plot_only:
+        csv_path = os.path.join(args.out_dir, "results_ntp_shape_sweep.csv")
+        if not os.path.isfile(csv_path):
+            raise FileNotFoundError(
+                f"{csv_path} not found. Run training first or set --out_dir correctly."
+            )
+        all_results = load_results_csv(csv_path)
+        param_groups = sorted({int(r["target_n"]) for r in all_results})
+        print(f"[plot_only] Loaded {len(all_results)} rows from {csv_path}")
+        print(f"[plot_only] N values: {param_groups}\n")
+        for n in param_groups:
+            rows = sorted(
+                [r for r in all_results if r["target_n"] == n],
+                key=lambda r: r["depth"],
+            )
+            plot_per_n_results(rows, n, args.out_dir)
+        plot_multi_n_summary(all_results, param_groups, args.out_dir)
+        print_summary_table(all_results, param_groups)
+        print(f"\n[plot_only] Plots and table regenerated under: {args.out_dir}")
+        print(f"[plot_only] CSV unchanged: {csv_path}")
+        return
 
     # Build config from args
     cfg = TrainCfg(**{
