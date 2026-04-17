@@ -818,7 +818,18 @@ def run_shape_sweep_for_n(
         )
         elapsed = time.time() - t_start
 
-        # 5. AGOP
+        # Save learning curve immediately after training so a later AGOP OOM
+        # does not lose hours of run data.
+        curve_path = os.path.join(curve_dir, f"depth{depth:04d}_d{d_model}.csv")
+        with open(curve_path, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=history[0].keys() if history else [])
+            w.writeheader()
+            w.writerows(history)
+
+        # 5. AGOP (JVP is memory-heavy; free cached blocks before it)
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+
         agop = estimate_agop_ntp(
             model, train_data,
             proj_samples=cfg.agop_proj_samples,
@@ -853,12 +864,6 @@ def run_shape_sweep_for_n(
             f"  → test_ce={metrics['test_ce']:.4f} nats  "
             f"AOFE_ratio={aofe_ratio:.4f}  α={alpha:.4f}  t={elapsed:.0f}s"
         )
-
-        # Save per-shape learning curve
-        curve_path = os.path.join(curve_dir, f"depth{depth:04d}_d{d_model}.csv")
-        with open(curve_path, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=history[0].keys() if history else [])
-            w.writeheader(); w.writerows(history)
 
     return results
 
