@@ -1,0 +1,2 @@
+target_n,depth,d_model,n_heads,d_ff,active_n,pad_ratio,alpha,train_ce,val_ce,test_ce,aofe,aofe_ratio,wtw_aofe_ratio,steps_run,elapsed_s
+10000000,5,400,100,1600,9916000,0.0084,0.0125,0.975095,0.969906,0.986175,1246460608.0,0.936718,0.936035,54932,25273.2
