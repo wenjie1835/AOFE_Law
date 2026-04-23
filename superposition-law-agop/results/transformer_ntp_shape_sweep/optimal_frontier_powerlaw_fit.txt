@@ -1,0 +1,4 @@
+Model: best_test_ce = a * (best_wtw_aofe_ratio)^b
+a = 0.903497346493
+b = -1.856641307721
+R^2 = 0.971842359627
