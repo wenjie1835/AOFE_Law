@@ -1,0 +1,29 @@
+{
+  "target_params": 3000000,
+  "tokens_per_param": 20.0,
+  "train_tokens": null,
+  "layers": [
+    2,
+    12
+  ],
+  "dataset": "wikitext-103",
+  "data_dir": "data",
+  "out_dir": "results_tiny_gpt_depth_aofe",
+  "block_size": 256,
+  "batch_size": 32,
+  "grad_accum": 1,
+  "eval_interval": 250,
+  "eval_iters": 50,
+  "aofe_batches": 32,
+  "lr": 0.0003,
+  "min_lr": 3e-05,
+  "weight_decay": 0.1,
+  "warmup_steps": 100,
+  "dropout": 0.0,
+  "seed": 1337,
+  "device": null,
+  "max_steps": null,
+  "compile": false,
+  "dry_run_configs": false,
+  "device_resolved": "cuda"
+}

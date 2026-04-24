@@ -1,0 +1,21 @@
+CSV: /workspace/AOFE_Law/superposition-law-agop/experiments/shape_scan/results_tiny_gpt_depth_aofe/depth_scan_results.csv
+Loss column: final_val_loss
+
+Lowest loss row: n_layer=5, n_embd=216, n_head=3
+  depth/width (L/C) = 0.023148
+  width/depth (C/L) = 43.2000
+  final_val_loss = 1.251658
+  AOFE = 5.420700e+03, AOFE-ratio = 0.902346
+
+Sorted by loss (best first):
+  L= 5 C=216  L/C=0.02315  final_val_loss=1.251658
+  L= 2 C=344  L/C=0.00581  final_val_loss=1.254289
+  L= 6 C=200  L/C=0.03000  final_val_loss=1.268558
+  L= 3 C=280  L/C=0.01071  final_val_loss=1.269272
+  L= 4 C=248  L/C=0.01613  final_val_loss=1.270151
+  L= 7 C=184  L/C=0.03804  final_val_loss=1.272686
+  L= 8 C=176  L/C=0.04545  final_val_loss=1.276361
+  L= 9 C=160  L/C=0.05625  final_val_loss=1.286798
+  L=12 C=144  L/C=0.08333  final_val_loss=1.288375
+  L=11 C=152  L/C=0.07237  final_val_loss=1.289143
+  L=10 C=152  L/C=0.06579  final_val_loss=1.290539

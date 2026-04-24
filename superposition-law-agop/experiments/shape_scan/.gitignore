@@ -1,0 +1,9 @@
+# Local WikiText byte caches (large; regenerate via transformer_shape_scan.py)
+data/
+_hf_smoke_data/
+
+# Training curves (optional; can be large)
+curves/
+
+__pycache__/
+*.pyc
