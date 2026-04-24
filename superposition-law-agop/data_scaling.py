@@ -687,13 +687,15 @@ def load_summary_from_save_dir(save_dir: str) -> Dict[str, np.ndarray]:
 
 
 def save_loss_agop_energy_plot_npz(summary: Dict[str, np.ndarray], path: str) -> None:
-    """Subset of summary for loss + AGOP off-diagonal energy dual-axis plot only."""
+    """Subset of summary for loss + AOFE + AOFE-ratio figure (``plot_loss_and_offdiag_energy_dual_axis``)."""
     keys = (
         "data_size",
         "test_loss_mean",
         "test_loss_std",
         "agop_offdiag_energy_mean",
         "agop_offdiag_energy_std",
+        "agop_offdiag_energy_ratio_mean",
+        "agop_offdiag_energy_ratio_std",
     )
     missing = [k for k in keys if k not in summary]
     if missing:
@@ -826,19 +828,26 @@ def plot_loss_and_offdiag_dual_axis(summary: Dict[str, np.ndarray], save_dir: Op
 
 def plot_loss_and_offdiag_energy_dual_axis(summary: Dict[str, np.ndarray], save_dir: Optional[str] = None) -> None:
     """
-    Single figure: x = dataset size (log), left y = test loss, right y = AOFE (AGOP off-diagonal
-    Frobenius energy, not ratio). Styled for publication (serif). No figure title (caption in paper).
+    Single figure: x = dataset size (log), left y = test loss, inner-right y = AOFE (AGOP off-diagonal
+    Frobenius energy), outer-right y = AOFE-ratio (off-diagonal energy / total Frobenius energy).
+    Styled for publication (serif). No figure title (caption in paper).
 
-    ``summary`` may be the full experiment summary or the minimal dict loaded from
-    ``loss_and_offdiag_energy_dual_axis_data.npz`` (see ``load_loss_agop_energy_plot_npz``).
+    ``summary`` may be the full experiment summary or the dict from
+    ``loss_and_offdiag_energy_dual_axis_data.npz`` (see ``load_loss_agop_energy_plot_npz``), which
+    must include AOFE-ratio keys when regenerating from the minimal bundle.
     """
-    required = ["agop_offdiag_energy_mean", "agop_offdiag_energy_std"]
+    required = [
+        "agop_offdiag_energy_mean",
+        "agop_offdiag_energy_std",
+        "agop_offdiag_energy_ratio_mean",
+        "agop_offdiag_energy_ratio_std",
+    ]
     missing = [k for k in required if k not in summary]
     if missing:
         raise ValueError(
             f"summary is missing keys: {missing}. "
-            "This usually means summary.npy was saved before the off-diagonal energy metrics were added. "
-            "Re-run the full experiment: python data_scaling_v2.py"
+            "Re-run the full experiment or use a summary.npz / minimal npz that includes "
+            "agop_offdiag_energy_* and agop_offdiag_energy_ratio_*."
         )
     ds = summary["data_size"].astype(np.float64)
 
@@ -850,7 +859,7 @@ def plot_loss_and_offdiag_energy_dual_axis(summary: Dict[str, np.ndarray], save_
         "axes.titlesize": 12,
         "xtick.labelsize": 10,
         "ytick.labelsize": 10,
-        "legend.fontsize": 10,
+        "legend.fontsize": 9,
         "axes.linewidth": 0.8,
         "grid.linewidth": 0.5,
         "lines.linewidth": 1.25,
@@ -858,16 +867,24 @@ def plot_loss_and_offdiag_energy_dual_axis(summary: Dict[str, np.ndarray], save_
         "mathtext.fontset": "cm",
     }
 
+    def _style_offset_right_spine(ax: plt.Axes, pos_axes: float) -> None:
+        ax.spines["right"].set_position(("axes", pos_axes))
+        ax.set_frame_on(True)
+        ax.patch.set_visible(False)
+        for k, sp in ax.spines.items():
+            sp.set_visible(k == "right")
+
     with plt.rc_context(pub_rc):
-        # ~2/3 text width for many two-column templates; adjust in manuscript if needed
-        fig, ax_left = plt.subplots(figsize=(5.5, 3.4), layout="constrained")
+        # Slightly wider to accommodate a second right-hand scale
+        fig, ax_left = plt.subplots(figsize=(6.2, 3.45), layout="constrained")
 
         ax_left.set_xscale("log")
         ax_left.set_xlabel("Dataset size (log scale)")
 
-        # Colorblind-friendly pair (Okabe–Ito blue + vermillion)
+        # Okabe–Ito: blue, vermillion, bluish green
         c_loss = "#0072B2"
-        c_agop = "#D55E00"
+        c_aofe = "#D55E00"
+        c_ratio = "#009E73"
 
         ax_left.errorbar(
             ds,
@@ -879,38 +896,63 @@ def plot_loss_and_offdiag_energy_dual_axis(summary: Dict[str, np.ndarray], save_
             elinewidth=0.9,
             capsize=2.5,
             label="Test loss",
-            zorder=3,
+            zorder=4,
         )
         ax_left.set_ylabel("Test loss", color=c_loss)
         ax_left.tick_params(axis="y", labelcolor=c_loss)
         ax_left.grid(True, which="major", linestyle=":", linewidth=0.6, alpha=0.85)
         ax_left.grid(True, which="minor", linestyle=":", linewidth=0.35, alpha=0.55)
 
-        ax_right = ax_left.twinx()
-        ax_right.errorbar(
+        ax_aofe = ax_left.twinx()
+        ax_aofe.errorbar(
             ds,
             summary["agop_offdiag_energy_mean"],
             yerr=summary["agop_offdiag_energy_std"],
             fmt="s-",
-            color=c_agop,
-            ecolor=c_agop,
+            color=c_aofe,
+            ecolor=c_aofe,
             elinewidth=0.9,
             capsize=2.5,
             label="AOFE",
+            zorder=3,
+        )
+        ax_aofe.set_ylabel("AOFE", color=c_aofe)
+        ax_aofe.tick_params(axis="y", labelcolor=c_aofe)
+
+        ax_ratio = ax_left.twinx()
+        _style_offset_right_spine(ax_ratio, 1.14)
+        ax_ratio.errorbar(
+            ds,
+            summary["agop_offdiag_energy_ratio_mean"],
+            yerr=summary["agop_offdiag_energy_ratio_std"],
+            fmt="^-",
+            color=c_ratio,
+            ecolor=c_ratio,
+            elinewidth=0.9,
+            capsize=2.5,
+            label="AOFE-ratio",
             zorder=2,
         )
-        ax_right.set_ylabel("AOFE", color=c_agop)
-        ax_right.tick_params(axis="y", labelcolor=c_agop)
-        # Full rectangle: twinx() leaves left/bottom/right by default; we had hidden top—show it again.
-        ax_left.spines["top"].set_visible(True)
-        ax_right.spines["top"].set_visible(True)
+        ax_ratio.set_ylabel("AOFE-ratio", color=c_ratio)
+        ax_ratio.tick_params(axis="y", labelcolor=c_ratio)
 
-        lines_left, labels_left = ax_left.get_legend_handles_labels()
-        lines_right, labels_right = ax_right.get_legend_handles_labels()
+        ax_left.spines["top"].set_visible(True)
+        ax_aofe.spines["top"].set_visible(True)
+        ax_ratio.spines["top"].set_visible(True)
+
+        lines = (
+            ax_left.get_legend_handles_labels()
+            + ax_aofe.get_legend_handles_labels()
+            + ax_ratio.get_legend_handles_labels()
+        )
+        all_lines = [h for pair in lines[0::2] for h in pair]
+        all_labels = [t for pair in lines[1::2] for t in pair]
         ax_left.legend(
-            lines_left + lines_right,
-            labels_left + labels_right,
-            loc="best",
+            all_lines,
+            all_labels,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.22),
+            ncol=3,
             frameon=True,
             fancybox=False,
             edgecolor="0.4",
@@ -919,7 +961,12 @@ def plot_loss_and_offdiag_energy_dual_axis(summary: Dict[str, np.ndarray], save_
         if save_dir:
             out = os.path.join(save_dir, "loss_and_offdiag_energy_dual_axis.png")
             fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white", edgecolor="none")
-            fig.savefig(os.path.join(save_dir, "loss_and_offdiag_energy_dual_axis.pdf"), bbox_inches="tight", facecolor="white", edgecolor="none")
+            fig.savefig(
+                os.path.join(save_dir, "loss_and_offdiag_energy_dual_axis.pdf"),
+                bbox_inches="tight",
+                facecolor="white",
+                edgecolor="none",
+            )
         plt.show()
 
 
@@ -1060,9 +1107,11 @@ def main() -> None:
     # 1000-20000: 10 log-evenly-spaced points covering the large data regime
     _large_sizes = [int(round(x)) for x in np.logspace(np.log10(1000), np.log10(20000), 10).tolist()]
     # _large_sizes ≈ [1000, 1394, 1945, 2714, 3787, 5284, 7369, 10278, 14340, 20000]
+    # Extra large-N points (append after log-spaced grid):
+    _extra_large = [30000, 40000]
 
     exp = ExperimentConfig(
-        data_sizes=[3, 5, 8, 10, 15, 30, 50, 100, 200, 500] + _large_sizes,
+        data_sizes=[3, 5, 8, 10, 15, 30, 50, 100, 200, 500] + _large_sizes + _extra_large,
         num_dim=1000,
         hidden_size=2,
         sparsity=0.99,
