@@ -1,0 +1,34 @@
+{
+  "final_val_loss_vs_hidden_layers": {
+    "pearson": 0.9806947550448748,
+    "spearman": 0.9947368421052631
+  },
+  "final_val_loss_vs_hidden_width": {
+    "pearson": -0.8641446388920171,
+    "spearman": -0.9947368421052631
+  },
+  "final_val_loss_vs_depth_width_ratio": {
+    "pearson": 0.9553346281321066,
+    "spearman": 0.9947368421052631
+  },
+  "final_val_loss_vs_aofe": {
+    "pearson": -0.31006309403646964,
+    "spearman": -0.3684210526315789
+  },
+  "final_val_loss_vs_log10_aofe": {
+    "pearson": -0.3127185317303965,
+    "spearman": -0.3684210526315789
+  },
+  "final_val_loss_vs_aofe_ratio": {
+    "pearson": 0.9871082058786339,
+    "spearman": 0.9859649122807017
+  },
+  "final_val_loss_vs_aofe_total_energy": {
+    "pearson": -0.5621438093113624,
+    "spearman": -0.5982456140350877
+  },
+  "final_val_loss_vs_benign_score": {
+    "pearson": 0.987108205878634,
+    "spearman": 0.9859649122807017
+  }
+}

@@ -1,0 +1,30 @@
+CSV: /workspace/AOFE_Law/superposition-law-agop/experiments/shape_scan/results_mlp_teacher_student_depth_scan/depth_scan_results.csv
+Schema: mlp
+Loss column: final_val_loss
+
+Lowest loss row: hidden_layers=3, hidden_width=1208, param_count=3000673
+  depth/width (L/W) = 0.002483
+  width/depth (W/L) = 402.6667
+  final_val_loss = 0.022394
+  AOFE = 2.412225e-01, AOFE-ratio = 0.812625
+
+Sorted by loss (best first):
+  L= 3 W=1208  L/W=0.00248  final_val_loss=0.022394
+  L= 4 W= 992  L/W=0.00403  final_val_loss=0.025479
+  L= 2 W=1696  L/W=0.00118  final_val_loss=0.026210
+  L= 5 W= 856  L/W=0.00584  final_val_loss=0.030067
+  L= 6 W= 768  L/W=0.00781  final_val_loss=0.033394
+  L= 7 W= 704  L/W=0.00994  final_val_loss=0.035900
+  L= 8 W= 648  L/W=0.01235  final_val_loss=0.038876
+  L= 9 W= 608  L/W=0.01480  final_val_loss=0.040794
+  L=10 W= 576  L/W=0.01736  final_val_loss=0.042399
+  L=11 W= 544  L/W=0.02022  final_val_loss=0.044913
+  L=12 W= 520  L/W=0.02308  final_val_loss=0.046888
+  L=13 W= 496  L/W=0.02621  final_val_loss=0.048101
+  L=14 W= 480  L/W=0.02917  final_val_loss=0.049242
+  L=15 W= 464  L/W=0.03233  final_val_loss=0.049971
+  L=16 W= 448  L/W=0.03571  final_val_loss=0.050958
+  L=17 W= 432  L/W=0.03935  final_val_loss=0.053039
+  L=18 W= 416  L/W=0.04327  final_val_loss=0.055111
+  L=19 W= 408  L/W=0.04657  final_val_loss=0.055409
+  L=20 W= 392  L/W=0.05102  final_val_loss=0.057296

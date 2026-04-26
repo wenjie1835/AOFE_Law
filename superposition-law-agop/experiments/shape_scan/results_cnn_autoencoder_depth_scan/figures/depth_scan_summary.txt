@@ -1,0 +1,34 @@
+CSV: /workspace/AOFE_Law/superposition-law-agop/experiments/shape_scan/results_cnn_autoencoder_depth_scan/depth_scan_results.csv
+Schema: cnn
+Loss column: final_val_loss
+
+Lowest loss row: blocks=5, width=184, param_count=3063051
+  depth/width (L/W) = 0.027174
+  width/depth (W/L) = 36.8000
+  final_val_loss = 0.001792
+  AOFE = 1.119804e+02, AOFE-ratio = 0.947160
+
+Sorted by loss (best first):
+  B= 5 W= 184  B/W=0.02717  final_val_loss=0.001792
+  B=12 W= 120  B/W=0.10000  final_val_loss=0.001808
+  B=14 W= 112  B/W=0.12500  final_val_loss=0.001809
+  B= 6 W= 168  B/W=0.03571  final_val_loss=0.001820
+  B= 4 W= 200  B/W=0.02000  final_val_loss=0.001820
+  B=16 W= 104  B/W=0.15385  final_val_loss=0.001821
+  B=19 W=  96  B/W=0.19792  final_val_loss=0.001831
+  B=18 W=  96  B/W=0.18750  final_val_loss=0.001838
+  B=22 W=  88  B/W=0.25000  final_val_loss=0.001841
+  B= 8 W= 144  B/W=0.05556  final_val_loss=0.001844
+  B=13 W= 112  B/W=0.11607  final_val_loss=0.001845
+  B= 9 W= 136  B/W=0.06618  final_val_loss=0.001847
+  B=21 W=  88  B/W=0.23864  final_val_loss=0.001853
+  B= 3 W= 232  B/W=0.01293  final_val_loss=0.001860
+  B=23 W=  88  B/W=0.26136  final_val_loss=0.001861
+  B= 2 W= 288  B/W=0.00694  final_val_loss=0.001862
+  B=17 W=  96  B/W=0.17708  final_val_loss=0.001870
+  B=10 W= 128  B/W=0.07812  final_val_loss=0.001872
+  B=11 W= 120  B/W=0.09167  final_val_loss=0.001876
+  B=15 W= 104  B/W=0.14423  final_val_loss=0.001884
+  B= 7 W= 152  B/W=0.04605  final_val_loss=0.001889
+  B=20 W=  88  B/W=0.22727  final_val_loss=0.001895
+  B=24 W=  80  B/W=0.30000  final_val_loss=0.001895
